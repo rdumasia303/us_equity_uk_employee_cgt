@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>E*Trade Data Processor & CGT Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    /* Dark mode colors */
+    :root {
+      --bg-primary: #1a1b1e;
+      --bg-secondary: #2a2b2e;
+      --bg-tertiary: #3a3b3e;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --accent-primary: #6366f1;
+      --accent-hover: #818cf8;
+      --border-color: #404040;
+      --success-color: #22c55e;
+      --error-color: #ef4444;
+    }
+
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 2rem;
+    }
+
+    /* Header styles */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, var(--accent-primary), var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    /* Upload grid & sections */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .upload-section {
+      background-color: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .upload-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .upload-section h3 {
+      margin-bottom: 1rem;
+      color: var(--accent-primary);
+      font-size: 1.1rem;
+    }
+
+    /* Custom file input wrapper */
+    .file-input-wrapper {
+      position: relative;
+      margin-top: 1rem;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+
+    .file-input-wrapper label {
+      display: inline-block;
+      padding: 0.8rem 1.2rem;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      text-align: center;
+    }
+
+    .file-input-wrapper label:hover {
+      background-color: var(--accent-primary);
+    }
+
+    /* File name display */
+    .file-name {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      min-height: 1.2em; /* So the element doesn't collapse when empty */
+    }
+
+    /* Process button */
+    .process-button {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      text-align: center;
+    }
+
+    .process-button:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .process-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Results container with tabs */
+    .results-container {
+      margin-top: 3rem;
+      background-color: var(--bg-secondary);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* Navigation tabs (top row) */
+    .tabs-container {
+      background-color: var(--bg-tertiary);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .tab {
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .tab.active {
+      background-color: var(--accent-primary);
+      color: white;
+    }
+
+    /* Tab content area */
+    .tab-content {
+      display: none;
+      padding: 2rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th {
+      background-color: var(--bg-tertiary);
+      color: var(--accent-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 1rem;
+    }
+
+    td {
+      padding: 1rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    tr:hover td {
+      background-color: var(--bg-tertiary);
+    }
+
+    /* Summary cards */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 1rem 0 2rem;
+    }
+
+    .summary-card {
+      background-color: var(--bg-tertiary);
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .summary-card h4 {
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-card .value {
+      font-size: 1.5rem;
+      color: var(--accent-primary);
+      font-weight: bold;
+    }
+
+    /* Validation report */
+    pre {
+      background-color: var(--bg-tertiary);
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow: auto;
+      color: var(--text-primary);
+      font-family: 'Monaco', 'Consolas', monospace;
+      white-space: pre-wrap;
+    }
+
+    /* Scrollable tables */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Manual Transactions Section */
+    .manual-transactions-section {
+      background-color: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .manual-transactions-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .manual-transactions-section h3 {
+      margin-bottom: 1rem;
+      color: var(--accent-primary);
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .manual-transactions-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .manual-transactions-form input {
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .add-transaction-button {
+      padding: 0.8rem 1.2rem;
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .add-transaction-button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .manual-transactions-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--bg-secondary);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .manual-transactions-table th, .manual-transactions-table td {
+      padding: 0.8rem;
+      border: 1px solid var(--border-color);
+      text-align: left;
+      color: var(--text-primary);
+    }
+
+    .manual-transactions-table th {
+      background-color: var(--bg-tertiary);
+      color: var(--accent-primary);
+    }
+
+    .remove-transaction-button {
+      padding: 0.3rem 0.6rem;
+      background-color: var(--error-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .remove-transaction-button:hover {
+      background-color: darkred;
+    }
+
+    /* Disabled state for manual transactions form */
+    .manual-transactions-form input:disabled,
+    .manual-transactions-form .add-transaction-button:disabled {
+      background-color: var(--border-color);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    /* Download Buttons */
+    .download-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .download-button {
+      padding: 0.6rem 1rem;
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .download-button:hover {
+      background-color: var(--accent-hover);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>E*Trade Data Processor &amp; CGT Calculator</h1>
+    <p>Upload your files and process them to see consolidated transactions and CGT results.</p>
+  </div>
+
+  <!-- Upload Grid -->
+  <div class="upload-grid">
+    <!-- Gains/Losses -->
+    <div class="upload-section">
+      <h3>1. Gains/Losses (XLS/XLSX)</h3>
+      <div class="file-input-wrapper">
+        <input type="file" id="gainsFile" accept=".xls,.xlsx"
+               onchange="handleFileSelection('gainsFile','gainsFileName')" />
+        <label for="gainsFile">Choose File</label>
+      </div>
+      <div class="file-name" id="gainsFileName"></div>
+    </div>
+
+    <!-- Benefits -->
+    <div class="upload-section">
+      <h3>2. Benefits (XLS/XLSX)</h3>
+      <div class="file-input-wrapper">
+        <input type="file" id="benefitsFile" accept=".xls,.xlsx"
+               onchange="handleFileSelection('benefitsFile','benefitsFileName')" />
+        <label for="benefitsFile">Choose File</label>
+      </div>
+      <div class="file-name" id="benefitsFileName"></div>
+    </div>
+
+    <!-- Stock Prices -->
+    <div class="upload-section">
+      <h3>3. Stock Prices (CSV)</h3>
+      <div class="file-input-wrapper">
+        <input type="file" id="stockFile" accept=".csv"
+               onchange="handleFileSelection('stockFile','stockFileName')" />
+        <label for="stockFile">Choose File</label>
+      </div>
+      <div class="file-name" id="stockFileName"></div>
+    </div>
+
+    <!-- Forex Rates -->
+    <div class="upload-section">
+      <h3>4. Forex Rates (CSV)</h3>
+      <div class="file-input-wrapper">
+        <input type="file" id="forexFile" accept=".csv"
+               onchange="handleForexFileUpload()" />
+        <label for="forexFile">Choose File</label>
+      </div>
+      <div class="file-name" id="forexFileName"></div>
+    </div>
+
+    <!-- US Holidays -->
+    <div class="upload-section">
+      <h3>5. US Holidays (JSON)</h3>
+      <div class="file-input-wrapper">
+        <input type="file" id="holidaysFile" accept=".json"
+               onchange="handleFileSelection('holidaysFile','holidaysFileName')" />
+        <label for="holidaysFile">Choose File</label>
+      </div>
+      <div class="file-name" id="holidaysFileName"></div>
+    </div>
+  </div>
+
+  <!-- Manual Transactions Section -->
+  <div class="manual-transactions-section">
+    <h3>6. Manual Transactions (RSUs)</h3>
+    <div class="manual-transactions-form">
+      <input type="date" id="manualDate" placeholder="Date" />
+      <input type="number" id="manualQuantity" placeholder="Quantity" min="1" />
+      <input type="number" id="manualPriceUSD" placeholder="Price per Share (USD)" min="0" step="0.01" />
+      <input type="text" id="manualGrantNumber" placeholder="Grant Number" />
+      <button class="add-transaction-button" onclick="addManualTransaction()">Add Transaction</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="manual-transactions-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Quantity</th>
+            <th>Price (USD)</th>
+            <th>Price (GBP)</th>
+            <th>Grant Number</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="manualTransactionsBody">
+          <!-- Manual transactions will be appended here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Process Button -->
+  <button class="process-button" id="processBtn">Process Files</button>
+
+  <!-- Results Container (tabs + content) -->
+  <div class="results-container">
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab active" data-tab="tabConsolidated">Combined Transactions</button>
+        <button class="tab" data-tab="tabValidation">Data Validation</button>
+        <button class="tab" data-tab="tabCGT">CGT Disposals</button>
+        <button class="tab" data-tab="tabTxLog">Transaction History</button>
+        <!-- New Tab Added -->
+        <button class="tab" data-tab="tabCGTSummary">CGT Summary</button>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT: Combined/Consolidated -->
+    <div id="tabConsolidated" class="tab-content active">
+      <h2>All Combined Transactions</h2>
+      <div class="table-wrapper">
+        <table id="outputTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT: Validation -->
+    <div id="tabValidation" class="tab-content">
+      <h2>Validation Report</h2>
+      <pre id="validationReport"></pre>
+    </div>
+
+    <!-- TAB CONTENT: CGT Disposals -->
+    <div id="tabCGT" class="tab-content">
+      <div class="summary">
+        <div class="summary-card">
+          <h4>Total Shares in Pool</h4>
+          <div class="value"><span id="poolShares">0.00</span></div>
+        </div>
+        <div class="summary-card">
+          <h4>Average Cost (GBP)</h4>
+          <div class="value"><span id="poolAvgCost">£0.00</span></div>
+        </div>
+      </div>
+      <h2>Disposals</h2>
+      <div id="disposalResults"></div>
+      <!-- Download CGT Disposals CSV Button -->
+      <div class="download-buttons">
+        <button class="download-button" onclick="downloadCGTDisposalsCSV()">Download CGT Disposals CSV</button>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT: Transaction History -->
+    <div id="tabTxLog" class="tab-content">
+      <h2>Transaction History</h2>
+      <div id="transactionLog"></div>
+      <!-- Download Transaction Log CSV Button -->
+      <div class="download-buttons">
+        <button class="download-button" onclick="downloadTransactionLogCSV()">Download Transaction Log CSV</button>
+      </div>
+    </div>
+
+    <!-- New TAB CONTENT: CGT Summary -->
+    <div id="tabCGTSummary" class="tab-content">
+      <h2>CGT Summary</h2>
+      <div class="summary">
+        <div class="summary-card">
+          <h4>Total Gain/Loss (GBP)</h4>
+          <div class="value"><span id="totalGainLoss">£0.00</span></div>
+        </div>
+      </div>
+      <h3>Gain/Loss by UK Tax Year</h3>
+      <div class="table-wrapper">
+        <table id="cgtSummaryTable">
+          <thead>
+            <tr>
+              <th>Tax Year</th>
+              <th>Gain/Loss (GBP)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- CGT Summary rows will be appended here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Existing and Updated Scripts -->
+<script>
+
+/**
+ * Show the selected file name under each input.
+ */
+function handleFileSelection(inputId, displayId) {
+  const input = document.getElementById(inputId);
+  const display = document.getElementById(displayId);
+  if (input.files && input.files.length > 0) {
+    display.textContent = "Chosen File: " + input.files[0].name;
+  } else {
+    display.textContent = "";
+  }
+}
+
+/**
+ * Handle Forex File Upload
+ * Parses the Forex file upon upload and populates the forexRatesMap.
+ */
+async function handleForexFileUpload() {
+  const forexFile = document.getElementById('forexFile').files[0];
+  const display = document.getElementById('forexFileName');
+  if (forexFile) {
+    display.textContent = "Chosen File: " + forexFile.name;
+    try {
+      const forexData = await parseCSVFile(forexFile);
+      // Build forexRatesMap with 'YYYY-MM-DD' keys
+      forexRatesMap = {};
+      forexData.forEach(row => {
+        if (row['Date'] && row['Average']) {
+          const isoDate = toISODate(row['Date']);
+          if (isoDate) {
+            forexRatesMap[isoDate] = parseFloatSafe(row['Average']);
+          }
+        }
+      });
+      alert("Forex Rates file processed successfully.");
+      // Enable manual transactions form
+      enableManualTransactionsForm(true);
+    } catch (err) {
+      alert(`Error processing Forex Rates file: ${err.message}`);
+      console.error(err);
+      // Clear forexRatesMap
+      forexRatesMap = {};
+      // Disable manual transactions form
+      enableManualTransactionsForm(false);
+    }
+  } else {
+    display.textContent = "";
+    forexRatesMap = {};
+    enableManualTransactionsForm(false);
+  }
+}
+
+/********************************************************************
+ * 1) UTILITY HELPERS
+ ********************************************************************/
+
+function parseIntSafe(value) {
+  const num = parseInt(value, 10);
+  return isNaN(num) ? 0 : num;
+}
+
+function parseFloatSafe(value) {
+  const num = parseFloat(value);
+  return isNaN(num) ? 0 : num;
+}
+
+function parseExcelFile(file, skipSummaryRow = false) {
+  // Returns a Promise that resolves to an array of row objects (like CSV).
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        let jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: null });
+
+        if (skipSummaryRow) {
+          // Filter out summary row
+          jsonData = jsonData.filter(row => row['Record Type'] !== 'Summary');
+        }
+        resolve(jsonData);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function parseCSVFile(file) {
+  // Returns a Promise that resolves to an array of row objects.
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const text = e.target.result;
+      resolve(csvToJson(text));
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsText(file);
+  });
+}
+
+function parseJSONFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const jsonObj = JSON.parse(e.target.result);
+        resolve(jsonObj);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsText(file);
+  });
+}
+
+function csvToJson(csvText) {
+  // Simple CSV-to-JSON conversion, assuming first row is headers
+  const lines = csvText.trim().split(/\r?\n/);
+  const headers = lines[0].split(',');
+  const data = [];
+  for (let i = 1; i < lines.length; i++) {
+    const row = {};
+    const cols = lines[i].split(',');
+    headers.forEach((h, idx) => {
+      row[h.trim()] = (cols[idx] !== undefined) ? cols[idx].trim() : '';
+    });
+    data.push(row);
+  }
+  return data;
+}
+
+function formatDate(dateObj) {
+  if (!(dateObj instanceof Date) || isNaN(dateObj.valueOf())) {
+    return null;
+  }
+  // Force UTC handling to avoid timezone shifts
+  const yyyy = dateObj.getUTCFullYear();
+  const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(dateObj.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function toISODate(dateStr) {
+  if (!dateStr) return null;
+
+  // Handle Excel's US date format (MM/DD/YYYY)
+  if (dateStr.includes('/')) {
+    const [month, day, year] = dateStr.split('/');
+    // Create date in UTC to avoid timezone shifts
+    return formatDate(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day))));
+  }
+
+  // Handle ISO format (YYYY-MM-DD)
+  if (dateStr.includes('-')) {
+    const [year, month, day] = dateStr.split('-');
+    return formatDate(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day))));
+  }
+
+  // For any other format, try parsing but force UTC
+  const parsed = new Date(dateStr);
+  if (isNaN(parsed.valueOf())) return null;
+  return formatDate(new Date(Date.UTC(
+    parsed.getFullYear(),
+    parsed.getMonth(),
+    parsed.getDate()
+  )));
+}
+
+/********************************************************************
+ * 2) VEST PRICE CALCULATOR
+ ********************************************************************/
+class VestPriceCalculator {
+  constructor(stockData, forexData, holidaysSet) {
+    this.stockPrices = this._buildStockMap(stockData);
+    this.forexRates = this._buildForexMap(forexData);
+    this.holidays = holidaysSet;
+  }
+
+  _buildStockMap(stockData) {
+    const map = {};
+    stockData.forEach(row => {
+      if (!row['Date']) return;  // Skip if no date
+      const dateStr = toISODate(row['Date']);
+      if (dateStr) {
+        map[dateStr] = parseFloatSafe(row['Close_Price']);
+      }
+    });
+    return map;
+  }
+
+  _buildForexMap(forexData) {
+    const map = {};
+    forexData.forEach(row => {
+      if (!row['Date']) return;  // Skip if no date
+      const dateStr = toISODate(row['Date']);
+      if (dateStr) {
+        map[dateStr] = parseFloatSafe(row['Average']);
+      }
+    });
+    return map;
+  }
+
+  _isBusinessDay(date) {
+    // Use UTC days to avoid timezone issues
+    if (date.getUTCDay() === 6 || date.getUTCDay() === 0) {
+      return false;
+    }
+    const dateStr = formatDate(date);
+    return !this.holidays.has(dateStr);
+  }
+
+  _getNextBusinessDay(date) {
+    let next = new Date(Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate()
+    ));
+
+    while (!this._isBusinessDay(next)) {
+      next.setUTCDate(next.getUTCDate() + 1);
+    }
+    return next;
+  }
+
+  getVestPrice(vestDateStr) {
+    // Returns [usdPrice, fxRate, gbpPrice, actualDateStr]
+    if (!vestDateStr) {
+      return [null, null, null, vestDateStr];
+    }
+
+    // Parse the vest date using UTC
+    const [year, month, day] = vestDateStr.split('-');
+    const dateObj = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+
+    if (isNaN(dateObj.valueOf())) {
+      return [null, null, null, vestDateStr];
+    }
+
+    const actualDate = this._getNextBusinessDay(dateObj);
+    const actualDateStr = formatDate(actualDate);
+
+    const usdPrice = this.stockPrices[actualDateStr];
+    if (usdPrice === undefined) {
+      return [null, null, null, actualDateStr];
+    }
+
+    const fxRate = this.forexRates[actualDateStr];
+    if (fxRate === undefined) {
+      return [usdPrice, null, null, actualDateStr];
+    }
+
+    const gbpPrice = usdPrice / fxRate;
+    return [usdPrice, fxRate, gbpPrice, actualDateStr];
+  }
+}
+
+/********************************************************************
+ * 3) ETradeDataProcessor
+ ********************************************************************/
+class ETradeDataProcessor {
+  constructor(stockData, forexData, holidaysData) {
+    this.gainsColumns = [
+      "Record Type", "Date Acquired", "Date Sold", "Qty.",
+      "Proceeds Per Share", "Vest Date", "Vest Date FMV",
+      "Grant Date FMV", "Grant Number", "Order Type", "Type"
+    ];
+    this.dateColumns = ["Date Acquired", "Date Sold", "Vest Date"];
+    this.validationStats = {
+      unmatched_vests: 0,
+      missing_fmv: 0,
+      negative_quantities: 0,
+      zero_prices: 0,
+      calculated_prices: 0
+    };
+
+    // Build a set of holiday date strings
+    const holidaysSet = new Set();
+    holidaysData.forEach(h => {
+      // only add if global or not 'Optional'
+      if (h.global || !h.types.includes("Optional")) {
+        holidaysSet.add(h.date);
+      }
+    });
+
+    this.priceCalculator = new VestPriceCalculator(stockData, forexData, holidaysSet);
+  }
+
+  processGainsLosses(gainsData) {
+    this._validateRequiredColumns(gainsData, this.gainsColumns, "gains/losses file");
+    gainsData = this._standardizeDates(gainsData, this.dateColumns);
+    this._validateNumericValues(gainsData, "Qty.");
+    return gainsData;
+  }
+
+  processBenefits(benefitsData) {
+    const requiredColumns = ['Grant Number', 'Date', 'Event Type', 'Qty. or Amount'];
+    this._validateRequiredColumns(benefitsData, requiredColumns, "benefits file");
+
+    // Standardize date and quantity
+    benefitsData.forEach(row => {
+      row['Date'] = toISODate(row['Date']);
+      row["Qty. or Amount"] = parseIntSafe(row["Qty. or Amount"]);
+    });
+
+    // Filter for 'Shares released'
+    const filtered = benefitsData.filter(row => row['Event Type'] === 'Shares released');
+    return filtered;
+  }
+
+  consolidateTransactions(salesData, vestsData, manualTransactions = []) {
+    // 1) Build FMV mapping from sales data
+    const fmvMapping = {};
+    salesData.forEach(row => {
+      const gn = String(row["Grant Number"] || "").trim();
+      const vd = String(row["Vest Date"] || "").trim();
+      const fmv = parseFloatSafe(row["Vest Date FMV"]);
+      if (gn && vd) {
+        fmvMapping[`${gn}::${vd}`] = fmv;
+      }
+    });
+
+    // 2) Merge vests with that FMV
+    vestsData.forEach(vestRow => {
+      const gn = String(vestRow["Grant Number"] || "").trim();
+      const d = String(vestRow["Date"] || "").trim();
+      const key = `${gn}::${d}`;
+      vestRow["Vest Date FMV"] = (fmvMapping[key] !== undefined) ? fmvMapping[key] : null;
+    });
+
+    // 3) Calculate missing FMV
+    vestsData.forEach(vestRow => {
+      if (vestRow["Vest Date FMV"] == null || isNaN(vestRow["Vest Date FMV"])) {
+        const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(vestRow["Date"]);
+        if (usdPrice != null) {
+          vestRow["Vest Date FMV"] = usdPrice;
+          vestRow["GBP_Price"] = (gbpPrice != null) ? gbpPrice : null;
+          vestRow["USD_GBP_Rate"] = fxRate;
+          vestRow["Actual_Vest_Date"] = actualDate;
+          this.validationStats.calculated_prices++;
+        } else {
+          vestRow["Vest Date FMV"] = null;
+          this.validationStats.missing_fmv++;
+        }
+      } else {
+        // We have a FMV => also compute GBP if we can get an fxRate
+        const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(vestRow["Date"]);
+        if (fxRate != null) {
+          vestRow["GBP_Price"] = vestRow["Vest Date FMV"] / fxRate;
+          vestRow["USD_GBP_Rate"] = fxRate;
+          vestRow["Actual_Vest_Date"] = actualDate;
+        }
+      }
+    });
+
+    // Track unmatched vests
+    vestsData.forEach(vestRow => {
+      if (vestRow["Vest Date FMV"] == null || isNaN(vestRow["Vest Date FMV"])) {
+        this.validationStats.unmatched_vests++;
+      }
+    });
+
+    // 4) Convert vests => "Buy" records
+    const buyRecords = vestsData.map(vestRow => {
+      const actualVestDate = vestRow["Actual_Vest_Date"] || vestRow["Date"];
+      return {
+        'Record Type': 'Buy',
+        'Qty.': vestRow["Qty. or Amount"],
+        'Date': actualVestDate,
+        'Price Per Share': vestRow["Vest Date FMV"],
+        'Price Per Share GBP': vestRow["GBP_Price"] || null,
+        'Exchange Rate': vestRow["USD_GBP_Rate"] || null,
+        'Order Type': 'Vest',
+        'Type': 'Restricted Stock Unit',
+        'Grant Number': vestRow["Grant Number"]
+      };
+    });
+
+    // 4a) Add manual transactions as Buy records
+    manualTransactions.forEach(tx => {
+      buyRecords.push({
+        'Record Type': 'Buy',
+        'Qty.': tx.quantity,
+        'Date': tx.date,
+        'Price Per Share': tx.priceUSD,
+        'Price Per Share GBP': tx.priceGBP,
+        'Exchange Rate': tx.exchangeRate,
+        'Order Type': 'Manual',
+        'Type': 'Restricted Stock Unit',
+        'Grant Number': tx.grantNumber
+      });
+    });
+
+    // 5) Convert sells => "Sell" records
+    const sellRecords = salesData.map(sellRow => {
+      const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(sellRow["Date Sold"]);
+      let pricePerShareGBP = null;
+      let exchangeRate = null;
+      if (fxRate != null) {
+        pricePerShareGBP = parseFloatSafe(sellRow["Proceeds Per Share"]) / fxRate;
+        exchangeRate = fxRate;
+      }
+      return {
+        'Record Type': 'Sell',
+        'Qty.': parseFloatSafe(sellRow["Qty."]),
+        'Date': sellRow["Date Sold"],
+        'Price Per Share': parseFloatSafe(sellRow["Proceeds Per Share"]),
+        'Price Per Share GBP': pricePerShareGBP,
+        'Exchange Rate': exchangeRate,
+        'Order Type': sellRow["Order Type"],
+        'Type': sellRow["Type"],
+        'Grant Number': sellRow["Grant Number"]
+      };
+    });
+
+    // Combine
+    let allRecords = [...buyRecords, ...sellRecords];
+
+    // Standardize date => for sorting
+    allRecords.forEach(r => {
+      let d = new Date(r.Date);
+      if (isNaN(d.valueOf())) {
+        d = new Date();
+      }
+      r._dateObj = d;
+    });
+
+    // Consolidate similar prices
+    allRecords = this.consolidateSimilarPrices(allRecords);
+
+    // Sort
+    allRecords.sort((a, b) => a._dateObj - b._dateObj);
+
+    // Final date format
+    allRecords.forEach(r => {
+      r.Date = formatDate(r._dateObj);
+      delete r._dateObj;
+    });
+
+    // Final columns
+    const finalCols = [
+      'Record Type', 'Date', 'Qty.', 'Price Per Share',
+      'Price Per Share GBP', 'Exchange Rate',
+      'Order Type', 'Type', 'Grant Number'
+    ];
+
+    return allRecords.map(rec => {
+      const rowObj = {};
+      finalCols.forEach(c => {
+        rowObj[c] = (rec[c] !== undefined) ? rec[c] : null;
+      });
+      return rowObj;
+    });
+  }
+
+  consolidateSimilarPrices(records, priceTolerance = 0.01) {
+    const grouped = {};
+    records.forEach(r => {
+      const key = `${r.Date}||${r['Record Type']}||${r['Order Type']}||${r['Type']}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(r);
+    });
+
+    const result = [];
+    for (const key in grouped) {
+      const [date, recordType, orderType, secType] = key.split('||');
+      const group = grouped[key];
+      if (recordType === 'Buy') {
+        // no consolidation for buys
+        result.push(...group);
+        continue;
+      }
+      // For sells
+      let local = [...group];
+      while (local.length > 0) {
+        const ref = local[0];
+        const refPrice = parseFloatSafe(ref['Price Per Share'] || 0);
+        const similar = local.filter(r => {
+          const p = parseFloatSafe(r['Price Per Share']);
+          if (refPrice === 0) return (p === 0);
+          const diff = Math.abs(p - refPrice) / refPrice;
+          return diff <= priceTolerance;
+        });
+        if (similar.length > 1) {
+          let sumQty = 0, sumUSD = 0, sumGBP = 0, sumGBPRecords = 0;
+          let usedFxRate = null;
+          const allGrants = new Set();
+          similar.forEach(s => {
+            const qty = parseFloatSafe(s['Qty.']);
+            const pUSD = parseFloatSafe(s['Price Per Share'] || 0);
+            sumQty += qty;
+            sumUSD += (pUSD * qty);
+            if (s['Price Per Share GBP'] != null) {
+              const pGBP = parseFloatSafe(s['Price Per Share GBP']);
+              sumGBP += (pGBP * qty);
+              sumGBPRecords++;
+            }
+            if (s['Exchange Rate'] != null && usedFxRate == null) {
+              usedFxRate = s['Exchange Rate'];
+            }
+            const gns = ("" + (s['Grant Number'] || "")).split('-').map(x => x.trim()).filter(x => x);
+            gns.forEach(g => allGrants.add(g));
+          });
+          const avgUSD = (sumQty !== 0) ? (sumUSD / sumQty) : 0;
+          const avgGBP = (sumQty !== 0 && sumGBPRecords > 0) ? (sumGBP / sumQty) : null;
+
+          result.push({
+            'Record Type': recordType,
+            'Date': date,
+            'Qty.': sumQty,
+            'Price Per Share': parseFloat(avgUSD.toFixed(6)),
+            'Price Per Share GBP': (avgGBP != null) ? parseFloat(avgGBP.toFixed(6)) : null,
+            'Exchange Rate': usedFxRate,
+            'Order Type': orderType,
+            'Type': secType,
+            'Grant Number': Array.from(allGrants).sort().join('-'),
+            '_dateObj': new Date(date)
+          });
+          local = local.filter(r => !similar.includes(r));
+        } else {
+          result.push(ref);
+          local.splice(0, 1);
+        }
+      }
+    }
+    return result;
+  }
+
+  generateValidationReport() {
+    const vs = this.validationStats;
+    return `Validation Report:
+- Unmatched vests: ${vs.unmatched_vests}
+- Records with missing FMV: ${vs.missing_fmv}
+- Records with negative quantities: ${vs.negative_quantities}
+- Records with zero/negative prices: ${vs.zero_prices}
+- Calculated FMVs from Stock & Forex: ${vs.calculated_prices}`;
+  }
+
+  _validateRequiredColumns(dataArr, required, context) {
+    if (dataArr.length === 0) {
+      throw new Error(`No data found in ${context}.`);
+    }
+    const keys = new Set(Object.keys(dataArr[0]));
+    required.forEach(col => {
+      if (!keys.has(col)) {
+        throw new Error(`Missing required column '${col}' in ${context}.`);
+      }
+    });
+  }
+
+  _standardizeDates(dataArr, dateCols) {
+    dataArr.forEach(row => {
+      dateCols.forEach(dc => {
+        if (row[dc]) {
+          const iso = toISODate(row[dc]);
+          row[dc] = iso;
+        }
+      });
+    });
+    return dataArr;
+  }
+
+  _validateNumericValues(dataArr, qtyField) {
+    dataArr.forEach(row => {
+      const qtyVal = parseFloatSafe(row[qtyField]);
+      if (qtyVal < 0) {
+        this.validationStats.negative_quantities++;
+      }
+      if (row["Price Per Share"] !== undefined) {
+        const priceVal = parseFloatSafe(row["Price Per Share"]);
+        if (priceVal <= 0) {
+          this.validationStats.zero_prices++;
+        }
+      }
+    });
+  }
+}
+
+/********************************************************************
+ * 4) SECTION 104 CGT LOGIC
+ ********************************************************************/
+class Transaction {
+  constructor(row) {
+    this.type = (row["Record Type"] || "").toUpperCase();  // BUY or SELL
+    // Create date in UTC to avoid timezone shifts
+    const [year, month, day] = row["Date"].split('-');
+    this.date = new Date(Date.UTC(year, month - 1, day));
+    this.quantity = parseFloat(row["Qty."]) || 0;
+    this.priceGBP = parseFloat(row["Price Per Share GBP"]) || 0;
+    this.priceUSD = parseFloat(row["Price Per Share"]) || 0;
+    this.exchangeRate = parseFloat(row["Exchange Rate"]) || 0;
+    this.orderType = row["Order Type"] || "";
+    this.securityType = row["Type"] || "";
+    this.grantNumber = row["Grant Number"] || "";
+    this.addedToPool = false;
+  }
+
+  isValid() {
+    return !isNaN(this.quantity) && 
+           !isNaN(this.priceGBP) && 
+           !isNaN(this.priceUSD) && 
+           !isNaN(this.exchangeRate) &&
+           this.date instanceof Date && 
+           !isNaN(this.date);
+  }
+}
+
+class Section104Pool {
+  constructor() {
+    this.totalShares = 0.0;
+    this.avgCostGBP = 0.0;
+  }
+
+  addShares(quantity, costPerShareGBP) {
+    if (quantity <= 0) return;
+    const totalExistingCost = this.avgCostGBP * this.totalShares;
+    const totalNewCost = costPerShareGBP * quantity;
+    const newTotal = this.totalShares + quantity;
+
+    if (newTotal > 0) {
+      this.avgCostGBP = (totalExistingCost + totalNewCost) / newTotal;
+      this.totalShares = newTotal;
+    } else {
+      this.totalShares = 0;
+      this.avgCostGBP = 0;
+    }
+  }
+
+  removeShares(quantity) {
+    if (quantity > this.totalShares) {
+      throw new Error(`Not enough shares in S.104 pool. Need ${quantity}, have ${this.totalShares}`);
+    }
+    const cost = this.avgCostGBP * quantity;
+    this.totalShares -= quantity;
+    return cost;
+  }
+}
+
+function processCGT(transactions) {
+  const s104Pool = new Section104Pool();
+  const realized = [];
+  const transactionLog = [];
+
+  // Separate buys & sells
+  const buys = transactions.filter(t => t.type === "BUY" && t.isValid());
+  const sells = transactions.filter(t => t.type === "SELL" && t.isValid())
+    .sort((a, b) => a.date - b.date);
+
+  // Process each sell
+  for (const s of sells) {
+    const disposalDate = s.date;
+    const disposalQty = s.quantity;
+    const disposalProceedsGBP = s.priceGBP * s.quantity;
+    let matchedCostGBP = 0.0;
+    let remainingQty = disposalQty;
+
+    // 1) Add older buys to pool
+    for (const b of buys) {
+      if (b.date < disposalDate && !b.addedToPool && b.quantity > 0) {
+        s104Pool.addShares(b.quantity, b.priceGBP);
+        b.addedToPool = true;
+        transactionLog.push({
+          Date: formatDate(b.date),
+          Action: 'ADD TO POOL',
+          Quantity: parseFloat(b.quantity.toFixed(2)),
+          PriceGBP: parseFloat(b.priceGBP.toFixed(2)),
+          PriceUSD: parseFloat(s.priceUSD.toFixed(2)),
+          ExchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
+          PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+          PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+          Grant: b.grantNumber
+        });
+      }
+    }
+
+    // 2) Same-day match
+    const sameDayMatches = [];
+    for (const b of buys) {
+      // Compare dates using formatDate to ignore time components
+      if (formatDate(b.date) === formatDate(disposalDate) && !b.addedToPool && b.quantity > 0) {
+        const matchable = Math.min(remainingQty, b.quantity);
+        if (matchable > 0) {
+          matchedCostGBP += matchable * b.priceGBP;
+          remainingQty -= matchable;
+          b.quantity -= matchable;
+          sameDayMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+        }
+      }
+    }
+    // Log same-day matches
+    for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of sameDayMatches) {
+      transactionLog.push({
+        Date: formatDate(disposalDate),
+        Action: 'SAME-DAY MATCH',
+        Quantity: parseFloat(qty.toFixed(2)),
+        PriceGBP: parseFloat(priceGBP.toFixed(2)),
+        PriceUSD: parseFloat(priceUSD.toFixed(2)),
+        ExchangeRate: parseFloat(exchangeRate.toFixed(4)),
+        PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+        PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+        Grant: grant
+      });
+    }
+
+    // 3) Bed & Breakfast (30-day match)
+    if (remainingQty > 0) {
+      // Create bnbCutoff date using UTC
+      const bnbCutoff = new Date(Date.UTC(
+        disposalDate.getUTCFullYear(),
+        disposalDate.getUTCMonth(),
+        disposalDate.getUTCDate() + 30
+      ));
+      
+      const bnbMatches = [];
+
+      for (const b of buys) {
+        if (b.date > disposalDate && b.date <= bnbCutoff && !b.addedToPool && b.quantity > 0) {
+          const matchable = Math.min(remainingQty, b.quantity);
+          if (matchable > 0) {
+            matchedCostGBP += matchable * b.priceGBP;
+            remainingQty -= matchable;
+            b.quantity -= matchable;
+            bnbMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+          }
+        }
+      }
+      // Log B&B matches
+      for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of bnbMatches) {
+        transactionLog.push({
+          Date: formatDate(disposalDate),
+          Action: 'B&B MATCH',
+          Quantity: parseFloat(qty.toFixed(2)),
+          PriceGBP: parseFloat(priceGBP.toFixed(2)),
+          PriceUSD: parseFloat(priceUSD.toFixed(2)),
+          ExchangeRate: parseFloat(exchangeRate.toFixed(4)),
+          PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+          PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+          Grant: grant
+        });
+      }
+    }
+
+    // 4) Use the pool for any remainder
+    if (remainingQty > 0) {
+      const costFromPool = s104Pool.removeShares(remainingQty);
+      matchedCostGBP += costFromPool;
+
+      // Log the pool sale
+      transactionLog.push({
+        Date: formatDate(disposalDate),
+        Action: 'POOL SALE',
+        Quantity: parseFloat((-remainingQty).toFixed(2)),
+        PriceGBP: parseFloat(s.priceGBP.toFixed(2)),
+        PriceUSD: parseFloat(s.priceUSD.toFixed(2)),
+        ExchangeRate: parseFloat(s.exchangeRate.toFixed(4)),
+        PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+        PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+        Grant: s.grantNumber
+      });
+    }
+
+    const gainLossGBP = disposalProceedsGBP - matchedCostGBP;
+    realized.push({
+      date: disposalDate,
+      qty: parseFloat(disposalQty.toFixed(2)),
+      sellPriceGBP: parseFloat(s.priceGBP.toFixed(2)),
+      sellPriceUSD: parseFloat(s.priceUSD.toFixed(2)),
+      exchangeRate: parseFloat(s.exchangeRate.toFixed(4)),
+      proceedsGBP: parseFloat(disposalProceedsGBP.toFixed(2)),
+      matchedCostGBP: parseFloat(matchedCostGBP.toFixed(2)),
+      gainLossGBP: parseFloat(gainLossGBP.toFixed(2))
+    });
+  }
+
+  // 5) Add remaining unmatched buys to pool
+  for (const b of buys) {
+    if (b.quantity > 0 && !b.addedToPool) {
+      s104Pool.addShares(b.quantity, b.priceGBP);
+      transactionLog.push({
+        Date: formatDate(b.date),
+        Action: 'ADD TO POOL',
+        Quantity: parseFloat(b.quantity.toFixed(2)),
+        PriceGBP: parseFloat(b.priceGBP.toFixed(2)),
+        PriceUSD: parseFloat(b.priceUSD.toFixed(2)),
+        ExchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
+        PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+        PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+        Grant: b.grantNumber
+      });
+    }
+  }
+
+  return { realized, s104Pool, transactionLog };
+}
+
+/********************************************************************
+ * 5) MAIN WORKFLOW
+ ********************************************************************/
+const manualTransactions = []; // Array to store manual transactions
+let forexRatesMap = {}; // To store forex rates after parsing
+
+function enableManualTransactionsForm(enable) {
+  document.getElementById('manualDate').disabled = !enable;
+  document.getElementById('manualQuantity').disabled = !enable;
+  document.getElementById('manualPriceUSD').disabled = !enable;
+  document.getElementById('manualGrantNumber').disabled = !enable;
+  document.querySelector('.add-transaction-button').disabled = !enable;
+}
+
+function addManualTransaction() {
+  const dateInput = document.getElementById('manualDate');
+  const quantityInput = document.getElementById('manualQuantity');
+  const priceUSDInput = document.getElementById('manualPriceUSD');
+  const grantNumberInput = document.getElementById('manualGrantNumber');
+
+  const date = dateInput.value;
+  const quantity = parseFloat(quantityInput.value);
+  const priceUSD = parseFloat(priceUSDInput.value);
+  const grantNumber = grantNumberInput.value.trim();
+
+  if (!date || isNaN(quantity) || isNaN(priceUSD) || !grantNumber) {
+    alert("Please fill in all fields correctly.");
+    return;
+  }
+
+  if (!forexRatesMap || Object.keys(forexRatesMap).length === 0) {
+    alert("Forex Rates data is not loaded. Please upload the Forex Rates file first.");
+    return;
+  }
+
+  // Ensure the date is in 'YYYY-MM-DD' format
+  const formattedDate = toISODate(date);
+  if (!formattedDate) {
+    alert("Invalid date format.");
+    return;
+  }
+
+  // Get the forex rate for the given date
+  const fxRate = forexRatesMap[formattedDate];
+  if (!fxRate) {
+    const proceed = confirm(`Exchange rate for ${formattedDate} not found. Proceed with GBP Price as 0?`);
+    if (!proceed) {
+      return;
+    }
+  }
+
+  const priceGBP = fxRate ? (priceUSD / fxRate) : 0;
+
+  // Add to manualTransactions array
+  manualTransactions.push({
+    date: formattedDate,
+    quantity,
+    priceUSD,
+    priceGBP,
+    grantNumber,
+    exchangeRate: fxRate || 0
+  });
+
+  // Clear input fields
+  dateInput.value = '';
+  quantityInput.value = '';
+  priceUSDInput.value = '';
+  grantNumberInput.value = '';
+
+  // Render the manual transactions table
+  renderManualTransactions();
+}
+
+function renderManualTransactions() {
+  const tbody = document.getElementById('manualTransactionsBody');
+  tbody.innerHTML = '';
+
+  manualTransactions.forEach((tx, index) => {
+    const tr = document.createElement('tr');
+
+    const dateTd = document.createElement('td');
+    dateTd.textContent = tx.date;
+    tr.appendChild(dateTd);
+
+    const qtyTd = document.createElement('td');
+    qtyTd.textContent = tx.quantity.toFixed(2);
+    tr.appendChild(qtyTd);
+
+    const priceUSDTd = document.createElement('td');
+    priceUSDTd.textContent = `$${tx.priceUSD.toFixed(2)}`;
+    tr.appendChild(priceUSDTd);
+
+    const priceGBPTd = document.createElement('td');
+    priceGBPTd.textContent = `£${tx.priceGBP.toFixed(2)}`;
+    tr.appendChild(priceGBPTd);
+
+    const grantTd = document.createElement('td');
+    grantTd.textContent = tx.grantNumber;
+    tr.appendChild(grantTd);
+
+    const actionTd = document.createElement('td');
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.classList.add('remove-transaction-button');
+    removeBtn.onclick = () => {
+      manualTransactions.splice(index, 1);
+      renderManualTransactions();
+    };
+    actionTd.appendChild(removeBtn);
+    tr.appendChild(actionTd);
+
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('processBtn').addEventListener('click', async () => {
+  try {
+    const gainsFile = document.getElementById('gainsFile').files[0];
+    const benefitsFile = document.getElementById('benefitsFile').files[0];
+    const stockFile = document.getElementById('stockFile').files[0];
+    const forexFile = document.getElementById('forexFile').files[0];
+    const holidaysFile = document.getElementById('holidaysFile').files[0];
+
+    if (!gainsFile || !benefitsFile || !stockFile || !forexFile || !holidaysFile) {
+      alert("Please upload all 5 files before processing.");
+      return;
+    }
+
+    // 1) Parse files
+    const gainsData = await parseExcelFile(gainsFile, true);
+    const benefitsData = await parseExcelFile(benefitsFile);
+    const stockData = await parseCSVFile(stockFile);
+    const forexData = await parseCSVFile(forexFile);
+    const holidaysData = await parseJSONFile(holidaysFile);
+
+    // Rebuild forexRatesMap to ensure it's up-to-date
+    forexRatesMap = {};
+    forexData.forEach(row => {
+      if (row['Date'] && row['Average']) {
+        const isoDate = toISODate(row['Date']);
+        if (isoDate) {
+          forexRatesMap[isoDate] = parseFloatSafe(row['Average']);
+        }
+      }
+    });
+
+    // 2) Construct ETradeDataProcessor
+    const processor = new ETradeDataProcessor(stockData, forexData, holidaysData);
+
+    // 3) Process Gains/Losses
+    const gains = processor.processGainsLosses(gainsData);
+
+    // 4) Process Benefits
+    const benefits = processor.processBenefits(benefitsData);
+
+    // 5) Consolidate, including manual transactions
+    const consolidated = processor.consolidateTransactions(gains, benefits, manualTransactions);
+
+    // 6) Render the consolidated table
+    renderOutputTable(consolidated);
+
+    // 7) Show validation report
+    document.getElementById('validationReport').textContent = processor.generateValidationReport();
+
+    // 8) Convert consolidated => Transactions for CGT
+    //    (Exclude anything that is "Non-Qualified Stock Option" if that logic is desired)
+    const transactions = consolidated
+      .filter(row => row["Type"] !== "Non-Qualified Stock Option")
+      .map(row => new Transaction(row))
+      .filter(tx => tx.isValid())
+      .sort((a, b) => a.date - b.date);
+
+    // 9) Run CGT process
+    const cgtResults = processCGT(transactions);
+    displayCGTResults(cgtResults);
+
+    // 10) Render CGT Summary
+    renderCGTSummary(cgtResults.realized);
+
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+    console.error(err);
+  }
+});
+
+/********************************************************************
+ * 6) RENDERING FUNCTIONS
+ ********************************************************************/
+function renderOutputTable(consolidated) {
+  const table = document.getElementById('outputTable');
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  if (!consolidated || consolidated.length === 0) {
+    thead.innerHTML = '<tr><th>No records found</th></tr>';
+    return;
+  }
+
+  const columns = Object.keys(consolidated[0]);
+  // Header row
+  const headerRow = document.createElement('tr');
+  columns.forEach(col => {
+    const th = document.createElement('th');
+    th.textContent = col;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  // Rows
+  consolidated.forEach(rowObj => {
+    const tr = document.createElement('tr');
+    columns.forEach(col => {
+      const td = document.createElement('td');
+      td.textContent = (rowObj[col] !== null && rowObj[col] !== undefined) ? rowObj[col] : '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function displayCGTResults({ realized, s104Pool, transactionLog }) {
+  // Store current CGT results for CSV downloads
+  window.currentCGTResults = { realized, s104Pool, transactionLog };
+
+  // 1) Pool status
+  document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
+  document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+
+  // 2) Disposal results
+  const disposalDiv = document.getElementById('disposalResults');
+  disposalDiv.innerHTML = '';
+  if (realized.length === 0) {
+    disposalDiv.textContent = 'No disposals.';
+    return;
+  }
+  const disposalTable = document.createElement('table');
+  disposalTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Quantity</th>
+        <th>Sale Price (GBP)</th>
+        <th>Sale Price (USD)</th>
+        <th>Exchange Rate</th>
+        <th>Proceeds (GBP)</th>
+        <th>Cost (GBP)</th>
+        <th>Gain/Loss (GBP)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${realized.map(r => `
+        <tr>
+          <td>${formatDate(r.date)}</td>
+          <td>${r.qty.toFixed(2)}</td>
+          <td>${formatCurrency(r.sellPriceGBP)}</td>
+          <td>$${r.sellPriceUSD.toFixed(2)}</td>
+          <td>${r.exchangeRate.toFixed(4)}</td>
+          <td>${formatCurrency(r.proceedsGBP)}</td>
+          <td>${formatCurrency(r.matchedCostGBP)}</td>
+          <td>${formatCurrency(r.gainLossGBP)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  disposalDiv.appendChild(disposalTable);
+
+  // 3) Transaction log
+  const logDiv = document.getElementById('transactionLog');
+  logDiv.innerHTML = '';
+  if (transactionLog.length === 0) {
+    logDiv.textContent = 'No transaction log.';
+    return;
+  }
+  const logTable = document.createElement('table');
+  logTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Action</th>
+        <th>Quantity</th>
+        <th>Price (GBP)</th>
+        <th>Price (USD)</th>
+        <th>Exchange Rate</th>
+        <th>Pool Size After</th>
+        <th>Pool Avg Cost (GBP)</th>
+        <th>Grant</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${transactionLog.map(t => `
+        <tr>
+          <td>${t.Date}</td>
+          <td>${t.Action}</td>
+          <td>${t.Quantity.toFixed(2)}</td>
+          <td>£${t.PriceGBP.toFixed(2)}</td>
+          <td>$${t.PriceUSD.toFixed(2)}</td>
+          <td>${t.ExchangeRate.toFixed(4)}</td>
+          <td>${t.PoolSizeAfter.toFixed(2)}</td>
+          <td>£${t.PoolAvgCostGBP.toFixed(2)}</td>
+          <td>${t.Grant || ''}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  logDiv.appendChild(logTable);
+}
+
+/********************************************************************
+ * 7) CSV DOWNLOAD FUNCTIONS
+ ********************************************************************/
+
+function downloadCGTDisposalsCSV() {
+  // Assuming 'realized' data is available globally
+  // You might need to store 'realized' data globally or pass it appropriately
+  // For simplicity, we'll assume it's stored in a global variable 'currentCGTResults'
+  if (!window.currentCGTResults || !window.currentCGTResults.realized) {
+    alert("No CGT Disposals data available to download.");
+    return;
+  }
+
+  const data = window.currentCGTResults.realized;
+  if (data.length === 0) {
+    alert("No CGT Disposals data available to download.");
+    return;
+  }
+
+  const headers = [
+    "Date",
+    "Quantity",
+    "Sale Price (GBP)",
+    "Sale Price (USD)",
+    "Exchange Rate",
+    "Proceeds (GBP)",
+    "Cost (GBP)",
+    "Gain/Loss (GBP)"
+  ];
+
+  const csvRows = [
+    headers.join(','), // header row first
+    ...data.map(row => [
+      formatDate(row.date),
+      row.qty.toFixed(2),
+      row.sellPriceGBP.toFixed(2),
+      row.sellPriceUSD.toFixed(2),
+      row.exchangeRate.toFixed(4),
+      row.proceedsGBP.toFixed(2),
+      row.matchedCostGBP.toFixed(2),
+      row.gainLossGBP.toFixed(2)
+    ].join(','))
+  ];
+
+  const csvContent = csvRows.join('\n');
+  downloadCSV(csvContent, 'cgt_disposals.csv');
+}
+
+function downloadTransactionLogCSV() {
+  // Assuming 'transactionLog' data is available globally
+  // You might need to store 'transactionLog' data globally or pass it appropriately
+  // For simplicity, we'll assume it's stored in a global variable 'currentCGTResults'
+  if (!window.currentCGTResults || !window.currentCGTResults.transactionLog) {
+    alert("No Transaction Log data available to download.");
+    return;
+  }
+
+  const data = window.currentCGTResults.transactionLog;
+  if (data.length === 0) {
+    alert("No Transaction Log data available to download.");
+    return;
+  }
+
+  const headers = [
+    "Date",
+    "Action",
+    "Quantity",
+    "Price GBP",
+    "Price USD",
+    "Exchange Rate",
+    "Pool Size After",
+    "Pool Avg Cost GBP",
+    "Grant"
+  ];
+
+  const csvRows = [
+    headers.join(','), // header row first
+    ...data.map(row => [
+      row.Date,
+      row.Action,
+      row.Quantity.toFixed(2),
+      parseFloat(row.PriceGBP.toFixed(2)),
+      parseFloat(row.PriceUSD.toFixed(2)),
+      row.ExchangeRate.toFixed(4),
+      parseFloat(row.PoolSizeAfter.toFixed(2)),
+      parseFloat(row.PoolAvgCostGBP.toFixed(2)),
+      row.Grant || ''
+    ].join(','))
+  ];
+
+  const csvContent = csvRows.join('\n');
+  downloadCSV(csvContent, 'transaction_log.csv');
+}
+
+function downloadCSV(csvContent, filename) {
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  if (navigator.msSaveBlob) { // IE 10+
+    navigator.msSaveBlob(blob, filename);
+  } else {
+    const link = document.createElement("a");
+    if (link.download !== undefined) { // feature detection
+      // Browsers that support HTML5 download attribute
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+}
+
+/********************************************************************
+ * 8) TAB SWITCHING
+ ********************************************************************/
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    // Remove active from all
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    // Add active to clicked
+    tab.classList.add('active');
+    const tabContent = document.getElementById(tab.getAttribute('data-tab'));
+    tabContent.classList.add('active');
+  });
+});
+
+/********************************************************************
+ * 9) USD to GBP Conversion Function
+ ********************************************************************/
+function convertUSDToGBP(date, amount) {
+  const fxRate = forexRatesMap[date];
+  if (!fxRate) {
+    return null;
+  }
+  return amount / fxRate;
+}
+
+/********************************************************************
+ * 10) Format Currency Function (Updated)
+ ********************************************************************/
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+}
+
+/********************************************************************
+ * 11) Display CGT Results and Store for CSV Downloads
+ ********************************************************************/
+let currentCGTResults = null;
+
+function displayCGTResults({ realized, s104Pool, transactionLog }) {
+  // Store current CGT results for CSV downloads
+  window.currentCGTResults = { realized, s104Pool, transactionLog };
+
+  // 1) Pool status
+  document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
+  document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+
+  // 2) Disposal results
+  const disposalDiv = document.getElementById('disposalResults');
+  disposalDiv.innerHTML = '';
+  if (realized.length === 0) {
+    disposalDiv.textContent = 'No disposals.';
+    return;
+  }
+  const disposalTable = document.createElement('table');
+  disposalTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Quantity</th>
+        <th>Sale Price (GBP)</th>
+        <th>Sale Price (USD)</th>
+        <th>Exchange Rate</th>
+        <th>Proceeds (GBP)</th>
+        <th>Cost (GBP)</th>
+        <th>Gain/Loss (GBP)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${realized.map(r => `
+        <tr>
+          <td>${formatDate(r.date)}</td>
+          <td>${r.qty.toFixed(2)}</td>
+          <td>${formatCurrency(r.sellPriceGBP)}</td>
+          <td>$${r.sellPriceUSD.toFixed(2)}</td>
+          <td>${r.exchangeRate.toFixed(4)}</td>
+          <td>${formatCurrency(r.proceedsGBP)}</td>
+          <td>${formatCurrency(r.matchedCostGBP)}</td>
+          <td>${formatCurrency(r.gainLossGBP)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  disposalDiv.appendChild(disposalTable);
+
+  // 3) Transaction log
+  const logDiv = document.getElementById('transactionLog');
+  logDiv.innerHTML = '';
+  if (transactionLog.length === 0) {
+    logDiv.textContent = 'No transaction log.';
+    return;
+  }
+  const logTable = document.createElement('table');
+  logTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Action</th>
+        <th>Quantity</th>
+        <th>Price (GBP)</th>
+        <th>Price (USD)</th>
+        <th>Exchange Rate</th>
+        <th>Pool Size After</th>
+        <th>Pool Avg Cost (GBP)</th>
+        <th>Grant</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${transactionLog.map(t => `
+        <tr>
+          <td>${t.Date}</td>
+          <td>${t.Action}</td>
+          <td>${t.Quantity.toFixed(2)}</td>
+          <td>£${t.PriceGBP.toFixed(2)}</td>
+          <td>$${t.PriceUSD.toFixed(2)}</td>
+          <td>${t.ExchangeRate.toFixed(4)}</td>
+          <td>${t.PoolSizeAfter.toFixed(2)}</td>
+          <td>£${t.PoolAvgCostGBP.toFixed(2)}</td>
+          <td>${t.Grant || ''}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+  logDiv.appendChild(logTable);
+}
+
+/********************************************************************
+ * 12) RENDER CGT SUMMARY FUNCTION
+ ********************************************************************/
+function renderCGTSummary(realized) {
+  const summaryTableBody = document.querySelector('#cgtSummaryTable tbody');
+  summaryTableBody.innerHTML = '';
+
+  if (!realized || realized.length === 0) {
+    summaryTableBody.innerHTML = '<tr><td colspan="2">No CGT disposals data available.</td></tr>';
+    document.getElementById('totalGainLoss').textContent = formatCurrency(0);
+    return;
+  }
+
+  // Helper function to determine UK tax year
+  function getTaxYear(date) {
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1; // 1-12
+    const day = date.getUTCDate();
+    if (month > 4 || (month === 4 && day >=6)) {
+      return `${year}-${year + 1}`;
+    } else {
+      return `${year -1}-${year}`;
+    }
+  }
+
+  // Calculate total gain/loss
+  let totalGainLoss = 0;
+  const taxYearMap = {};
+
+  realized.forEach(r => {
+    totalGainLoss += r.gainLossGBP;
+    const taxYear = getTaxYear(r.date);
+    if (!taxYearMap[taxYear]) {
+      taxYearMap[taxYear] = 0;
+    }
+    taxYearMap[taxYear] += r.gainLossGBP;
+  });
+
+  // Update total gain/loss
+  document.getElementById('totalGainLoss').textContent = formatCurrency(totalGainLoss);
+
+  // Populate tax year breakdown
+  for (const [taxYear, gainLoss] of Object.entries(taxYearMap)) {
+    const tr = document.createElement('tr');
+
+    const taxYearTd = document.createElement('td');
+    taxYearTd.textContent = taxYear;
+    tr.appendChild(taxYearTd);
+
+    const gainLossTd = document.createElement('td');
+    gainLossTd.textContent = formatCurrency(gainLoss);
+    tr.appendChild(gainLossTd);
+
+    summaryTableBody.appendChild(tr);
+  }
+}
+
+</script>
+
+</body>
+</html>

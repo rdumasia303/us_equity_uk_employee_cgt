@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 104 CGT Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .results {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Section 104 CGT Calculator</h1>
+        
+        <div class="upload-area">
+            <input type="file" id="csvFile" accept=".csv" />
+            <p>Drop your CSV file here or click to select</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="results">Results & Pool Status</button>
+            <button class="tab" data-tab="transactions">Transaction Log</button>
+        </div>
+
+        <div id="results" class="tab-content active">
+            <div id="poolStatus" class="summary">
+                <h3>Current Pool Status</h3>
+                <p>Total Shares: <span id="poolShares">0.00</span></p>
+                <p>Average Cost (GBP): <span id="poolAvgCost">£0.00</span></p>
+            </div>
+
+            <h2>Disposal Results</h2>
+            <div id="disposalResults"></div>
+        </div>
+
+        <div id="transactions" class="tab-content">
+            <h2>Transaction Log</h2>
+            <div id="transactionLog"></div>
+        </div>
+    </div>
+
+    <script>
+        class Transaction {
+            constructor(row) {
+                this.type = (row["Record Type"] || "").toUpperCase();
+                this.date = new Date(row["Date"]);
+                this.quantity = parseFloat(row["Qty."]) || 0;
+                this.priceGBP = parseFloat(row["Price Per Share GBP"]) || 0;
+                this.priceUSD = parseFloat(row["Price Per Share"]) || 0;
+                this.exchangeRate = parseFloat(row["Exchange Rate"]) || 0;
+                this.orderType = row["Order Type"] || "";
+                this.securityType = row["Type"] || "";
+                this.grantNumber = row["Grant Number"] || "";
+                this.addedToPool = false;
+            }
+
+            isValid() {
+                return !isNaN(this.quantity) && 
+                    !isNaN(this.priceGBP) && 
+                    !isNaN(this.priceUSD) && 
+                    !isNaN(this.exchangeRate) &&
+                    this.date instanceof Date && 
+                    !isNaN(this.date);
+            }
+        }
+
+        class Section104Pool {
+            constructor() {
+                this.totalShares = 0.0;
+                this.avgCostGBP = 0.0;
+            }
+
+            addShares(quantity, costPerShareGBP) {
+                if (quantity <= 0) return;
+                const totalExistingCost = this.avgCostGBP * this.totalShares;
+                const totalNewCost = costPerShareGBP * quantity;
+                const newTotal = this.totalShares + quantity;
+
+                if (newTotal > 0) {
+                    this.avgCostGBP = (totalExistingCost + totalNewCost) / newTotal;
+                    this.totalShares = newTotal;
+                } else {
+                    this.totalShares = 0;
+                    this.avgCostGBP = 0;
+                }
+            }
+
+            removeShares(quantity) {
+                if (quantity > this.totalShares) {
+                    throw new Error(`Not enough shares in S.104 pool to remove. Need ${quantity}, have ${this.totalShares}`);
+                }
+                const cost = this.avgCostGBP * quantity;
+                this.totalShares -= quantity;
+                return cost;
+            }
+        }
+
+        function processCGT(transactions) {
+            const s104Pool = new Section104Pool();
+            const realized = [];
+            const transactionLog = [];
+
+            const buys = transactions.filter(t => t.type === "BUY" && t.isValid());
+            const sells = transactions.filter(t => t.type === "SELL" && t.isValid())
+                .sort((a, b) => a.date - b.date);
+
+            for (const s of sells) {
+                const disposalDate = s.date;
+                const disposalQty = s.quantity;
+                const disposalProceedsGBP = s.priceGBP * s.quantity;
+                let matchedCostGBP = 0.0;
+                let remainingQty = disposalQty;
+
+                // Add older buys to pool
+                for (const b of buys) {
+                    if (b.date < disposalDate && !b.addedToPool && b.quantity > 0) {
+                        s104Pool.addShares(b.quantity, b.priceGBP);
+                        b.addedToPool = true;
+                        transactionLog.push({
+                            Date: b.date,
+                            Action: 'ADD TO POOL',
+                            Quantity: b.quantity,
+                            PriceGBP: b.priceGBP,
+                            PriceUSD: b.priceUSD,
+                            ExchangeRate: b.exchangeRate,
+                            PoolSizeAfter: s104Pool.totalShares,
+                            PoolAvgCostGBP: s104Pool.avgCostGBP,
+                            Grant: b.grantNumber
+                        });
+                    }
+                }
+
+                // Same-day matching
+                const sameDayMatches = [];
+                for (const b of buys) {
+                    if (b.date.toDateString() === disposalDate.toDateString() && !b.addedToPool && b.quantity > 0) {
+                        const matchable = Math.min(remainingQty, b.quantity);
+                        if (matchable > 0) {
+                            matchedCostGBP += matchable * b.priceGBP;
+                            remainingQty -= matchable;
+                            b.quantity -= matchable;
+                            sameDayMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+                        }
+                    }
+                }
+
+                for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of sameDayMatches) {
+                    transactionLog.push({
+                        Date: disposalDate,
+                        Action: 'SAME-DAY MATCH',
+                        Quantity: qty,
+                        PriceGBP: priceGBP,
+                        PriceUSD: priceUSD,
+                        ExchangeRate: exchangeRate,
+                        PoolSizeAfter: s104Pool.totalShares,
+                        PoolAvgCostGBP: s104Pool.avgCostGBP,
+                        Grant: grant
+                    });
+                }
+
+                // B&B matching
+                if (remainingQty > 0) {
+                    const bnbCutoff = new Date(disposalDate);
+                    bnbCutoff.setDate(bnbCutoff.getDate() + 30);
+                    const bnbMatches = [];
+
+                    for (const b of buys) {
+                        if (b.date > disposalDate && b.date <= bnbCutoff && !b.addedToPool && b.quantity > 0) {
+                            const matchable = Math.min(remainingQty, b.quantity);
+                            if (matchable > 0) {
+                                matchedCostGBP += matchable * b.priceGBP;
+                                remainingQty -= matchable;
+                                b.quantity -= matchable;
+                                bnbMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+                            }
+                        }
+                    }
+
+                    for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of bnbMatches) {
+                        transactionLog.push({
+                            Date: disposalDate,
+                            Action: 'B&B MATCH',
+                            Quantity: qty,
+                            PriceGBP: priceGBP,
+                            PriceUSD: priceUSD,
+                            ExchangeRate: exchangeRate,
+                            PoolSizeAfter: s104Pool.totalShares,
+                            PoolAvgCostGBP: s104Pool.avgCostGBP,
+                            Grant: grant
+                        });
+                    }
+                }
+
+                // Use pool for remaining quantity
+                if (remainingQty > 0) {
+                    const costFromPool = s104Pool.removeShares(remainingQty);
+                    matchedCostGBP += costFromPool;
+
+                    transactionLog.push({
+                        Date: disposalDate,
+                        Action: 'POOL SALE',
+                        Quantity: -remainingQty,
+                        PriceGBP: s.priceGBP,
+                        PriceUSD: s.priceUSD,
+                        ExchangeRate: s.exchangeRate,
+                        PoolSizeAfter: s104Pool.totalShares,
+                        PoolAvgCostGBP: s104Pool.avgCostGBP,
+                        Grant: s.grantNumber
+                    });
+                }
+
+                const gainLossGBP = disposalProceedsGBP - matchedCostGBP;
+                realized.push({
+                    date: s.date,
+                    qty: s.quantity,
+                    sellPriceGBP: s.priceGBP,
+                    sellPriceUSD: s.priceUSD,
+                    exchangeRate: s.exchangeRate,
+                    proceedsGBP: disposalProceedsGBP,
+                    matchedCostGBP: matchedCostGBP,
+                    gainLossGBP: gainLossGBP
+                });
+            }
+
+            // Add remaining unmatched buys to pool
+            for (const b of buys) {
+                if (b.quantity > 0 && !b.addedToPool) {
+                    s104Pool.addShares(b.quantity, b.priceGBP);
+                    transactionLog.push({
+                        Date: b.date,
+                        Action: 'ADD TO POOL',
+                        Quantity: b.quantity,
+                        PriceGBP: b.priceGBP,
+                        PriceUSD: b.priceUSD,
+                        ExchangeRate: b.exchangeRate,
+                        PoolSizeAfter: s104Pool.totalShares,
+                        PoolAvgCostGBP: s104Pool.avgCostGBP,
+                        Grant: b.grantNumber
+                    });
+                }
+            }
+
+            return { realized, s104Pool, transactionLog };
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-GB', { 
+                style: 'currency', 
+                currency: 'GBP' 
+            }).format(value);
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function displayResults(results) {
+            const { realized, s104Pool, transactionLog } = results;
+
+            // Update pool status
+            document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
+            document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+
+            // Display disposal results
+            const disposalTable = document.createElement('table');
+            disposalTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Quantity</th>
+                        <th>Sale Price (GBP)</th>
+                        <th>Sale Price (USD)</th>
+                        <th>Exchange Rate</th>
+                        <th>Proceeds (GBP)</th>
+                        <th>Cost (GBP)</th>
+                        <th>Gain/Loss (GBP)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${realized.map(r => `
+                        <tr>
+                            <td>${formatDate(r.date)}</td>
+                            <td>${r.qty.toFixed(2)}</td>
+                            <td>${formatCurrency(r.sellPriceGBP)}</td>
+                            <td>$${r.sellPriceUSD.toFixed(2)}</td>
+                            <td>${r.exchangeRate.toFixed(4)}</td>
+                            <td>${formatCurrency(r.proceedsGBP)}</td>
+                            <td>${formatCurrency(r.matchedCostGBP)}</td>
+                            <td>${formatCurrency(r.gainLossGBP)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            document.getElementById('disposalResults').innerHTML = '';
+            document.getElementById('disposalResults').appendChild(disposalTable);
+
+            // Display transaction log
+            const logTable = document.createElement('table');
+            logTable.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Action</th>
+                        <th>Quantity</th>
+                        <th>Price (GBP)</th>
+                        <th>Price (USD)</th>
+                        <th>Exchange Rate</th>
+                        <th>Pool Size</th>
+                        <th>Pool Avg Cost (GBP)</th>
+                        <th>Grant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${transactionLog.map(t => `
+                        <tr>
+                            <td>${formatDate(t.Date)}</td>
+                            <td>${t.Action}</td>
+                            <td>${t.Quantity.toFixed(2)}</td>
+                            <td>${formatCurrency(t.PriceGBP)}</td>
+                            <td>${t.PriceUSD.toFixed(2)}</td>
+                            <td>${t.ExchangeRate.toFixed(4)}</td>
+                            <td>${t.PoolSizeAfter.toFixed(2)}</td>
+                            <td>${formatCurrency(t.PoolAvgCostGBP)}</td>
+                            <td>${t.Grant || ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            document.getElementById('transactionLog').innerHTML = '';
+            document.getElementById('transactionLog').appendChild(logTable);
+        }
+
+        // Handle file upload
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    complete: function(results) {
+                        // Filter out invalid rows and create Transaction objects
+                        const transactions = results.data
+                            .filter(row => 
+                                row["Type"] !== "Non-Qualified Stock Option" &&
+                                row["Record Type"] && 
+                                row["Date"] && 
+                                row["Qty."]
+                            )
+                            .map(row => new Transaction(row))
+                            .filter(tx => tx.isValid())
+                            .sort((a, b) => a.date - b.date);
+                        
+                        const cgtResults = processCGT(transactions);
+                        displayResults(cgtResults);
+                    },
+                    error: function(error) {
+                        console.error('Error parsing CSV:', error);
+                    }
+                });
+            }
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabContent = document.getElementById(tab.getAttribute('data-tab'));
+                tabContent.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
