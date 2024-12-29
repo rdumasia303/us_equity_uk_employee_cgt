@@ -353,6 +353,10 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       color: var(--accent-primary);
     }
 
+    body.corporate-mode a{
+      color: var(--corp-accent);
+    }
+
     /* Reset and base styles */
     * {
       margin: 0;
@@ -1505,8 +1509,8 @@ By using this software, you agree to these terms. For commercial use inquiries, 
     <button class="main-app-tab" data-tab="about">About</button>
     <!-- Add this new button -->
     <button id="themeToggle" class="theme-toggle">
-      <span class="cyber-text">🤖 Cyber Mode</span>
-      <span class="corp-text">💼 Corporate</span>
+      <span class="cyber-text">🤖 Go Corporate</span>
+      <span class="corp-text">💼 Go Cyberpunk</span>
     </button>
     <div class="donate-container">
       <form action="https://www.paypal.com/donate" method="post" target="_top">
@@ -1538,10 +1542,12 @@ By using this software, you agree to these terms. For commercial use inquiries, 
 
         <!-- Corporate version -->
         <h1 class="corp-content">US Equity Compensation Management</h1>
-        <h1 class="corp-content">UK Tax Compliance Calculator</h1>
+        <h1 class="corp-content">UK Capital Gains Tax Calculator For Vested Equity Within E*Trade</h1>
 
         <p>Upload your files and process them to see consolidated transactions and CGT results.</p>
         <p>No liability for any bugs. All data handling done client side. Feel free to check the code.</p>
+        <p class="cyber-content">Click 'go corporate' for a sanitised version of the docs and guides.</p>
+        <p class="corp-content">Click 'go cyberpunk' for more 'informal' documentation and guides.</p>
       </div>
 
       <!-- Upload Grid -->
@@ -2169,7 +2175,8 @@ By using this software, you agree to these terms. For commercial use inquiries, 
           <span class="sender">Accountant</span>
           <p>The "bed and breakfast" rule prevents you from selling and repurchasing the same shares within 30 days for
             tax advantage. If you sell your RSUs and repurchase them quickly, HMRC will treat it as the same holding for
-            tax purposes. Timing is key if you want to avoid this.</p>
+            tax purposes. Release on vest is effectively an acquisition, so if you sold in the 30 days prior to vest,
+            this is a situation you may encounter. Timing is key if you want to avoid this.</p>
         </div>
 
         <div class="message incoming">
