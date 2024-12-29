@@ -107,8 +107,34 @@ Welcome to the **Handling US Equity Compensation for UK Workers** project. This 
   - Section 104 pooling.
 
 ## 🎨 **Design Philosophy**
-- **Cyberpunk Aesthetic**: A nod to the complexity and chaos of the financial system.
-- **Transparency**: All data is processed client-side, ensuring user privacy.
+- All data is processed client-side, ensuring user privacy.
+
+## 🎨 **Themes: Cyberpunk vs Corporate Mode**
+
+This app offers two distinct themes to suit your aesthetic and professional needs:
+
+### **Cyberpunk Mode**
+- **Aesthetic**: Bright neon colors, glowing accents, and a retro-futuristic vibe.
+- **Intended Audience**: Tech enthusiasts and users who enjoy a playful, unconventional interface.
+- **Key Features**:
+  - Neon text and glowing effects.
+  - Dark background with high-contrast visuals.
+  - A nod to the chaos and complexity of modern finance.
+
+### **Corporate Mode**
+- **Aesthetic**: Clean, professional, and minimalist.
+- **Intended Audience**: Professionals looking for a distraction-free, business-friendly appearance.
+- **Key Features**:
+  - Neutral color palette with light backgrounds and subtle accents.
+  - Sans-serif fonts for readability.
+  - No glowing effects or animations—focused on clarity and precision.
+
+### **Switching Themes**
+- Use the theme toggle button to instantly switch between Cyberpunk and Corporate modes.
+- The theme preference is applied globally to the app for a consistent experience.
+
+Whether you prefer the playful glow of Cyberpunk or the sleek professionalism of Corporate Mode, this app provides a flexible design to match your style.
+
 
 ## 📢 **Disclaimer**
 - This tool is not financial or tax advice. Always consult a qualified professional.

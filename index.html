@@ -54,6 +54,299 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       --error-color: #ff3333;
       --neon-glow: 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 30px #00ff66;
       --neon-glow-strong: 0 0 15px #00ff66, 0 0 25px #00ff66, 0 0 35px #00ff66;
+
+      /* Add corporate theme variables */
+      --corp-bg-primary: #ffffff;
+      --corp-bg-secondary: #f8fafc;
+      --corp-text-primary: #2c5282;
+      --corp-text-secondary: #4a5568;
+      --corp-accent: #4299e1;
+      --corp-border: #e2e8f0;
+    }
+
+    .theme-toggle {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-primary);
+    }
+
+    /* Base corporate mode styles */
+    body.corporate-mode {
+      background: var(--corp-bg-primary);
+      background-image: none;
+      /* Remove the grid background */
+      color: var(--corp-text-primary);
+      font-family: Arial, sans-serif;
+    }
+
+    /* Hide corporate text by default */
+    .corp-text {
+      display: none;
+    }
+
+    .cyber-text {
+      display: inline;
+    }
+
+    /* Switch theme toggle text */
+    body.corporate-mode .corp-text {
+      display: inline;
+    }
+
+    body.corporate-mode .cyber-text {
+      display: none;
+    }
+
+    /* Style changes for corporate theme */
+    body.corporate-mode .theme-toggle {
+      border-color: var(--corp-accent);
+      color: var(--corp-text-primary);
+    }
+
+    /* Navigation and header in corporate mode */
+    body.corporate-mode .main-app-tabs {
+      background-color: var(--corp-bg-secondary);
+      border-bottom: 1px solid var(--corp-border);
+    }
+
+    body.corporate-mode .main-app-tab {
+      color: var(--corp-text-secondary);
+      border: none;
+      font-family: Arial, sans-serif;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    body.corporate-mode .main-app-tab:hover {
+      color: var(--corp-text-primary);
+      background: var(--corp-bg-secondary);
+      box-shadow: none;
+    }
+
+    body.corporate-mode .main-app-tab.active {
+      color: var(--corp-text-primary);
+      background: var(--corp-bg-primary);
+      border-bottom: 2px solid var(--corp-accent);
+      box-shadow: none;
+    }
+
+    /* Header text */
+    body.corporate-mode .header h1 {
+      color: var(--corp-text-primary);
+      text-shadow: none;
+      font-size: 2rem;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    body.corporate-mode .header p {
+      color: var(--corp-text-secondary);
+    }
+
+    /* Manual Transactions Section in corporate mode */
+    body.corporate-mode .manual-transactions-section {
+      background-color: var(--corp-bg-secondary);
+      border: 1px solid var(--corp-border);
+      box-shadow: none;
+    }
+
+    body.corporate-mode .manual-transactions-section h3 {
+      color: var(--corp-text-primary);
+      text-shadow: none;
+    }
+
+    body.corporate-mode .manual-transactions-section input {
+      border: 1px solid var(--corp-border);
+      background-color: var(--corp-bg-primary);
+      color: var(--corp-text-primary);
+    }
+
+    body.corporate-mode .add-transaction-button {
+      background-color: var(--corp-accent);
+      color: white;
+      border: none;
+      box-shadow: none;
+    }
+
+    /* Main output area in corporate mode */
+    body.corporate-mode .results-container {
+      background-color: var(--corp-bg-secondary);
+      border: 1px solid var(--corp-border);
+      box-shadow: none;
+    }
+
+    body.corporate-mode .tab {
+      color: var(--corp-text-secondary);
+      border: 1px solid var(--corp-border);
+    }
+
+    body.corporate-mode .tab.active {
+      background-color: var(--corp-accent);
+      color: white;
+      border: 1px solid var(--corp-accent);
+      box-shadow: none;
+    }
+
+    body.corporate-mode .tab:hover {
+      color: var(--corp-text-primary);
+      border-color: var(--corp-accent);
+      box-shadow: none;
+    }
+
+    /* Table styles in corporate mode */
+    body.corporate-mode table {
+      background-color: var(--corp-bg-primary);
+      border: 1px solid var(--corp-border);
+    }
+
+    body.corporate-mode th {
+      background-color: var(--corp-bg-secondary);
+      color: var(--corp-text-primary);
+      border-bottom: 2px solid var(--corp-accent);
+    }
+
+    body.corporate-mode td {
+      border-top: 1px solid var(--corp-border);
+      color: var(--corp-text-primary);
+    }
+
+    /* Summary cards in corporate mode */
+    body.corporate-mode .summary-card {
+      background-color: var(--corp-bg-secondary);
+      border: 1px solid var(--corp-border);
+      box-shadow: none;
+    }
+
+    body.corporate-mode .summary-card h4 {
+      color: var(--corp-text-secondary);
+    }
+
+    body.corporate-mode .summary-card .value {
+      color: var(--corp-text-primary);
+      text-shadow: none;
+    }
+
+    /* Process Files and Download buttons in corporate mode */
+    body.corporate-mode .process-button,
+    body.corporate-mode .download-button {
+      background-color: var(--corp-accent);
+      color: white;
+      border: none;
+      box-shadow: none;
+      text-transform: none;
+      letter-spacing: normal;
+      font-family: Arial, sans-serif;
+    }
+
+    body.corporate-mode .process-button:hover,
+    body.corporate-mode .download-button:hover {
+      background-color: var(--corp-text-primary);
+      box-shadow: none;
+    }
+
+    /* Section headings in corporate mode */
+    body.corporate-mode h2 {
+      color: var(--corp-text-primary);
+      text-shadow: none;
+    }
+
+    body.corporate-mode h1 {
+      color: var(--corp-text-primary);
+      text-shadow: none;
+    }
+
+    body.corporate-mode h3 {
+      color: var(--corp-text-primary);
+      text-shadow: none;
+    }
+
+
+    /* Fix any remaining dark backgrounds */
+    body.corporate-mode .results-container,
+    body.corporate-mode .tab-content {
+      background-color: var(--corp-bg-primary);
+    }
+
+    /* Fix the tabs container background in corporate mode */
+    body.corporate-mode .tabs-container {
+      background-color: var(--corp-bg-primary);
+      border-bottom: 1px solid var(--corp-border);
+    }
+
+    /* Fix individual tab styling in corporate mode */
+    body.corporate-mode .tabs {
+      background-color: var(--corp-bg-primary);
+    }
+
+    /* Style the pre/validation report area in corporate mode */
+    body.corporate-mode #validationReport,
+    body.corporate-mode pre {
+      background-color: var(--corp-bg-secondary);
+      color: var(--corp-text-primary);
+      border: 1px solid var(--corp-border);
+      padding: 1rem;
+      border-radius: 4px;
+    }
+
+    /* Upload sections in corporate mode */
+    body.corporate-mode .upload-section {
+      background-color: var(--corp-bg-secondary);
+      border: 1px solid var(--corp-border);
+      box-shadow: none;
+    }
+
+    body.corporate-mode .upload-section h3 {
+      color: var(--corp-text-primary);
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    body.corporate-mode .file-input-wrapper label {
+      border: 1px solid var(--corp-accent);
+      color: var(--corp-text-primary);
+      background: var(--corp-bg-primary);
+      text-transform: none;
+      letter-spacing: normal;
+      font-family: Arial, sans-serif;
+    }
+
+    body.corporate-mode .file-input-wrapper label:hover {
+      background: var(--corp-accent);
+      color: white;
+      box-shadow: none;
+    }
+
+    /* Support button in corporate mode */
+    body.corporate-mode .donate-button {
+      background: var(--corp-accent);
+      color: white;
+      border: none;
+      box-shadow: none;
+      text-transform: none;
+      letter-spacing: normal;
+      font-family: Arial, sans-serif;
+    }
+
+    .corp-content {
+      display: none;
+    }
+
+    body.corporate-mode .donate-button:hover {
+      background: var(--corp-text-primary);
+    }
+
+    /* File name display in corporate mode */
+    body.corporate-mode .file-name {
+      color: var(--corp-text-secondary);
     }
 
     a {
@@ -656,10 +949,26 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       font-family: 'Courier New', monospace;
     }
 
+    .tax-punks-container.corporate-mode {
+      /*background: #f8f9fa;*/
+      /* Light gray for corporate feel */
+      border: 1px solid #ced4da;
+      /* Neutral gray border */
+      font-family: 'Arial', sans-serif;
+      /* Corporate-friendly font */
+    }
+
     .tax-punks-container h2 {
       color: var(--accent-primary);
       text-shadow: var(--neon-glow);
       margin-bottom: 1rem;
+    }
+
+    .tax-punks-container h2.corporate-mode {
+      color: #343a40;
+      /* Dark gray for headings */
+      text-shadow: none;
+      /* Remove neon glow */
     }
 
     .disclaimer {
@@ -667,6 +976,11 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       font-style: italic;
       margin-bottom: 2rem;
       font-size: 0.9rem;
+    }
+
+    .disclaimer.corporate-mode {
+      color: #6c757d;
+      /* Muted gray for secondary text */
     }
 
     .chat-thread {
@@ -688,10 +1002,24 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       border-left: 2px solid var(--accent-primary);
     }
 
+    .message.incoming.corporate-mode {
+      background: #e9ecef;
+      /* Very light gray */
+      border-left: 2px solid #007bff;
+      /* Corporate blue for accent */
+    }
+
     .message.outgoing {
       background: var(--bg-secondary);
       margin-left: auto;
       border-right: 2px solid var(--accent-primary);
+    }
+
+    .message.outgoing.corporate-mode {
+      background: #d4edda;
+      /* Soft green for outgoing messages */
+      border-right: 2px solid #28a745;
+      /* Green for outgoing message accent */
     }
 
     .message.system {
@@ -703,6 +1031,15 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       animation: pulse 2s infinite;
     }
 
+    .message.system.corporate-mode {
+      border: 1px solid #6c757d;
+      /* Subtle muted gray border */
+      color: #6c757d;
+      /* Muted gray for system messages */
+      animation: none;
+      /* Remove pulse animation */
+    }
+
     .time {
       color: var(--text-secondary);
       font-size: 0.8rem;
@@ -710,11 +1047,21 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       display: block;
     }
 
+    .time.corporate-mode {
+      color: #6c757d;
+      /* Muted gray for timestamps */
+    }
+
     .sender {
       color: var(--accent-primary);
       font-weight: bold;
       display: block;
       margin-bottom: 0.5rem;
+    }
+
+    .sender.corporate-mode {
+      color: #343a40;
+      /* Dark gray for sender names */
     }
 
     @keyframes pulse {
@@ -1156,6 +1503,11 @@ By using this software, you agree to these terms. For commercial use inquiries, 
     <button class="main-app-tab" data-tab="docs">Documentation</button>
     <button class="main-app-tab" data-tab="chat">Not Advice...</button>
     <button class="main-app-tab" data-tab="about">About</button>
+    <!-- Add this new button -->
+    <button id="themeToggle" class="theme-toggle">
+      <span class="cyber-text">🤖 Cyber Mode</span>
+      <span class="corp-text">💼 Corporate</span>
+    </button>
     <div class="donate-container">
       <form action="https://www.paypal.com/donate" method="post" target="_top">
         <input type="hidden" name="business" value="S7T27LMZ6RSXE" />
@@ -1181,8 +1533,13 @@ By using this software, you agree to these terms. For commercial use inquiries, 
     <div class="container">
       <!-- Header -->
       <div class="header">
-        <h1>US Equity Comp Fun for UK workers</h1>
-        <h1>E*Trade Handler &amp; CGT Calculator</h1>
+        <h1 class="cyber-content">US Equity Comp Fun for UK workers</h1>
+        <h1 class="cyber-content">E*Trade Handler &amp; CGT Calculator</h1>
+
+        <!-- Corporate version -->
+        <h1 class="corp-content">US Equity Compensation Management</h1>
+        <h1 class="corp-content">UK Tax Compliance Calculator</h1>
+
         <p>Upload your files and process them to see consolidated transactions and CGT results.</p>
         <p>No liability for any bugs. All data handling done client side. Feel free to check the code.</p>
       </div>
@@ -1365,7 +1722,7 @@ By using this software, you agree to these terms. For commercial use inquiries, 
 
   <!-- Documentation tab content -->
   <div id="docs" class="main-app-content">
-    <div class="docs-container">
+    <div class="docs-container cyber-content">
       <h2>NAVIGATING THE CORPORATE MAZE: UK EQUITY HELL</h2>
       <h3>DATA EXTRACTION PROTOCOL: E*TRADE EDITION</h3>
       <p>First, you'll need to hack your way through E*Trade's labyrinth to extract these essential files. Because
@@ -1480,10 +1837,122 @@ By using this software, you agree to these terms. For commercial use inquiries, 
         shouldn't require 'a very specific set of skills' to navigate. But just be glad you're hopefully not on
         Universal Credit.</p>
     </div>
+
+    <div class="docs-container corp-content">
+      <h2>E*Trade Data Management Guide</h2>
+
+      <section>
+        <h3>Accessing Required E*Trade Data</h3>
+        <p>E*Trade provides multiple reports necessary for managing equity compensation. Follow these steps to obtain
+          the required data:</p>
+        <ul>
+          <li>
+            <strong>Login to E*Trade</strong><br />
+            Ensure you have access to your account.
+          </li>
+          <li>
+            <strong>Stock Plan Selection</strong><br />
+            Select your stock plan from the dashboard, avoiding the company name.<br />
+            <img src="select_stock_plan.png" alt="Select stock plan" width="750">
+          </li>
+          <li>
+            <strong>Benefits Report</strong><br />
+            Navigate to <code>My Account > Benefit History</code>. Click "Download Expanded" to save the report.<br />
+            <img src="select_benefit_history.png" alt="Select Benefit History" width="750"><br />
+            <img src="benefit_history_download.png" alt="Download Benefit History" width="750">
+          </li>
+          <li>
+            <strong>Gains & Losses Report</strong><br />
+            Access the <code>My Account > Gains & Losses</code> section. Request the maximum available date range for
+            reporting.<br />
+            <img src="select_gains_and_losses.png" alt="Select Gains & Losses" width="750"><br />
+            <img src="gains_and_losses_download.png" alt="Download Gains and Losses" width="750">
+          </li>
+          <li>
+            <strong>Stock Price and Other Supporting Data</strong><br />
+            Obtain the following additional resources to support calculations:
+            <ul>
+              <li><strong>Historical Stock Price Data</strong>: Required for tax basis calculations.</li>
+              <li><strong>Currency Data</strong>: Use this <a href="stock_price_downloader.py" download>Python
+                  Script</a> to fetch GBP/USD daily averages.</li>
+              <li><strong>US Holiday Calendar</strong>: This <a href="holiday_downloader.py" download>Python script</a>
+                ensures date adjustments align with market closures.</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Navigating the UK Tax Framework</h3>
+        <p>Equity compensation in the UK involves specific tax considerations. Here are the key components:</p>
+        <ul>
+          <li>
+            <strong>Income Tax at Vesting</strong><br />
+            RSUs are subject to Income Tax and National Insurance Contributions (NICs) upon vesting, calculated based on
+            the share value.
+          </li>
+          <li>
+            <strong>Capital Gains Tax (CGT) on Sale</strong><br />
+            Any subsequent sale incurs CGT. Ensure you account for:
+            <ul>
+              <li>Section 104 holding calculations.</li>
+              <li>Same-day transaction matching.</li>
+              <li>30-day matching rules.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Currency Adjustments</strong><br />
+            Convert USD values to GBP using average daily exchange rates.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Features of This Tool</h3>
+        <p>This app simplifies the complex processes required for UK equity compensation compliance by:</p>
+        <ul>
+          <li>Integrating fragmented E*Trade reports into cohesive data.</li>
+          <li>Automating currency conversions for HMRC compliance.</li>
+          <li>Implementing Section 104 pooling rules to streamline CGT calculations.</li>
+          <li>Adjusting for non-business days using US holiday data.</li>
+          <li>Generating a comprehensive paper trail suitable for auditing.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Handling Stock Options</h3>
+        <p>While primarily designed for RSUs, this app can accommodate stock options with some manual inputs:</p>
+        <ul>
+          <li>Treat stock options as RSUs for calculation purposes.</li>
+          <li>Include "cash exercise and hold" or "sell to cover and hold" transactions.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Survival Strategies for Tax Optimization</h3>
+        <p>Maximize efficiency by adopting the following strategies:</p>
+        <ul>
+          <li><strong>Tax Year Planning</strong>: Distribute sales across tax years to optimize CGT allowances.</li>
+          <li><strong>30-Day Rule Awareness</strong>: Be mindful of HMRC’s rules to avoid unintentional tax liabilities.
+          </li>
+          <li><strong>Maintain Detailed Documentation</strong>: Track all transactions and supporting data to ensure
+            compliance.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Conclusion</h3>
+        <p>This app was developed to alleviate the challenges of managing equity compensation in the UK. By automating
+          complex tasks and ensuring compliance with HMRC rules, it provides the tools needed to navigate the system
+          efficiently.</p>
+      </section>
+    </div>
+
+
   </div>
 
   <div id="chat" class="main-app-content">
-    <div class="tax-punks-container">
+    <div class="tax-punks-container cyber-content">
       <img src="logo.webp" alt="Select stock plan" width="100">
       <h2>TALES FROM THE TAX PUNKS</h2>
       <p class="disclaimer">Intercepted communications from the tax resistance. Not financial advice. For entertainment
@@ -1649,10 +2118,131 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       <p class="epilogue">No tax advisors were harmed in the creation of this chat log. But several spreadsheets did
         expire from exhaustion.</p>
     </div>
+
+    <div class="tax-punks-container corp-content">
+      <h2>Insights from the Accountant's Desk</h2>
+      <p class="disclaimer">This conversation is for educational purposes only and does not constitute professional tax
+        advice. Please consult with a qualified tax advisor for your specific circumstances.</p>
+
+      <div class="chat-thread">
+        <div class="message system">
+          <span class="time">20:57</span>
+          <p>[ Conversation initiated - Advisor online ]</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">20:58</span>
+          <span class="sender">Employee</span>
+          <p>My RSUs just vested, but over half was taken for tax withholding. Is this normal?</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:00</span>
+          <span class="sender">Accountant</span>
+          <p>Yes, that's standard. At vesting, Income Tax and National Insurance are calculated on the full market value
+            of the shares. The withholding is an estimate, and any overpayment will be adjusted via your PAYE tax code.
+          </p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:01</span>
+          <span class="sender">Employee</span>
+          <p>Should I hold the shares or sell them now? They’re quite volatile.</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:03</span>
+          <span class="sender">Accountant</span>
+          <p>That depends on your risk tolerance. Remember, you’ve already paid tax on the shares' value at vesting. If
+            the stock drops, you won’t recover that tax. Holding is essentially like reinvesting post-tax money into the
+            stock.</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:04</span>
+          <span class="sender">Employee</span>
+          <p>What about the "bed and breakfast" rule I’ve heard about? Does that apply here?</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:06</span>
+          <span class="sender">Accountant</span>
+          <p>The "bed and breakfast" rule prevents you from selling and repurchasing the same shares within 30 days for
+            tax advantage. If you sell your RSUs and repurchase them quickly, HMRC will treat it as the same holding for
+            tax purposes. Timing is key if you want to avoid this.</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:07</span>
+          <span class="sender">Employee</span>
+          <p>I’ve also seen mentions of "Section 104 pools." What are those?</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:09</span>
+          <span class="sender">Accountant</span>
+          <p>Section 104 pools are used to average the acquisition cost of shares acquired over time. However, same-day
+            transactions and the 30-day rule take precedence. This can be advantageous if you’re strategic with your
+            trades, especially around vesting dates.</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:10</span>
+          <span class="sender">Employee</span>
+          <p>My company also keeps mentioning salary sacrifice schemes. Are they worth considering?</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:12</span>
+          <span class="sender">Accountant</span>
+          <p>Salary sacrifice can reduce your taxable income, which may help you stay below key thresholds, such as the
+            higher tax rate or child benefit taper. Common options include pension contributions, cycle-to-work schemes,
+            and electric vehicle plans. They’re worth exploring if they align with your financial goals.</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:13</span>
+          <span class="sender">Employee</span>
+          <p>It all seems so complex. Why does the system work this way?</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:15</span>
+          <span class="sender">Accountant</span>
+          <p>The complexity creates opportunities for optimization but also makes compliance challenging. Timing
+            disposals, using allowances, and understanding the nuances of rules like Section 104 can help reduce your
+            tax liability. Knowledge is key.</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:16</span>
+          <span class="sender">Employee</span>
+          <p>Where can I learn more? I’d like to better understand these strategies.</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:18</span>
+          <span class="sender">Accountant</span>
+          <p>I recommend starting with HMRC’s official guides and consulting with a tax professional for tailored
+            advice. Additionally, understanding effective marginal rates and income thresholds can provide deeper
+            insights into tax planning.</p>
+        </div>
+
+        <div class="message system">
+          <span class="time">21:20</span>
+          <p>[ Conversation ended - Advisor offline ]</p>
+        </div>
+      </div>
+
+      <p class="epilogue">This professional dialogue aims to clarify common tax considerations for RSUs. Always seek
+        formal advice for your specific situation.</p>
+    </div>
+
+
   </div>
 
   <div id="about" class="main-app-content">
-    <div class="about-container">
+    <div class="about-container cyber-content">
       <h2>Who are you?</h2>
       <p>Not an accountant. Just someone who once had a 116% Effective marginal tax rate on part of their income</p>
       <br />
@@ -1669,7 +2259,45 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       <br />
       <h2>Just do it!</h2>
       <p>Remember Goodfellas? - sufficient clicks of that donate button and I might think about it!</p>
+      <br />
+      <h2>How can I contact you? I want to integrate this into my corporate dystopia.</h2>
+      <p>Contact details and the license are <a href="LICENSE">here</a></p>
+      <p>The site source is on <a href="https://github.com/rdumasia303/us_equity_uk_employee_cgt">github</a></p>
     </div>
+
+    <div class="about-container corp-content">
+      <h2>About Me</h2>
+      <p>I'm not an accountant, but an experienced professional who understands the challenges of navigating complex tax
+        systems. My perspective comes from real-world experience, including managing scenarios like effective marginal
+        tax rates exceeding 100%.</p>
+      <br />
+
+      <h2>Do You Offer Advice?</h2>
+      <p>I strongly encourage you to verify any calculations and seek formal guidance from a qualified accountant to
+        ensure compliance with tax regulations.</p>
+      <br />
+
+      <h2>Why Are Multiple Files Needed Instead of Just E*Trade Reports?</h2>
+      <p>To ensure accurate calculations, additional data such as stock prices, forex rates, and US holidays are
+        required. Implementing a server-side component could streamline this process in the future, depending on user
+        demand.</p>
+      <br />
+
+      <h2>Why Keep It Local?</h2>
+      <p>My focus is on privacy and simplicity. By running locally, the tool avoids reliance on external servers, with
+        only a lightweight third-party library for handling Excel files.</p>
+      <br />
+
+      <h2>Can You Add More Features?</h2>
+      <p>With enough community support, further development is possible. As the saying goes, “Every little
+        helps”—especially when it comes to hitting that donate button!</p>
+      <br />
+
+      <h2>How can I contact you? I want to integrate this into my company site</h2>
+      <p>Contact details and the license are <a href="LICENSE">here</a></p>
+      <p>The site source is on <a href="https://github.com/rdumasia303/us_equity_uk_employee_cgt">github</a></p>
+    </div>
+
   </div>
 
   <!-- Existing and Updated Scripts -->
@@ -2662,6 +3290,35 @@ By using this software, you agree to these terms. For commercial use inquiries, 
     /********************************************************************
      * 6) RENDERING FUNCTIONS
      ********************************************************************/
+
+    /* Toggle theme*/
+    document.getElementById('themeToggle').addEventListener('click', function () {
+      document.body.classList.toggle('corporate-mode');
+
+      const elementsToToggle = document.querySelectorAll('.tax-punks-container, .message, .disclaimer, .time, .sender, .message.incoming, .message.outgoing, .message.system');
+
+      elementsToToggle.forEach(element => {
+        element.classList.toggle('corporate-mode');
+      });
+
+      // Get all elements with cyber-content and corp-content classes
+      const cyberContentElements = document.querySelectorAll('.cyber-content');
+      const corpContentElements = document.querySelectorAll('.corp-content');
+
+      // Check if corporate mode is active
+      const isCorporateMode = document.body.classList.contains('corporate-mode');
+
+      // Set visibility for cyber-content and corp-content elements
+      cyberContentElements.forEach(element => {
+        element.style.display = isCorporateMode ? 'none' : 'block';
+      });
+
+      corpContentElements.forEach(element => {
+        element.style.display = isCorporateMode ? 'block' : 'none';
+      });
+    });
+
+
     function renderOutputTable(consolidated) {
       const table = document.getElementById('outputTable');
       const thead = table.querySelector('thead');
