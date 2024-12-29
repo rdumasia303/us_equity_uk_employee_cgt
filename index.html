@@ -33,6 +33,7 @@ By using this software, you agree to these terms. For commercial use inquiries, 
 -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>US Equity Comp Fun for UK workers. E*Trade Handler & CGT Calculator</title>
@@ -41,607 +42,604 @@ By using this software, you agree to these terms. For commercial use inquiries, 
   <style>
     /* Cyberpunk colors */
     :root {
-    --bg-primary: #000000;
-    --bg-secondary: #0a0a0a;
-    --bg-tertiary: #111111;
-    --text-primary: #00ff66;
-    --text-secondary: #00cc55;
-    --accent-primary: #00ff66;
-    --accent-hover: #00ff99;
-    --border-color: #00ff66;
-    --success-color: #00ff99;
-    --error-color: #ff3333;
-    --neon-glow: 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 30px #00ff66;
-    --neon-glow-strong: 0 0 15px #00ff66, 0 0 25px #00ff66, 0 0 35px #00ff66;
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-tertiary: #111111;
+      --text-primary: #00ff66;
+      --text-secondary: #00cc55;
+      --accent-primary: #00ff66;
+      --accent-hover: #00ff99;
+      --border-color: #00ff66;
+      --success-color: #00ff99;
+      --error-color: #ff3333;
+      --neon-glow: 0 0 10px #00ff66, 0 0 20px #00ff66, 0 0 30px #00ff66;
+      --neon-glow-strong: 0 0 15px #00ff66, 0 0 25px #00ff66, 0 0 35px #00ff66;
     }
 
     a {
-     color: var(--accent-primary);
+      color: var(--accent-primary);
     }
 
     /* Reset and base styles */
     * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     img {
-      display: block; /* Ensures proper spacing and alignment */
-      max-width: 100%; /* Makes images responsive */
-      height: auto; /* Maintains aspect ratio */
-      border-radius: 4px; /* Optional: Slightly rounds the corners */
-      box-shadow: var(--neon-glow); /* Applies the predefined neon glow */
-      transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smoothens hover effects */
-      margin: 1rem 0; /* Adds vertical spacing */
+      display: block;
+      /* Ensures proper spacing and alignment */
+      max-width: 100%;
+      /* Makes images responsive */
+      height: auto;
+      /* Maintains aspect ratio */
+      border-radius: 4px;
+      /* Optional: Slightly rounds the corners */
+      box-shadow: var(--neon-glow);
+      /* Applies the predefined neon glow */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      /* Smoothens hover effects */
+      margin: 1rem 0;
+      /* Adds vertical spacing */
     }
 
     img:hover {
-      transform: scale(1.05); /* Slightly enlarges the image on hover */
-      box-shadow: var(--neon-glow-strong); /* Enhances the glow on hover */
+      transform: scale(1.05);
+      /* Slightly enlarges the image on hover */
+      box-shadow: var(--neon-glow-strong);
+      /* Enhances the glow on hover */
     }
 
     body {
-    font-family: 'Courier New', monospace;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    line-height: 1.6;
-    background-image: 
-        repeating-linear-gradient(
-        90deg,
-        rgba(0, 255, 102, 0.03) 0px,
-        rgba(0, 255, 102, 0.03) 1px,
-        transparent 1px,
-        transparent 30px
-        ),
-        repeating-linear-gradient(
-        0deg,
-        rgba(0, 255, 102, 0.03) 0px,
-        rgba(0, 255, 102, 0.03) 1px,
-        transparent 1px,
-        transparent 30px
-        );
+      font-family: 'Courier New', monospace;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      background-image:
+        repeating-linear-gradient(90deg,
+          rgba(0, 255, 102, 0.03) 0px,
+          rgba(0, 255, 102, 0.03) 1px,
+          transparent 1px,
+          transparent 30px),
+        repeating-linear-gradient(0deg,
+          rgba(0, 255, 102, 0.03) 0px,
+          rgba(0, 255, 102, 0.03) 1px,
+          transparent 1px,
+          transparent 30px);
     }
 
     .container {
-    max-width: 1400px;
-    margin: 2rem auto;
-    padding: 2rem;
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0rem 2rem 2rem 2rem;
     }
 
     /* Header styles */
     .header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    position: relative;
+      text-align: center;
+      margin-top: 0.5rem;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
     }
 
     .header::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--accent-primary),
-        transparent
-    );
-    animation: scanline 2s linear infinite;
-    }
-
-    @keyframes scanline {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg,
+          transparent,
+          var(--accent-primary),
+          transparent);
     }
 
     .header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-    text-shadow: var(--neon-glow);
-    letter-spacing: 2px;
-    text-transform: uppercase;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      text-shadow: var(--neon-glow);
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
     .header p {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
     }
 
     /* Upload grid & sections */
     .upload-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
 
     .upload-section {
-    background-color: rgba(0, 255, 102, 0.05);
-    padding: 1.5rem;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+      background-color: rgba(0, 255, 102, 0.05);
+      padding: 1.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
     .upload-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.5s ease;
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
     }
 
     .upload-section:hover::before {
-    transform: translateX(100%);
+      transform: translateX(100%);
     }
 
     .upload-section:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--neon-glow);
-    border-color: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--neon-glow);
+      border-color: var(--accent-hover);
     }
 
     .upload-section h3 {
-    margin-bottom: 1rem;
-    color: var(--accent-primary);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+      margin-bottom: 1rem;
+      color: var(--accent-primary);
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     /* Custom file input wrapper */
     .file-input-wrapper {
-    position: relative;
-    margin-top: 1rem;
+      position: relative;
+      margin-top: 1rem;
     }
 
     .file-input-wrapper input[type="file"] {
-    display: none;
+      display: none;
     }
 
     .file-input-wrapper label {
-    display: inline-block;
-    padding: 0.8rem 1.2rem;
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
+      display: inline-block;
+      padding: 0.8rem 1.2rem;
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
     }
 
     .file-input-wrapper label:hover {
-    background-color: var(--accent-primary);
-    color: black;
-    box-shadow: var(--neon-glow);
+      background-color: var(--accent-primary);
+      color: black;
+      box-shadow: var(--neon-glow);
     }
 
     /* File name display */
     .file-name {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    min-height: 1.2em;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      min-height: 1.2em;
     }
 
     /* Process button */
     .process-button {
-    display: block;
-    width: 100%;
-    max-width: 300px;
-    margin: 2rem auto;
-    padding: 1rem 2rem;
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 2px solid var(--accent-primary);
-    border-radius: 4px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    position: relative;
-    overflow: hidden;
-    font-family: 'Courier New', monospace;
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 2rem auto;
+      padding: 1rem 2rem;
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 2px solid var(--accent-primary);
+      border-radius: 4px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
     }
 
     .process-button:hover {
-    background-color: var(--accent-primary);
-    color: black;
-    box-shadow: var(--neon-glow);
+      background-color: var(--accent-primary);
+      color: black;
+      box-shadow: var(--neon-glow);
     }
 
     .process-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
     /* Results container with tabs */
     .results-container {
-    margin-top: 3rem;
-    background-color: var(--bg-secondary);
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
+      margin-top: 3rem;
+      background-color: var(--bg-secondary);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
     }
 
     /* Navigation tabs */
     .tabs-container {
-    background-color: var(--bg-tertiary);
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .tabs {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
     }
 
     .tab {
-    padding: 0.8rem 1.5rem;
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid transparent;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-family: 'Courier New', monospace;
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Courier New', monospace;
     }
 
     .tab:hover {
-    color: var(--text-primary);
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 5px var(--accent-primary);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 5px var(--accent-primary);
     }
 
     .tab.active {
-    background-color: var(--accent-primary);
-    color: black;
-    border-color: var(--accent-primary);
-    box-shadow: var(--neon-glow);
+      background-color: var(--accent-primary);
+      color: black;
+      border-color: var(--accent-primary);
+      box-shadow: var(--neon-glow);
     }
 
     /* Tab content */
     .tab-content {
-    display: none;
-    padding: 2rem;
+      display: none;
+      padding: 2rem;
     }
 
     .tab-content.active {
-    display: block;
+      display: block;
     }
 
     /* Table styles */
     table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 1rem 0;
-    background-color: var(--bg-secondary);
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1rem 0;
+      background-color: var(--bg-secondary);
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
     }
 
     th {
-    background-color: var(--bg-tertiary);
-    color: var(--accent-primary);
-    font-weight: 600;
-    text-align: left;
-    padding: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 2px solid var(--accent-primary);
+      background-color: var(--bg-tertiary);
+      color: var(--accent-primary);
+      font-weight: 600;
+      text-align: left;
+      padding: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 2px solid var(--accent-primary);
     }
 
     td {
-    padding: 1rem;
-    border-top: 1px solid rgba(0, 255, 102, 0.2);
-    color: var(--text-primary);
-    transition: all 0.3s ease;
+      padding: 1rem;
+      border-top: 1px solid rgba(0, 255, 102, 0.2);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
     }
 
     tr:hover td {
-    background-color: rgba(0, 255, 102, 0.05);
-    text-shadow: 0 0 5px var(--accent-primary);
+      background-color: rgba(0, 255, 102, 0.05);
+      text-shadow: 0 0 5px var(--accent-primary);
     }
 
     /* Summary cards */
     .summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin: 1rem 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 1rem 0 2rem;
     }
 
     .summary-card {
-    background-color: var(--bg-tertiary);
-    padding: 1.5rem;
-    border-radius: 4px;
-    text-align: center;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
+      background-color: var(--bg-tertiary);
+      padding: 1.5rem;
+      border-radius: 4px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
     }
 
     .summary-card:hover {
-    box-shadow: var(--neon-glow);
+      box-shadow: var(--neon-glow);
     }
 
     .summary-card h4 {
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .summary-card .value {
-    font-size: 1.5rem;
-    color: var(--accent-primary);
-    font-weight: bold;
-    text-shadow: 0 0 5px var(--accent-primary);
+      font-size: 1.5rem;
+      color: var(--accent-primary);
+      font-weight: bold;
+      text-shadow: 0 0 5px var(--accent-primary);
     }
 
     /* Validation report */
     pre {
-    background-color: var(--bg-tertiary);
-    padding: 1.5rem;
-    border-radius: 4px;
-    overflow: auto;
-    color: var(--text-primary);
-    font-family: 'Courier New', monospace;
-    white-space: pre-wrap;
-    border: 1px solid var(--border-color);
+      background-color: var(--bg-tertiary);
+      padding: 1.5rem;
+      border-radius: 4px;
+      overflow: auto;
+      color: var(--text-primary);
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      border: 1px solid var(--border-color);
     }
 
     /* Manual Transactions Section */
     .manual-transactions-section {
-    background-color: rgba(0, 255, 102, 0.05);
-    padding: 1.5rem;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    margin-bottom: 2rem;
-    transition: all 0.3s ease;
+      background-color: rgba(0, 255, 102, 0.05);
+      padding: 1.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
     }
 
     .manual-transactions-section:hover {
-    box-shadow: var(--neon-glow);
+      box-shadow: var(--neon-glow);
     }
 
     .manual-transactions-section h3 {
-    margin-bottom: 1rem;
-    color: var(--accent-primary);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: center;
+      margin-bottom: 1rem;
+      color: var(--accent-primary);
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
     }
 
     .manual-transactions-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
     }
 
     .manual-transactions-form input {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-family: 'Courier New', monospace;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      font-family: 'Courier New', monospace;
     }
 
     .manual-transactions-form input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 5px var(--accent-primary);
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 5px var(--accent-primary);
     }
 
     .add-transaction-button {
-    padding: 0.8rem 1.2rem;
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-family: 'Courier New', monospace;
+      padding: 0.8rem 1.2rem;
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Courier New', monospace;
     }
 
     .add-transaction-button:hover {
-    background-color: var(--accent-primary);
-    color: black;
-    box-shadow: var(--neon-glow);
+      background-color: var(--accent-primary);
+      color: black;
+      box-shadow: var(--neon-glow);
     }
 
     .remove-transaction-button {
-    padding: 0.3rem 0.6rem;
-    background-color: transparent;
-    color: var(--error-color);
-    border: 1px solid var(--error-color);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Courier New', monospace;
+      padding: 0.3rem 0.6rem;
+      background-color: transparent;
+      color: var(--error-color);
+      border: 1px solid var(--error-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Courier New', monospace;
     }
 
     .remove-transaction-button:hover {
-    background-color: var(--error-color);
-    color: black;
-    box-shadow: 0 0 10px var(--error-color);
+      background-color: var(--error-color);
+      color: black;
+      box-shadow: 0 0 10px var(--error-color);
     }
 
     /* Download Buttons */
     .download-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    justify-content: center;
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      justify-content: center;
     }
 
     .download-button {
-    padding: 0.6rem 1rem;
-    background-color: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-family: 'Courier New', monospace;
+      padding: 0.6rem 1rem;
+      background-color: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Courier New', monospace;
     }
 
     .download-button:hover {
-    background-color: var(--accent-primary);
-    color: black;
-    box-shadow: var(--neon-glow);
+      background-color: var(--accent-primary);
+      color: black;
+      box-shadow: var(--neon-glow);
     }
 
     /* Main app tabs */
     .main-app-tabs {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
-    position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+      /* Add this */
+      margin-bottom: 0;
+      padding: 0.25rem;
+      background-color: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .main-app-tabs::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--accent-primary),
-        transparent
-    );
-    animation: scanline 2s linear infinite;
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg,
+          transparent,
+          var(--accent-primary),
+          transparent);
     }
 
     .main-app-tab {
-    padding: 1rem 2rem;
-    background: transparent;
-    color: var(--text-secondary);
-    border: 2px solid transparent;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-family: 'Courier New', monospace;
-    font-size: 1.2rem;
-    position: relative;
-    overflow: hidden;
+      padding: 1rem 2rem;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 2px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+      font-size: 1.2rem;
+      position: relative;
+      overflow: hidden;
     }
 
     .main-app-tab:hover {
-    color: var(--text-primary);
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 5px var(--accent-primary);
+      color: var(--text-primary);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 5px var(--accent-primary);
     }
 
     .main-app-tab.active {
-    background-color: var(--accent-primary);
-    color: black;
-    border-color: var(--accent-primary);
-    box-shadow: var(--neon-glow);
+      background-color: var(--accent-primary);
+      color: black;
+      border-color: var(--accent-primary);
+      box-shadow: var(--neon-glow);
     }
 
     .main-app-content {
-    display: none;
-    width: 100%;
-    padding: 2rem;
+      display: none;
+      width: 100%;
+      padding: 2rem;
     }
 
     .main-app-content.active {
-    display: block;
+      display: block;
     }
 
     /* Documentation styles */
     .docs-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: rgba(0, 255, 102, 0.05);
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: rgba(0, 255, 102, 0.05);
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
     }
 
     .docs-container h2 {
-    color: var(--accent-primary);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 1.5rem;
-    text-shadow: 0 0 5px var(--accent-primary);
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 5px var(--accent-primary);
     }
 
     .docs-container h3 {
-    color: var(--text-primary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 2rem 0 1rem;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 2rem 0 1rem;
     }
 
     .docs-container p {
-    margin-bottom: 1rem;
-    line-height: 1.6;
+      margin-bottom: 1rem;
+      line-height: 1.6;
     }
 
     .docs-container ul {
-    list-style: none;
-    margin: 1rem 0;
-    padding-left: 1.5rem;
+      list-style: none;
+      margin: 1rem 0;
+      padding-left: 1.5rem;
     }
 
     .docs-container ul li {
-    margin-bottom: 0.5rem;
-    position: relative;
+      margin-bottom: 0.5rem;
+      position: relative;
     }
 
     .docs-container ul li::before {
-    content: '>';
-    color: var(--accent-primary);
-    position: absolute;
-    left: -1.5rem;
-    text-shadow: 0 0 5px var(--accent-primary);
+      content: '>';
+      color: var(--accent-primary);
+      position: absolute;
+      left: -1.5rem;
+      text-shadow: 0 0 5px var(--accent-primary);
     }
 
     .tax-punks-container {
@@ -655,7 +653,7 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       border-radius: 4px;
       padding: 2rem;
       margin: 2rem 0;
-      font-family: 'Courier New', monospace;      
+      font-family: 'Courier New', monospace;
     }
 
     .tax-punks-container h2 {
@@ -723,1918 +721,2255 @@ By using this software, you agree to these terms. For commercial use inquiries, 
       0% {
         box-shadow: 0 0 5px var(--accent-primary);
       }
+
       50% {
         box-shadow: 0 0 15px var(--accent-primary);
       }
+
       100% {
         box-shadow: 0 0 5px var(--accent-primary);
       }
     }
 
-    <style>
-.donate-container {
-    text-align: center;
-    margin: 1rem 0;
-    position: relative;
-}
+    .donate-container {
+      text-align: center;
+      margin: 0;
+      /* Change from margin: 1rem 0 */
+    }
 
-.donate-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: transparent;
-    color: var(--text-primary);
-    border: 2px solid var(--accent-primary);
-    padding: 0.8rem 1.5rem;
-    font-family: 'Courier New', monospace;
-    font-size: 1rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    border-radius: 4px;
-}
+    .donate-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      color: var(--text-primary);
+      border: 2px solid var(--accent-primary);
+      padding: 0.8rem 1.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+    }
 
-  .donate-button:hover {
+    .donate-button:hover {
       background-color: var(--accent-primary);
       color: black;
       box-shadow: var(--neon-glow);
-  }
+    }
 
-  .donate-button::before {
+    .donate-button::before {
       content: '';
       position: absolute;
       top: 0;
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(
-          90deg,
+      background: linear-gradient(90deg,
           transparent,
           rgba(0, 255, 102, 0.2),
-          transparent
-      );
+          transparent);
       transition: 0.5s;
-  }
+    }
 
-  .donate-button:hover::before {
+    .donate-button:hover::before {
       left: 100%;
-  }
-
-  .about-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: rgba(0, 255, 102, 0.05);
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
     }
 
-  @media screen and (max-width: 768px) {
-    /* Global resets for mobile */
-    * {
-      -webkit-tap-highlight-color: transparent;
+    .about-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: rgba(0, 255, 102, 0.05);
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
     }
 
-    html {
-      font-size: 16px;
-    }
+    @media screen and (max-width: 768px) {
 
-    body {
-      font-size: 16px;
-      line-height: 1.6;
-      -webkit-text-size-adjust: 100%;
-    }
+      /* Global resets for mobile */
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
 
-    /* Container adjustments */
-    .container {
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-      padding: 1rem;
-    }
+      input[type="text"],
+      input[type="number"],
+      input[type="date"] {
+        font-size: 16px !important;
+      }
 
-    /* Header */
-    .header {
-      margin: 1rem 0 2rem;
-      padding: 1rem;
-    }
+      html {
+        font-size: 16px;
+      }
 
-    .header h1 {
-      font-size: 1.75rem;
-      margin: 0.5rem 0;
-      line-height: 1.3;
-      padding: 0 0.5rem;
-    }
+      body {
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-text-size-adjust: 100%;
+      }
 
-    .header p {
-      font-size: 1rem;
-      padding: 0 0.5rem;
-    }
+      /* Container adjustments */
+      .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 1rem;
+      }
 
-    /* Upload sections */
-    .upload-grid {
-      display: block;
-      margin: 1rem 0;
-    }
+      /* Header */
+      .header {
+        margin: 1rem 0 2rem;
+        padding: 1rem;
+      }
 
-    .upload-section {
-      margin-bottom: 1.5rem;
-      padding: 1.25rem;
-    }
+      .header h1 {
+        font-size: 1.75rem;
+        margin: 0.5rem 0;
+        line-height: 1.3;
+        padding: 0 0.5rem;
+      }
 
-    .upload-section h3 {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
+      .header p {
+        font-size: 1rem;
+        padding: 0 0.5rem;
+      }
 
-    /* File input styling */
-    .file-input-wrapper label {
-      display: block;
-      width: 100%;
-      padding: 1rem;
-      margin: 0.5rem 0;
-      text-align: center;
-      font-size: 1rem;
-    }
+      /* Upload sections */
+      .upload-grid {
+        display: grid;
+        /* This will allow boxes to shrink but not below 200px, and share available space equally */
+        grid-template-columns: repeat(5, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
 
-    /* Manual transactions section */
-    .manual-transactions-section {
-      margin: 1.5rem 0;
-      padding: 1.25rem;
-    }
+      .upload-section {
+        margin-bottom: 1.5rem;
+        padding: 1.25rem;
+      }
 
-    .manual-transactions-form {
-      display: block;
-    }
+      .upload-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
 
-    .manual-transactions-form input {
-      width: 100%;
-      margin-bottom: 1rem;
-      padding: 0.8rem;
-      font-size: 16px;
-      height: 3rem;
-    }
+      /* File input styling */
+      .file-input-wrapper label {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        text-align: center;
+        font-size: 1rem;
+      }
 
-    .add-transaction-button {
-      width: 100%;
-      margin: 1rem 0;
-      padding: 1rem;
-      font-size: 1rem;
-    }
+      /* Manual transactions section */
+      .manual-transactions-section {
+        margin: 1.5rem 0;
+        padding: 1.25rem;
+      }
 
-    /* Main app tabs */
-    .main-app-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      padding: 1rem;
-      margin: -1rem -1rem 1rem -1rem;
-      background-color: var(--bg-tertiary);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+      .manual-transactions-form {
+        display: block;
+      }
 
-    .main-app-tab {
-      flex: 1;
-      min-width: calc(50% - 0.25rem);
-      padding: 0.8rem;
-      font-size: 0.9rem;
-      text-align: center;
-      white-space: nowrap;
-    }
+      .manual-transactions-form input {
+        width: 100%;
+        margin-bottom: 1rem;
+        padding: 0.8rem;
+        font-size: 16px;
+        height: 3rem;
+      }
 
-    /* Content tabs */
-    .tabs-container {
-      margin: 0 -1rem;
-      padding: 1rem;
-      position: sticky;
-      top: 4rem;
-      z-index: 99;
-      background-color: var(--bg-tertiary);
-    }
+      .add-transaction-button {
+        width: 100%;
+        margin: 1rem 0;
+        padding: 1rem;
+        font-size: 1rem;
+      }
 
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
+      /* Main app tabs */
+      .main-app-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: -1rem -1rem 1rem -1rem;
+        background-color: var(--bg-tertiary);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
 
-    .tab {
-      flex: 1;
-      min-width: calc(50% - 0.25rem);
-      padding: 0.8rem;
-      font-size: 0.9rem;
-      text-align: center;
-      white-space: nowrap;
-    }
+      .main-app-tab {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+        padding: 0.8rem;
+        font-size: 0.9rem;
+        text-align: center;
+        white-space: nowrap;
+      }
 
-    /* Results container */
-    .results-container {
-      margin: 1.5rem -1rem;
-      border-radius: 0;
-    }
+      /* Content tabs */
+      .tabs-container {
+        margin: 0 -1rem;
+        padding: 1rem;
+        position: sticky;
+        top: 4rem;
+        z-index: 99;
+        background-color: var(--bg-tertiary);
+      }
 
-    /* Table adjustments */
-    .table-wrapper {
-      margin: 0 -1rem;
-    }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
 
-    table {
-      width: 100%;
-      display: block;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
+      .tab {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+        padding: 0.8rem;
+        font-size: 0.9rem;
+        text-align: center;
+        white-space: nowrap;
+      }
 
-    th, td {
-      min-width: 120px;
-      padding: 0.8rem;
-      font-size: 0.9rem;
-      white-space: nowrap;
-    }
+      /* Results container */
+      .results-container {
+        margin: 1.5rem -1rem;
+        border-radius: 0;
+      }
 
-    /* Documentation tab */
-    .docs-container {
-      margin: 0;
-      padding: 1rem;
-      font-size: 1rem;
-    }
+      /* Table adjustments */
+      .table-wrapper {
+        margin: 0 -1rem;
+      }
 
-    .docs-container h2 {
-      font-size: 1.5rem;
-      margin: 1.5rem 0;
-    }
+      table {
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
 
-    .docs-container h3 {
-      font-size: 1.25rem;
-      margin: 1.25rem 0;
-    }
+      th,
+      td {
+        min-width: 120px;
+        padding: 0.8rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
 
-    .docs-container p,
-    .docs-container ul li {
-      font-size: 1rem;
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
+      /* Documentation tab */
+      .docs-container {
+        margin: 0;
+        padding: 1rem;
+        font-size: 1rem;
+      }
 
-    .docs-container ul {
-      padding-left: 1.5rem;
-    }
+      .docs-container h2 {
+        font-size: 1.5rem;
+        margin: 1.5rem 0;
+      }
 
-    /* Chat tab */
-    .tax-punks-container {
-      margin: 0;
-      padding: 1rem;
-      font-size: 1rem;
-    }
+      .docs-container h3 {
+        font-size: 1.25rem;
+        margin: 1.25rem 0;
+      }
 
-    .tax-punks-container h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
+      .docs-container p,
+      .docs-container ul li {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+      }
 
-    .chat-thread {
-      margin-top: 1.5rem;
-    }
+      .docs-container ul {
+        padding-left: 1.5rem;
+      }
 
-    .message {
-      max-width: 90%;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
+      /* Chat tab */
+      .tax-punks-container {
+        margin: 0;
+        padding: 1rem;
+        font-size: 1rem;
+      }
 
-    .message p {
-      line-height: 1.6;
-    }
+      .tax-punks-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
 
-    .time {
-      font-size: 0.8rem;
-    }
+      .chat-thread {
+        margin-top: 1.5rem;
+      }
 
-    .sender {
-      font-size: 0.9rem;
-    }
+      .message {
+        max-width: 90%;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
 
-    /* Summary cards */
-    .summary {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      margin: 1rem 0;
-    }
+      .message p {
+        line-height: 1.6;
+      }
 
-    .summary-card {
-      padding: 1rem;
-    }
+      .time {
+        font-size: 0.8rem;
+      }
 
-    .summary-card h4 {
-      font-size: 1rem;
-    }
+      .sender {
+        font-size: 0.9rem;
+      }
 
-    .summary-card .value {
-      font-size: 1.5rem;
-    }
+      /* Summary cards */
+      .summary {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+      }
 
-    /* Buttons */
-    .process-button,
-    .download-button {
-      width: 100%;
-      padding: 1rem;
-      margin: 1rem 0;
-      font-size: 1rem;
-      height: auto;
-    }
+      .summary-card {
+        padding: 1rem;
+      }
 
-    .download-buttons {
-      flex-direction: column;
-      gap: 1rem;
-    }
+      .summary-card h4 {
+        font-size: 1rem;
+      }
 
-    /* Images */
-    img {
-      width: 100%;
-      height: auto;
-      margin: 1rem 0;
-    }
+      .summary-card .value {
+        font-size: 1.5rem;
+      }
 
-    .donate-button {
+      /* Buttons */
+      .process-button,
+      .download-button {
+        width: 100%;
+        padding: 1rem;
+        margin: 1rem 0;
+        font-size: 1rem;
+        height: auto;
+      }
+
+      .download-buttons {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      /* Images */
+      img {
+        width: 100%;
+        height: auto;
+        margin: 1rem 0;
+      }
+
+      .donate-button {
         width: calc(100% - 2rem);
         justify-content: center;
         margin: 0.5rem 1rem;
-    }
-  }
-
-  /* Extra small devices */
-  @media screen and (max-width: 480px) {
-    .main-app-tab,
-    .tab {
-      min-width: 100%;
+      }
     }
 
-    .header h1 {
-      font-size: 1.5rem;
+
+    /* Only switch layouts when boxes would become too small */
+    @media screen and (max-width: 1500px) {
+      .upload-grid {
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
+      }
     }
 
-    .message {
-      max-width: 95%;
+    @media screen and (max-width: 700px) {
+      .upload-grid {
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+      }
     }
 
-    th, td {
-      padding: 0.6rem;
-      font-size: 0.85rem;
+    @media screen and (max-width: 450px) {
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .docs-container h2,
-    .tax-punks-container h2 {
-      font-size: 1.3rem;
-    }
+    /* Extra small devices */
+    @media screen and (max-width: 480px) {
 
-    .docs-container h3 {
-      font-size: 1.1rem;
-    }
+      .main-app-tab,
+      .tab {
+        min-width: 100%;
+      }
 
-    .donate-button {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .message {
+        max-width: 95%;
+      }
+
+      th,
+      td {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+      }
+
+      .docs-container h2,
+      .tax-punks-container h2 {
+        font-size: 1.3rem;
+      }
+
+      .docs-container h3 {
+        font-size: 1.1rem;
+      }
+
+      .donate-button {
         width: calc(100% - 2rem);
         justify-content: center;
         margin: 0.5rem 1rem;
+      }
     }
-  }
 
-  /* Fix for iOS input zoom */
-  @media screen and (max-width: 768px) {
-    input[type="text"],
-    input[type="number"],
-    input[type="date"] {
-      font-size: 16px !important;
-    }
-  }
+    /* Print styles */
+    @media print {
 
-  /* Print styles */
-  @media print {
-    .main-app-tabs,
-    .tabs-container,
-    .file-input-wrapper,
-    .process-button,
-    .download-buttons {
-      display: none !important;
+      .main-app-tabs,
+      .tabs-container,
+      .file-input-wrapper,
+      .process-button,
+      .download-buttons {
+        display: none !important;
+      }
     }
-  }
   </style>
 </head>
+
 <body>
 
-<div class="main-app-tabs">
-  <button class="main-app-tab active" data-tab="calculator">Calculator</button>
-  <button class="main-app-tab" data-tab="docs">Documentation</button>
-  <button class="main-app-tab" data-tab="chat">Not Advice...</button>
-  <button class="main-app-tab" data-tab="about">About</button>
-  <div class="donate-container">
-    <form action="https://www.paypal.com/donate" method="post" target="_top">
+  <div class="main-app-tabs">
+    <button class="main-app-tab active" data-tab="calculator">Calculator</button>
+    <button class="main-app-tab" data-tab="docs">Documentation</button>
+    <button class="main-app-tab" data-tab="chat">Not Advice...</button>
+    <button class="main-app-tab" data-tab="about">About</button>
+    <div class="donate-container">
+      <form action="https://www.paypal.com/donate" method="post" target="_top">
         <input type="hidden" name="business" value="S7T27LMZ6RSXE" />
         <input type="hidden" name="no_recurring" value="0" />
-        <input type="hidden" name="item_name" value="For helping me avoid accountants. I'll declare the donations if they exceed my 1k trading allowance! Stay legal :-)" />
+        <input type="hidden" name="item_name"
+          value="For helping me avoid accountants. I'll declare the donations if they exceed my 1k trading allowance! Stay legal :-)" />
         <input type="hidden" name="currency_code" value="GBP" />
         <button type="submit" class="donate-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
-                <path d="M3 5v12a2 2 0 0 0 2 2h16v-5"></path>
-                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
-            </svg>
-            Support This Project
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+            <path d="M3 5v12a2 2 0 0 0 2 2h16v-5"></path>
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+          </svg>
+          Support This
         </button>
-    </form>
-</div>
-</div>
+      </form>
+    </div>
+  </div>
 
-<!-- Calculator tab content (existing app) -->
-<div id="calculator" class="main-app-content active">
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1>US Equity Comp Fun for UK workers</h1>
-      <h1>E*Trade Handler &amp; CGT Calculator</h1>
-      <p>Upload your files and process them to see consolidated transactions and CGT results.</p>
-      <p>No liability for any bugs. All data handling done client side. Feel free to check the code.</p>
-    </div>
-  
-    <!-- Upload Grid -->
-    <div class="upload-grid">
-      <!-- Gains/Losses -->
-      <div class="upload-section">
-        <h3>1. Gains/Losses (XLS/XLSX)</h3>
-        <div class="file-input-wrapper">
-          <input type="file" id="gainsFile" accept=".xls,.xlsx"
-                 onchange="handleFileSelection('gainsFile','gainsFileName')" />
-          <label for="gainsFile">Choose File</label>
+  <!-- Calculator tab content (existing app) -->
+  <div id="calculator" class="main-app-content active">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>US Equity Comp Fun for UK workers</h1>
+        <h1>E*Trade Handler &amp; CGT Calculator</h1>
+        <p>Upload your files and process them to see consolidated transactions and CGT results.</p>
+        <p>No liability for any bugs. All data handling done client side. Feel free to check the code.</p>
+      </div>
+
+      <!-- Upload Grid -->
+      <div class="upload-grid">
+        <!-- Gains/Losses -->
+        <div class="upload-section">
+          <h3>1. Gains/Losses (XLS/XLSX)</h3>
+          <div class="file-input-wrapper">
+            <input type="file" id="gainsFile" accept=".xls,.xlsx"
+              onchange="handleFileSelection('gainsFile','gainsFileName')" />
+            <label for="gainsFile">Choose File</label>
+          </div>
+          <div class="file-name" id="gainsFileName"></div>
         </div>
-        <div class="file-name" id="gainsFileName"></div>
-      </div>
-  
-      <!-- Benefits -->
-      <div class="upload-section">
-        <h3>2. Benefits (XLS/XLSX)</h3>
-        <div class="file-input-wrapper">
-          <input type="file" id="benefitsFile" accept=".xls,.xlsx"
-                 onchange="handleFileSelection('benefitsFile','benefitsFileName')" />
-          <label for="benefitsFile">Choose File</label>
+
+        <!-- Benefits -->
+        <div class="upload-section">
+          <h3>2. Benefits (XLS/XLSX)</h3>
+          <div class="file-input-wrapper">
+            <input type="file" id="benefitsFile" accept=".xls,.xlsx"
+              onchange="handleFileSelection('benefitsFile','benefitsFileName')" />
+            <label for="benefitsFile">Choose File</label>
+          </div>
+          <div class="file-name" id="benefitsFileName"></div>
         </div>
-        <div class="file-name" id="benefitsFileName"></div>
-      </div>
-  
-      <!-- Stock Prices -->
-      <div class="upload-section">
-        <h3>3. Stock Prices (CSV)</h3>
-        <div class="file-input-wrapper">
-          <input type="file" id="stockFile" accept=".csv"
-                 onchange="handleFileSelection('stockFile','stockFileName')" />
-          <label for="stockFile">Choose File</label>
+
+        <!-- Stock Prices -->
+        <div class="upload-section">
+          <h3>3. Stock Prices (CSV)</h3>
+          <div class="file-input-wrapper">
+            <input type="file" id="stockFile" accept=".csv"
+              onchange="handleFileSelection('stockFile','stockFileName')" />
+            <label for="stockFile">Choose File</label>
+          </div>
+          <div class="file-name" id="stockFileName"></div>
         </div>
-        <div class="file-name" id="stockFileName"></div>
-      </div>
-  
-      <!-- Forex Rates -->
-      <div class="upload-section">
-        <h3>4. Forex Rates (CSV)</h3>
-        <div class="file-input-wrapper">
-          <input type="file" id="forexFile" accept=".csv"
-                 onchange="handleForexFileUpload()" />
-          <label for="forexFile">Choose File</label>
+
+        <!-- Forex Rates -->
+        <div class="upload-section">
+          <h3>4. Forex Rates (CSV)</h3>
+          <div class="file-input-wrapper">
+            <input type="file" id="forexFile" accept=".csv" onchange="handleForexFileUpload()" />
+            <label for="forexFile">Choose File</label>
+          </div>
+          <div class="file-name" id="forexFileName"></div>
         </div>
-        <div class="file-name" id="forexFileName"></div>
-      </div>
-  
-      <!-- US Holidays -->
-      <div class="upload-section">
-        <h3>5. US Holidays (JSON)</h3>
-        <div class="file-input-wrapper">
-          <input type="file" id="holidaysFile" accept=".json"
-                 onchange="handleFileSelection('holidaysFile','holidaysFileName')" />
-          <label for="holidaysFile">Choose File</label>
-        </div>
-        <div class="file-name" id="holidaysFileName"></div>
-      </div>
-    </div>
-  
-    <!-- Manual Transactions Section -->
-    <div class="manual-transactions-section">
-      <h3>6. Manual Transactions (Use for Options)</h3>
-      <div class="manual-transactions-form">
-        <input type="date" id="manualDate" placeholder="Date" />
-        <input type="number" id="manualQuantity" placeholder="Quantity" min="1" />
-        <input type="number" id="manualPriceUSD" placeholder="Price per Share (USD)" min="0" step="0.01" />
-        <input type="text" id="manualGrantNumber" placeholder="Grant Number" />
-        <button class="add-transaction-button" onclick="addManualTransaction()">Add Transaction</button>
-      </div>
-      <div class="table-wrapper">
-        <table class="manual-transactions-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Quantity</th>
-              <th>Price (USD)</th>
-              <th>Price (GBP)</th>
-              <th>Grant Number</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="manualTransactionsBody">
-            <!-- Manual transactions will be appended here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- Process Button -->
-    <button class="process-button" id="processBtn">Process Files</button>
-  
-    <!-- Results Container (tabs + content) -->
-    <div class="results-container">
-      <div class="tabs-container">
-        <div class="tabs">
-          <button class="tab active" data-tab="tabConsolidated">Combined Transactions</button>
-          <button class="tab" data-tab="tabValidation">Data Validation</button>
-          <button class="tab" data-tab="tabCGT">CGT Disposals</button>
-          <button class="tab" data-tab="tabTxLog">Transaction History</button>
-          <!-- New Tab Added -->
-          <button class="tab" data-tab="tabCGTSummary">CGT Summary</button>
+
+        <!-- US Holidays -->
+        <div class="upload-section">
+          <h3>5. US Holidays (JSON)</h3>
+          <div class="file-input-wrapper">
+            <input type="file" id="holidaysFile" accept=".json"
+              onchange="handleFileSelection('holidaysFile','holidaysFileName')" />
+            <label for="holidaysFile">Choose File</label>
+          </div>
+          <div class="file-name" id="holidaysFileName"></div>
         </div>
       </div>
-  
-      <!-- TAB CONTENT: Combined/Consolidated -->
-      <div id="tabConsolidated" class="tab-content active">
-        <h2>All Combined Transactions</h2>
+
+      <!-- Manual Transactions Section -->
+      <div class="manual-transactions-section">
+        <h3>6. Manual Transactions (Use for Options)</h3>
+        <div class="manual-transactions-form">
+          <input type="date" id="manualDate" placeholder="Date" />
+          <input type="number" id="manualQuantity" placeholder="Quantity" min="1" />
+          <input type="number" id="manualPriceUSD" placeholder="Price per Share (USD)" min="0" step="0.01" />
+          <input type="text" id="manualGrantNumber" placeholder="Grant Number" />
+          <button class="add-transaction-button" onclick="addManualTransaction()">Add Transaction</button>
+        </div>
         <div class="table-wrapper">
-          <table id="outputTable">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-  
-      <!-- TAB CONTENT: Validation -->
-      <div id="tabValidation" class="tab-content">
-        <h2>Validation Report</h2>
-        <pre id="validationReport"></pre>
-      </div>
-  
-      <!-- TAB CONTENT: CGT Disposals -->
-      <div id="tabCGT" class="tab-content">
-        <div class="summary">
-          <div class="summary-card">
-            <h4>Total Shares in Pool</h4>
-            <div class="value"><span id="poolShares">0.00</span></div>
-          </div>
-          <div class="summary-card">
-            <h4>Average Cost (GBP)</h4>
-            <div class="value"><span id="poolAvgCost">£0.00</span></div>
-          </div>
-        </div>
-        <h2>Disposals</h2>
-        <div id="disposalResults"></div>
-        <!-- Download CGT Disposals CSV Button -->
-        <div class="download-buttons">
-          <button class="download-button" onclick="downloadCGTDisposalsCSV()">Download CGT Disposals CSV</button>
-        </div>
-      </div>
-  
-      <!-- TAB CONTENT: Transaction History -->
-      <div id="tabTxLog" class="tab-content">
-        <h2>Transaction History</h2>
-        <div id="transactionLog"></div>
-        <!-- Download Transaction Log CSV Button -->
-        <div class="download-buttons">
-          <button class="download-button" onclick="downloadTransactionLogCSV()">Download Transaction Log CSV</button>
-        </div>
-      </div>
-  
-      <!-- New TAB CONTENT: CGT Summary -->
-      <div id="tabCGTSummary" class="tab-content">
-        <h2>CGT Summary</h2>
-        <div class="summary">
-          <div class="summary-card">
-            <h4>Total Gain/Loss (GBP)</h4>
-            <div class="value"><span id="totalGainLoss">£0.00</span></div>
-          </div>
-        </div>
-        <h3>Gain/Loss by UK Tax Year</h3>
-        <div class="table-wrapper">
-          <table id="cgtSummaryTable">
+          <table class="manual-transactions-table">
             <thead>
               <tr>
-                <th>Tax Year</th>
-                <th>Gain/Loss (GBP)</th>
+                <th>Date</th>
+                <th>Quantity</th>
+                <th>Price (USD)</th>
+                <th>Price (GBP)</th>
+                <th>Grant Number</th>
+                <th>Action</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- CGT Summary rows will be appended here -->
+            <tbody id="manualTransactionsBody">
+              <!-- Manual transactions will be appended here -->
             </tbody>
           </table>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+      <!-- Process Button -->
+      <button class="process-button" id="processBtn">Process Files</button>
 
-<!-- Documentation tab content -->
-<div id="docs" class="main-app-content">
-  <div class="docs-container">
-    <h2>NAVIGATING THE CORPORATE MAZE: UK EQUITY HELL</h2>
-    <h3>DATA EXTRACTION PROTOCOL: E*TRADE EDITION</h3>
-    <p>First, you'll need to hack your way through E*Trade's labyrinth to extract these essential files. Because apparently, combining this into one report would be too damn convenient:</p>
-    <ul>
-      <li>Login to E*Trade. If you don't know how to do this, I dunno what to tell you.<br/></li>
-      <li>Select your stock plan. Click stock plan, not the company name. <img src="select_stock_plan.png" alt="Select stock plan" width="750"><br/></li>
-      <li>Benefits Report: This is everything you've been awarded. Navigate to 'My Account' > 'Benefit History'. <img src="select_benefit_history.png" alt="Select Benefit History" width="750"><br/></li>
-      <li>Click Download, and select 'Download Expanded'. Put it somewhere you'll find it. Don't look at it. It's ridiculous. <img src="benefit_history_download.png" alt="Download Benefit History" width="750"><br/></li>
-      <li>Gains/Losses Report: Sail on back to 'My Account' > 'Gains & Losses'. Ignore their calcs. They think we're in the US. <img src="select_gains_and_losses.png" alt="Select Gains & Losses" width="750"><br/></li>
-      <li>You'll want the max allowed. They seem to cap it at 5 years. If you've got RSUs from before that...you'll wanna massage the spreadsheet. <img src="gains_and_losses_download.png" alt="Download Gains and Losses" width="750"><br/></li>
-      <li>You'll want your companies Stock Price History: Because correlating the vesting value to a vest is apparently too hard to put in the benefit history, and can't be matched easily from the gains and losses....E*Trade thinks you need a treasure hunt. So I've included <a href="stock_price_downloader.py" download>this Python Script</a>. Fun times.</li>
-      <li>Finally we need <a href="gbpusdyahoo.py" download>an average daily price GBP/USD data grabber</a> and a <a href="holiday_downloader.py" download>US Holidays Downloader</a>. Because we aren't in the US, and things get complicated when E*Trade marks the vest date as a date that the stock can't actually vest on. They are on it, aren't they?</li>
-    </ul>
+      <!-- Results Container (tabs + content) -->
+      <div class="results-container">
+        <div class="tabs-container">
+          <div class="tabs">
+            <button class="tab active" data-tab="tabConsolidated">Combined Transactions</button>
+            <button class="tab" data-tab="tabValidation">Data Validation</button>
+            <button class="tab" data-tab="tabCGT">CGT Disposals</button>
+            <button class="tab" data-tab="tabTxLog">Transaction History</button>
+            <!-- New Tab Added -->
+            <button class="tab" data-tab="tabCGTSummary">CGT Summary</button>
+          </div>
+        </div>
 
-    <h3>THE KAFKAESQUE WORLD OF UK STOCK TAXATION</h3>
-    <p>And now we've got what we need....welcome to the bureaucratic nightmare that is RSU taxation in the UK. Whoever designed this system probably gets paid by the complexity:</p>
-    <ul>
-      <li>Income Tax + NI when your shares vest - because getting paid in shares wasn't complicated enough already. Don't forget you'll pay the Employer NI! But hey, that comes out of *our* pool if the company doesn't sell it behind the scenes.</li>
-      <li>CGT when you sell - calculated using a method that feels like it was designed by a sadistic mathematician</li>
-      <li>Everything's in USD but needs to be in GBP - and the best we can do is a daily average from Yahoo</li>
-      <li>Did I mention the CGT method?</li>
-    </ul>
+        <!-- TAB CONTENT: Combined/Consolidated -->
+        <div id="tabConsolidated" class="tab-content active">
+          <h2>All Combined Transactions</h2>
+          <div class="table-wrapper">
+            <table id="outputTable">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
 
-    <h3>WHY THIS APP EXISTS</h3>
-    <p>Because someone had to deal with this hot mess. Here's what it handles for you:</p>
-    <ul>
-      <li>Connects the dots between E*Trade's fragmented reports that should never have been separate</li>
-      <li>Deals with HMRC's currency conversion needs so you don't have to</li>
-      <li>Implements their Byzantine Section 104 pooling rules (more on that nightmare below)</li>
-      <li>Adjusts for non-business days because US holidays are too difficult for E*Trade to account for. </li>
-      <li>Creates a paper trail so detailed it would make an auditor weep with joy</li>
-    </ul>
+        <!-- TAB CONTENT: Validation -->
+        <div id="tabValidation" class="tab-content">
+          <h2>Validation Report</h2>
+          <pre id="validationReport"></pre>
+        </div>
 
-    <h3>SECTION 104: A SPECIAL CIRCLE OF HELL</h3>
-    <p>Welcome to the UK's share pooling system, where basic math goes to die:</p>
-    <ul>
-      <li>Same-day rule: Because selling and buying on the same day would be too straightforward without special rules</li>
-      <li>30-day rule: AKA the "bed and breakfasting" rule, because apparently we needed a cute name for tax avoidance prevention</li>
-      <li>Section 104 pool: Where your shares go to lose their identity and become part of the collective. Resistance is futile.</li>
-    </ul>
+        <!-- TAB CONTENT: CGT Disposals -->
+        <div id="tabCGT" class="tab-content">
+          <div class="summary">
+            <div class="summary-card">
+              <h4>Total Shares in Pool</h4>
+              <div class="value"><span id="poolShares">0.00</span></div>
+            </div>
+            <div class="summary-card">
+              <h4>Average Cost (GBP)</h4>
+              <div class="value"><span id="poolAvgCost">£0.00</span></div>
+            </div>
+          </div>
+          <h2>Disposals</h2>
+          <div id="disposalResults"></div>
+          <!-- Download CGT Disposals CSV Button -->
+          <div class="download-buttons">
+            <button class="download-button" onclick="downloadCGTDisposalsCSV()">Download CGT Disposals CSV</button>
+          </div>
+        </div>
 
-    <h3>WHAT ABOUT MY STOCK OPTIONS? AND I BED AND SIPP/ISA - HELP ME TOO!</h3>
-    <p>If you're transferring into your own ISA or SIPP - bed and whatevering - you're on your own my love. For options though: </p>
-    <ul>
-      <li>We are gonna treat them as RSUs internally. It's fine. They are stock. </li>
-      <li>We are only really concerned with cash exercise and hold, or sell to cover and hold. E*Trade *wonderfully* doesn't list stock options 'exercise and hold' in it's gains and losses file. It does have same day sales of them, but these matter not for CGT.</li>
-      <li>But...maybe it's elsewhere in the E*trade site. Who knows. What I did was add a manual adder. Just add how many options you kept after exercise, and the date, and the grant ID - and this will work out how they interact with your pool.</li> 
-    </ul>
+        <!-- TAB CONTENT: Transaction History -->
+        <div id="tabTxLog" class="tab-content">
+          <h2>Transaction History</h2>
+          <div id="transactionLog"></div>
+          <!-- Download Transaction Log CSV Button -->
+          <div class="download-buttons">
+            <button class="download-button" onclick="downloadTransactionLogCSV()">Download Transaction Log CSV</button>
+          </div>
+        </div>
 
-    <h3>WHAT ABOUT THE FEES?</h3>
-    <p>Oh, you mean the fees that E*Trade takes to sell tax withholding shares that are forcibly sold? And the ones on each transaction?</p>
-    <ul>
-      <li>Yeah, I would add this, but e*trade doesn't list them in the gains and losses file. So you'll have to add them manually. Sorry.</li>
-      <li>But here's a tip -
-        <ul>
-          <li>download the CGT disposals generated by the tool</li>
-          <li>open in excel</li>
-          <li>add a column for fees</li>
-          <li>add a formula =14.99 / exchange rate for that row</li>
-          <li>Delete any that didn't attract commission (these are usually the 'sold extra RSU as not enough to cover tax ones - they are rare)</li>
-          <li>Sum all that an you have offsettable fees</li>
-        </ul>
-      </li>
-      <li>I'll probably add this later. But for now, you're on your own.</li>
-      <li>As far as I can tell - the $25 wire fee and the exchange rate fees are not offsettable against CGT. But I'm not an accountant. Although you might assume I am.</li>
-    </ul>
-
-    <h3>SURVIVAL STRATEGIES</h3>
-    <ul>
-      <li>Play the tax year game - split your sales across years like you're playing 4D chess with HMRC</li>
-      <li>Watch out for the 30-day trap - HMRC is always watching, waiting for you to mess up the bed & breakfasting rules</li>
-      <li>Document everything because when HMRC comes knocking, "the dog ate my exchange rate calculations" won't cut it</li>
-      <li>Remember: just because you can calculate this manually doesn't mean you should. That's what this app is for. Life's too short.</li>
-    </ul>
-
-    <h3>THE BOTTOM LINE</h3>
-    <p>This app exists because E*Trade and HMRC won't give you the tools you actually need. It's built by someone who got tired of spreadsheets, manual calculations, and the soul-crushing realization that no one in authority thought this system needed simplifying. Enjoy the automation, and maybe one day they'll realize that tax systems shouldn't require 'a very specific set of skills' to navigate. But just be glad you're hopefully not on Universal Credit.</p>
-  </div>
-</div>
-
-<div id="chat" class="main-app-content">
-  <div class="tax-punks-container">
-    <img src="logo.webp" alt="Select stock plan" width="100">
-    <h2>TALES FROM THE TAX PUNKS</h2>
-    <p class="disclaimer">Intercepted communications from the tax resistance. Not financial advice. For entertainment purposes only. Any resemblance to actual tax optimization strategies is purely coincidental...</p>
-    
-    <div class="chat-thread">
-      <div class="message system">
-        <span class="time">20:57</span>
-        <p>[ Secure channel established - Encryption active ]</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">20:58</span>
-        <span class="sender">NovaRunner</span>
-        <p>first vest just hit. everyone's like "HODL, it'll go up!" but they already took over half in tax witholding anyway. feels wrong. i'm basic rate.</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:00</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>they never mention that part in the motivational speeches, do they? "congratulations on your RSUs, now watch half vanish for tax before you even see them" 😏. You'll get that diff back in your PAYE though.</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:01</span>
-        <span class="sender">NovaRunner</span>
-        <p>so what now? stocks are volatile</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:03</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>here's the thing no-one says: you already paid tax on full value at vest. holding after that is a pure gamble on you. like buying the stock with post-tax money, but on autopilot</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:04</span>
-        <span class="sender">NovaRunner</span>
-        <p>wait... so if it drops I still paid tax on the higher amount? 🤔</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:05</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>bingo. welcome to the matrix. only forced gamble was between grant and vest. maybe you made bank, maybe you didn't. your choice now tho ... just keep meditating 'safe percentage of net worth'</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:06</span>
-        <span class="sender">NovaRunner</span>
-        <p>damn. good point. but heard something about "bed and breakfast" rules if I sell? sounds like a hotel promotion 😅</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:08</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>haha HMRC's idea of hospitality. no fry up tho. can't sell and rebuy (a vest in our case) within 30 days or they treat it as same val. but that opens... possibilities for those who understand timing 😉</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:09</span>
-        <span class="sender">NovaRunner</span>
-        <p>seeing stuff about "Section 104 pools" too. sounds like a fancy swimming complex</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:11</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>their way of averaging your purchase costs. but here's a secret: same-day transactions match first. some people get creative with that knowledge... especially around vest days...</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:12</span>
-        <span class="sender">NovaRunner</span>
-        <p>👀</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:14</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>let's just say timing isn't just for traders. some folks get real precise with their clocks to realise the taxed vest value...</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:15</span>
-        <span class="sender">NovaRunner</span>
-        <p>my benefits team keeps pushing salary sacrifice schemes. seems random</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:17</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>not so random when you understand income thresholds. bikes, pension contributions, maybe a taycan or a tesla... all reduce "taxable income". interesting effects on child benefit and six figure ballers personal allowance taper....or UC...</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:18</span>
-        <span class="sender">NovaRunner</span>
-        <p>hold up. some people driving fancy new EVs or e-bikes might actually be gaming the system? legally??</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:20</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>well ... heard paye stories that would make mossack fonseca envious. all perfectly legal. system has more loopholes than a crochet convention. by design. labor lost to capital but crumbs are still there.</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:21</span>
-        <span class="sender">NovaRunner</span>
-        <p>starting to see why they make it so complicated...</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:23</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>complexity creates opportunity. pension allowances, carry back, charitable giving, timing of disposals... pieces of a puzzle waiting to be solved</p>
-      </div>
-  
-      <div class="message incoming">
-        <span class="time">21:24</span>
-        <span class="sender">NovaRunner</span>
-        <p>any recommended reading? need to level up my tax game</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:26</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>official guides tell half the story. watch what people actually do. especially those who talk about effective marginal rates and tax and benefit thresholds. but you didn't hear that from me...</p>
-      </div>
-  
-      <div class="message system">
-        <span class="time">21:27</span>
-        <p>[ Warning: HMRC pattern matching detected - Channel compromised ]</p>
-      </div>
-  
-      <div class="message outgoing">
-        <span class="time">21:28</span>
-        <span class="sender">TaxMatrix_Sage</span>
-        <p>time to disappear. remember: eggs in baskets, watch the clock near vest, and always read the fine print on salary sacrifice... 😉</p>
-      </div>
-  
-      <div class="message system">
-        <span class="time">21:29</span>
-        <p>[ Connection terminated - Channel shutdown complete ]</p>
+        <!-- New TAB CONTENT: CGT Summary -->
+        <div id="tabCGTSummary" class="tab-content">
+          <h2>CGT Summary</h2>
+          <div class="summary">
+            <div class="summary-card">
+              <h4>Total Gain/Loss (GBP)</h4>
+              <div class="value"><span id="totalGainLoss">£0.00</span></div>
+            </div>
+          </div>
+          <h3>Gain/Loss by UK Tax Year</h3>
+          <div class="table-wrapper">
+            <table id="cgtSummaryTable">
+              <thead>
+                <tr>
+                  <th>Tax Year</th>
+                  <th>Gain/Loss (GBP)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- CGT Summary rows will be appended here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
-  
-    <p class="epilogue">No tax advisors were harmed in the creation of this chat log. But several spreadsheets did expire from exhaustion.</p>
   </div>
-</div>
 
-<div id="about" class="main-app-content">
-  <div class="about-container">
-    <h2>Who are you?</h2>
-    <p>Not an accountant. Just someone who once had a 116% Effective marginal tax rate on part of their income</p>
-    <br/>
-    <h2>Jeez. Any Advice?</h2>
-    <p>I strongly suggest checking my working. </p>
-    <br/>
-    <h2>Why do I need 5 files, why not just the e*trade ones?</h2>
-    <p>Look into CORS. If people like it, then I can add a small server side component to avoid the need to upload stock prices/forex data/US holidays, and handle that stuff automatically. </p>
-    <br/>
-    <h2>Why don't you just do that?</h2>
-    <p>The reason I haven't done that is simple. I want it to be able to run locally, with the only reliance on a third party JS library for loading excel files.</p>
-    <br/>
-    <h2>Just do it!</h2>
-    <p>Remember Goodfellas? - sufficient clicks of that donate button and I might think about it!</p>
+  <!-- Documentation tab content -->
+  <div id="docs" class="main-app-content">
+    <div class="docs-container">
+      <h2>NAVIGATING THE CORPORATE MAZE: UK EQUITY HELL</h2>
+      <h3>DATA EXTRACTION PROTOCOL: E*TRADE EDITION</h3>
+      <p>First, you'll need to hack your way through E*Trade's labyrinth to extract these essential files. Because
+        apparently, combining this into one report would be too damn convenient:</p>
+      <ul>
+        <li>Login to E*Trade. If you don't know how to do this, I dunno what to tell you.<br /></li>
+        <li>Select your stock plan. Click stock plan, not the company name. <img src="select_stock_plan.png"
+            alt="Select stock plan" width="750"><br /></li>
+        <li>Benefits Report: This is everything you've been awarded. Navigate to 'My Account' > 'Benefit History'. <img
+            src="select_benefit_history.png" alt="Select Benefit History" width="750"><br /></li>
+        <li>Click Download, and select 'Download Expanded'. Put it somewhere you'll find it. Don't look at it. It's
+          ridiculous. <img src="benefit_history_download.png" alt="Download Benefit History" width="750"><br /></li>
+        <li>Gains/Losses Report: Sail on back to 'My Account' > 'Gains & Losses'. Ignore their calcs. They think we're
+          in the US. <img src="select_gains_and_losses.png" alt="Select Gains & Losses" width="750"><br /></li>
+        <li>You'll want the max allowed. They seem to cap it at 5 years. If you've got RSUs from before that...you'll
+          wanna massage the spreadsheet. <img src="gains_and_losses_download.png" alt="Download Gains and Losses"
+            width="750"><br /></li>
+        <li>You'll want your companies Stock Price History: Because correlating the vesting value to a vest is
+          apparently too hard to put in the benefit history, and can't be matched easily from the gains and
+          losses....E*Trade thinks you need a treasure hunt. So I've included <a href="stock_price_downloader.py"
+            download>this Python Script</a>. Fun times.</li>
+        <li>Finally we need <a href="gbpusdyahoo.py" download>an average daily price GBP/USD data grabber</a> and a <a
+            href="holiday_downloader.py" download>US Holidays Downloader</a>. Because we aren't in the US, and things
+          get complicated when E*Trade marks the vest date as a date that the stock can't actually vest on. They are on
+          it, aren't they?</li>
+      </ul>
+
+      <h3>THE KAFKAESQUE WORLD OF UK STOCK TAXATION</h3>
+      <p>And now we've got what we need....welcome to the bureaucratic nightmare that is RSU taxation in the UK. Whoever
+        designed this system probably gets paid by the complexity:</p>
+      <ul>
+        <li>Income Tax + NI when your shares vest - because getting paid in shares wasn't complicated enough already.
+          Don't forget you'll pay the Employer NI! But hey, that comes out of *our* pool if the company doesn't sell it
+          behind the scenes.</li>
+        <li>CGT when you sell - calculated using a method that feels like it was designed by a sadistic mathematician
+        </li>
+        <li>Everything's in USD but needs to be in GBP - and the best we can do is a daily average from Yahoo</li>
+        <li>Did I mention the CGT method?</li>
+      </ul>
+
+      <h3>WHY THIS APP EXISTS</h3>
+      <p>Because someone had to deal with this hot mess. Here's what it handles for you:</p>
+      <ul>
+        <li>Connects the dots between E*Trade's fragmented reports that should never have been separate</li>
+        <li>Deals with HMRC's currency conversion needs so you don't have to</li>
+        <li>Implements their Byzantine Section 104 pooling rules (more on that nightmare below)</li>
+        <li>Adjusts for non-business days because US holidays are too difficult for E*Trade to account for. </li>
+        <li>Creates a paper trail so detailed it would make an auditor weep with joy</li>
+      </ul>
+
+      <h3>SECTION 104: A SPECIAL CIRCLE OF HELL</h3>
+      <p>Welcome to the UK's share pooling system, where basic math goes to die:</p>
+      <ul>
+        <li>Same-day rule: Because selling and buying on the same day would be too straightforward without special rules
+        </li>
+        <li>30-day rule: AKA the "bed and breakfasting" rule, because apparently we needed a cute name for tax avoidance
+          prevention</li>
+        <li>Section 104 pool: Where your shares go to lose their identity and become part of the collective. Resistance
+          is futile.</li>
+      </ul>
+
+      <h3>WHAT ABOUT MY STOCK OPTIONS? AND I BED AND SIPP/ISA - HELP ME TOO!</h3>
+      <p>If you're transferring into your own ISA or SIPP - bed and whatevering - you're on your own my love. For
+        options though: </p>
+      <ul>
+        <li>We are gonna treat them as RSUs internally. It's fine. They are stock. </li>
+        <li>We are only really concerned with cash exercise and hold, or sell to cover and hold. E*Trade *wonderfully*
+          doesn't list stock options 'exercise and hold' in it's gains and losses file. It does have same day sales of
+          them, but these matter not for CGT.</li>
+        <li>But...maybe it's elsewhere in the E*trade site. Who knows. What I did was add a manual adder. Just add how
+          many options you kept after exercise, and the date, and the grant ID - and this will work out how they
+          interact with your pool.</li>
+      </ul>
+
+      <h3>WHAT ABOUT THE FEES?</h3>
+      <p>Oh, you mean the fees that E*Trade takes to sell tax withholding shares that are forcibly sold? And the ones on
+        each transaction?</p>
+      <ul>
+        <li>Yeah, I would add this, but e*trade doesn't list them in the gains and losses file. So you'll have to add
+          them manually. Sorry.</li>
+        <li>But here's a tip -
+          <ul>
+            <li>download the CGT disposals generated by the tool</li>
+            <li>open in excel</li>
+            <li>add a column for fees</li>
+            <li>add a formula =14.99 / exchange rate for that row</li>
+            <li>Delete any that didn't attract commission (these are usually the 'sold extra RSU as not enough to cover
+              tax ones - they are rare)</li>
+            <li>Sum all that an you have offsettable fees</li>
+          </ul>
+        </li>
+        <li>I'll probably add this later. But for now, you're on your own.</li>
+        <li>As far as I can tell - the $25 wire fee and the exchange rate fees are not offsettable against CGT. But I'm
+          not an accountant. Although you might assume I am.</li>
+      </ul>
+
+      <h3>SURVIVAL STRATEGIES</h3>
+      <ul>
+        <li>Play the tax year game - split your sales across years like you're playing 4D chess with HMRC</li>
+        <li>Watch out for the 30-day trap - HMRC is always watching, waiting for you to mess up the bed & breakfasting
+          rules</li>
+        <li>Document everything because when HMRC comes knocking, "the dog ate my exchange rate calculations" won't cut
+          it</li>
+        <li>Remember: just because you can calculate this manually doesn't mean you should. That's what this app is for.
+          Life's too short.</li>
+      </ul>
+
+      <h3>THE BOTTOM LINE</h3>
+      <p>This app exists because E*Trade and HMRC won't give you the tools you actually need. It's built by someone who
+        got tired of spreadsheets, manual calculations, and the soul-crushing realization that no one in authority
+        thought this system needed simplifying. Enjoy the automation, and maybe one day they'll realize that tax systems
+        shouldn't require 'a very specific set of skills' to navigate. But just be glad you're hopefully not on
+        Universal Credit.</p>
+    </div>
   </div>
-</div>
 
-<!-- Existing and Updated Scripts -->
-<script>
+  <div id="chat" class="main-app-content">
+    <div class="tax-punks-container">
+      <img src="logo.webp" alt="Select stock plan" width="100">
+      <h2>TALES FROM THE TAX PUNKS</h2>
+      <p class="disclaimer">Intercepted communications from the tax resistance. Not financial advice. For entertainment
+        purposes only. Any resemblance to actual tax optimization strategies is purely coincidental...</p>
 
-/**
- * Show the selected file name under each input.
- */
-function handleFileSelection(inputId, displayId) {
-  const input = document.getElementById(inputId);
-  const display = document.getElementById(displayId);
-  if (input.files && input.files.length > 0) {
-    display.textContent = "Chosen File: " + input.files[0].name;
-  } else {
-    display.textContent = "";
-  }
-}
+      <div class="chat-thread">
+        <div class="message system">
+          <span class="time">20:57</span>
+          <p>[ Secure channel established - Encryption active ]</p>
+        </div>
 
-/**
- * Handle Forex File Upload
- * Parses the Forex file upon upload and populates the forexRatesMap.
- */
-async function handleForexFileUpload() {
-  const forexFile = document.getElementById('forexFile').files[0];
-  const display = document.getElementById('forexFileName');
-  if (forexFile) {
-    display.textContent = "Chosen File: " + forexFile.name;
-    try {
-      const forexData = await parseCSVFile(forexFile);
-      // Build forexRatesMap with 'YYYY-MM-DD' keys
-      forexRatesMap = {};
-      forexData.forEach(row => {
-        if (row['Date'] && row['Average']) {
-          const isoDate = toISODate(row['Date']);
-          if (isoDate) {
-            forexRatesMap[isoDate] = parseFloatSafe(row['Average']);
-          }
-        }
-      });
-      alert("Forex Rates file processed successfully.");
-      // Enable manual transactions form
-      enableManualTransactionsForm(true);
-    } catch (err) {
-      alert(`Error processing Forex Rates file: ${err.message}`);
-      console.error(err);
-      // Clear forexRatesMap
-      forexRatesMap = {};
-      // Disable manual transactions form
-      enableManualTransactionsForm(false);
-    }
-  } else {
-    display.textContent = "";
-    forexRatesMap = {};
-    enableManualTransactionsForm(false);
-  }
-}
+        <div class="message incoming">
+          <span class="time">20:58</span>
+          <span class="sender">NovaRunner</span>
+          <p>first vest just hit. everyone's like "HODL, it'll go up!" but they already took over half in tax witholding
+            anyway. feels wrong. i'm basic rate.</p>
+        </div>
 
-/********************************************************************
- * 1) UTILITY HELPERS
- ********************************************************************/
+        <div class="message outgoing">
+          <span class="time">21:00</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>they never mention that part in the motivational speeches, do they? "congratulations on your RSUs, now
+            watch half vanish for tax before you even see them" 😏. You'll get that diff back in your PAYE though.</p>
+        </div>
 
-function parseIntSafe(value) {
-  const num = parseInt(value, 10);
-  return isNaN(num) ? 0 : num;
-}
+        <div class="message incoming">
+          <span class="time">21:01</span>
+          <span class="sender">NovaRunner</span>
+          <p>so what now? stocks are volatile</p>
+        </div>
 
-function parseFloatSafe(value) {
-  const num = parseFloat(value);
-  return isNaN(num) ? 0 : num;
-}
+        <div class="message outgoing">
+          <span class="time">21:03</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>here's the thing no-one says: you already paid tax on full value at vest. holding after that is a pure
+            gamble on you. like buying the stock with post-tax money, but on autopilot</p>
+        </div>
 
-function parseExcelFile(file, skipSummaryRow = false) {
-  // Returns a Promise that resolves to an array of row objects (like CSV).
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        let jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: null });
+        <div class="message incoming">
+          <span class="time">21:04</span>
+          <span class="sender">NovaRunner</span>
+          <p>wait... so if it drops I still paid tax on the higher amount? 🤔</p>
+        </div>
 
-        if (skipSummaryRow) {
-          // Filter out summary row
-          jsonData = jsonData.filter(row => row['Record Type'] !== 'Summary');
-        }
-        resolve(jsonData);
-      } catch (err) {
-        reject(err);
+        <div class="message outgoing">
+          <span class="time">21:05</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>bingo. welcome to the matrix. only forced gamble was between grant and vest. maybe you made bank, maybe you
+            didn't. your choice now tho ... just keep meditating 'safe percentage of net worth'</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:06</span>
+          <span class="sender">NovaRunner</span>
+          <p>damn. good point. but heard something about "bed and breakfast" rules if I sell? sounds like a hotel
+            promotion 😅</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:08</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>haha HMRC's idea of hospitality. no fry up tho. can't sell and rebuy (a vest in our case) within 30 days or
+            they treat it as same val. but that opens... possibilities for those who understand timing 😉</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:09</span>
+          <span class="sender">NovaRunner</span>
+          <p>seeing stuff about "Section 104 pools" too. sounds like a fancy swimming complex</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:11</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>their way of averaging your purchase costs. but here's a secret: same-day transactions match first. some
+            people get creative with that knowledge... especially around vest days...</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:12</span>
+          <span class="sender">NovaRunner</span>
+          <p>👀</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:14</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>let's just say timing isn't just for traders. some folks get real precise with their clocks to realise the
+            taxed vest value...</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:15</span>
+          <span class="sender">NovaRunner</span>
+          <p>my benefits team keeps pushing salary sacrifice schemes. seems random</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:17</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>not so random when you understand income thresholds. bikes, pension contributions, maybe a taycan or a
+            tesla... all reduce "taxable income". interesting effects on child benefit and six figure ballers personal
+            allowance taper....or UC...</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:18</span>
+          <span class="sender">NovaRunner</span>
+          <p>hold up. some people driving fancy new EVs or e-bikes might actually be gaming the system? legally??</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:20</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>well ... heard paye stories that would make mossack fonseca envious. all perfectly legal. system has more
+            loopholes than a crochet convention. by design. labor lost to capital but crumbs are still there.</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:21</span>
+          <span class="sender">NovaRunner</span>
+          <p>starting to see why they make it so complicated...</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:23</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>complexity creates opportunity. pension allowances, carry back, charitable giving, timing of disposals...
+            pieces of a puzzle waiting to be solved</p>
+        </div>
+
+        <div class="message incoming">
+          <span class="time">21:24</span>
+          <span class="sender">NovaRunner</span>
+          <p>any recommended reading? need to level up my tax game</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:26</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>official guides tell half the story. watch what people actually do. especially those who talk about
+            effective marginal rates and tax and benefit thresholds. but you didn't hear that from me...</p>
+        </div>
+
+        <div class="message system">
+          <span class="time">21:27</span>
+          <p>[ Warning: HMRC pattern matching detected - Channel compromised ]</p>
+        </div>
+
+        <div class="message outgoing">
+          <span class="time">21:28</span>
+          <span class="sender">TaxMatrix_Sage</span>
+          <p>time to disappear. remember: eggs in baskets, watch the clock near vest, and always read the fine print on
+            salary sacrifice... 😉</p>
+        </div>
+
+        <div class="message system">
+          <span class="time">21:29</span>
+          <p>[ Connection terminated - Channel shutdown complete ]</p>
+        </div>
+      </div>
+
+      <p class="epilogue">No tax advisors were harmed in the creation of this chat log. But several spreadsheets did
+        expire from exhaustion.</p>
+    </div>
+  </div>
+
+  <div id="about" class="main-app-content">
+    <div class="about-container">
+      <h2>Who are you?</h2>
+      <p>Not an accountant. Just someone who once had a 116% Effective marginal tax rate on part of their income</p>
+      <br />
+      <h2>Jeez. Any Advice?</h2>
+      <p>I strongly suggest checking my working. </p>
+      <br />
+      <h2>Why do I need 5 files, why not just the e*trade ones?</h2>
+      <p>Look into CORS. If people like it, then I can add a small server side component to avoid the need to upload
+        stock prices/forex data/US holidays, and handle that stuff automatically. </p>
+      <br />
+      <h2>Why don't you just do that?</h2>
+      <p>The reason I haven't done that is simple. I want it to be able to run locally, with the only reliance on a
+        third party JS library for loading excel files.</p>
+      <br />
+      <h2>Just do it!</h2>
+      <p>Remember Goodfellas? - sufficient clicks of that donate button and I might think about it!</p>
+    </div>
+  </div>
+
+  <!-- Existing and Updated Scripts -->
+  <script>
+
+    /**
+     * Show the selected file name under each input.
+     */
+    function handleFileSelection(inputId, displayId) {
+      const input = document.getElementById(inputId);
+      const display = document.getElementById(displayId);
+      if (input.files && input.files.length > 0) {
+        display.textContent = "Chosen File: " + input.files[0].name;
+      } else {
+        display.textContent = "";
       }
-    };
-    reader.onerror = err => reject(err);
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-function parseCSVFile(file) {
-  // Returns a Promise that resolves to an array of row objects.
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const text = e.target.result;
-      resolve(csvToJson(text));
-    };
-    reader.onerror = err => reject(err);
-    reader.readAsText(file);
-  });
-}
-
-function parseJSONFile(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const jsonObj = JSON.parse(e.target.result);
-        resolve(jsonObj);
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = err => reject(err);
-    reader.readAsText(file);
-  });
-}
-
-function csvToJson(csvText) {
-  // Simple CSV-to-JSON conversion, assuming first row is headers
-  const lines = csvText.trim().split(/\r?\n/);
-  const headers = lines[0].split(',');
-  const data = [];
-  for (let i = 1; i < lines.length; i++) {
-    const row = {};
-    const cols = lines[i].split(',');
-    headers.forEach((h, idx) => {
-      row[h.trim()] = (cols[idx] !== undefined) ? cols[idx].trim() : '';
-    });
-    data.push(row);
-  }
-  return data;
-}
-
-function formatDate(dateObj) {
-  if (!(dateObj instanceof Date) || isNaN(dateObj.valueOf())) {
-    return null;
-  }
-  // Force UTC handling to avoid timezone shifts
-  const yyyy = dateObj.getUTCFullYear();
-  const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(dateObj.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function toISODate(dateStr) {
-  if (!dateStr) return null;
-
-  // Handle Excel's US date format (MM/DD/YYYY)
-  if (dateStr.includes('/')) {
-    const [month, day, year] = dateStr.split('/');
-    // Create date in UTC to avoid timezone shifts
-    return formatDate(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day))));
-  }
-
-  // Handle ISO format (YYYY-MM-DD)
-  if (dateStr.includes('-')) {
-    const [year, month, day] = dateStr.split('-');
-    return formatDate(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day))));
-  }
-
-  // For any other format, try parsing but force UTC
-  const parsed = new Date(dateStr);
-  if (isNaN(parsed.valueOf())) return null;
-  return formatDate(new Date(Date.UTC(
-    parsed.getFullYear(),
-    parsed.getMonth(),
-    parsed.getDate()
-  )));
-}
-
-/********************************************************************
- * 2) VEST PRICE CALCULATOR
- ********************************************************************/
-class VestPriceCalculator {
-  constructor(stockData, forexData, holidaysSet) {
-    this.stockPrices = this._buildStockMap(stockData);
-    this.forexRates = this._buildForexMap(forexData);
-    this.holidays = holidaysSet;
-  }
-
-  _buildStockMap(stockData) {
-    const map = {};
-    stockData.forEach(row => {
-      if (!row['Date']) return;  // Skip if no date
-      const dateStr = toISODate(row['Date']);
-      if (dateStr) {
-        map[dateStr] = parseFloatSafe(row['Close_Price']);
-      }
-    });
-    return map;
-  }
-
-  _buildForexMap(forexData) {
-    const map = {};
-    forexData.forEach(row => {
-      if (!row['Date']) return;  // Skip if no date
-      const dateStr = toISODate(row['Date']);
-      if (dateStr) {
-        map[dateStr] = parseFloatSafe(row['Average']);
-      }
-    });
-    return map;
-  }
-
-  _isBusinessDay(date) {
-    // Use UTC days to avoid timezone issues
-    if (date.getUTCDay() === 6 || date.getUTCDay() === 0) {
-      return false;
-    }
-    const dateStr = formatDate(date);
-    return !this.holidays.has(dateStr);
-  }
-
-  _getNextBusinessDay(date) {
-    let next = new Date(Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate()
-    ));
-
-    while (!this._isBusinessDay(next)) {
-      next.setUTCDate(next.getUTCDate() + 1);
-    }
-    return next;
-  }
-
-  getVestPrice(vestDateStr) {
-    // Returns [usdPrice, fxRate, gbpPrice, actualDateStr]
-    if (!vestDateStr) {
-      return [null, null, null, vestDateStr];
     }
 
-    // Parse the vest date using UTC
-    const [year, month, day] = vestDateStr.split('-');
-    const dateObj = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
-
-    if (isNaN(dateObj.valueOf())) {
-      return [null, null, null, vestDateStr];
-    }
-
-    const actualDate = this._getNextBusinessDay(dateObj);
-    const actualDateStr = formatDate(actualDate);
-
-    const usdPrice = this.stockPrices[actualDateStr];
-    if (usdPrice === undefined) {
-      return [null, null, null, actualDateStr];
-    }
-
-    const fxRate = this.forexRates[actualDateStr];
-    if (fxRate === undefined) {
-      return [usdPrice, null, null, actualDateStr];
-    }
-
-    const gbpPrice = usdPrice / fxRate;
-    return [usdPrice, fxRate, gbpPrice, actualDateStr];
-  }
-}
-
-/********************************************************************
- * 3) ETradeDataProcessor
- ********************************************************************/
-class ETradeDataProcessor {
-  constructor(stockData, forexData, holidaysData) {
-    this.gainsColumns = [
-      "Record Type", "Date Acquired", "Date Sold", "Qty.",
-      "Proceeds Per Share", "Vest Date", "Vest Date FMV",
-      "Grant Date FMV", "Grant Number", "Order Type", "Type"
-    ];
-    this.dateColumns = ["Date Acquired", "Date Sold", "Vest Date"];
-    this.validationStats = {
-      unmatched_vests: 0,
-      missing_fmv: 0,
-      negative_quantities: 0,
-      zero_prices: 0,
-      calculated_prices: 0
-    };
-
-    // Build a set of holiday date strings
-    const holidaysSet = new Set();
-    holidaysData.forEach(h => {
-      // only add if global or not 'Optional'
-      if (h.global || !h.types.includes("Optional")) {
-        holidaysSet.add(h.date);
-      }
-    });
-
-    this.priceCalculator = new VestPriceCalculator(stockData, forexData, holidaysSet);
-  }
-
-  processGainsLosses(gainsData) {
-    this._validateRequiredColumns(gainsData, this.gainsColumns, "gains/losses file");
-    gainsData = this._standardizeDates(gainsData, this.dateColumns);
-    this._validateNumericValues(gainsData, "Qty.");
-    return gainsData;
-  }
-
-  processBenefits(benefitsData) {
-    const requiredColumns = ['Grant Number', 'Date', 'Event Type', 'Qty. or Amount'];
-    this._validateRequiredColumns(benefitsData, requiredColumns, "benefits file");
-
-    // Standardize date and quantity
-    benefitsData.forEach(row => {
-      row['Date'] = toISODate(row['Date']);
-      row["Qty. or Amount"] = parseIntSafe(row["Qty. or Amount"]);
-    });
-
-    // Filter for 'Shares released'
-    const filtered = benefitsData.filter(row => row['Event Type'] === 'Shares released');
-    return filtered;
-  }
-
-  consolidateTransactions(salesData, vestsData, manualTransactions = []) {
-    // 1) Build FMV mapping from sales data
-    const fmvMapping = {};
-    salesData.forEach(row => {
-      const gn = String(row["Grant Number"] || "").trim();
-      const vd = String(row["Vest Date"] || "").trim();
-      const fmv = parseFloatSafe(row["Vest Date FMV"]);
-      if (gn && vd) {
-        fmvMapping[`${gn}::${vd}`] = fmv;
-      }
-    });
-
-    // 2) Merge vests with that FMV
-    vestsData.forEach(vestRow => {
-      const gn = String(vestRow["Grant Number"] || "").trim();
-      const d = String(vestRow["Date"] || "").trim();
-      const key = `${gn}::${d}`;
-      vestRow["Vest Date FMV"] = (fmvMapping[key] !== undefined) ? fmvMapping[key] : null;
-    });
-
-    // 3) Calculate missing FMV
-    vestsData.forEach(vestRow => {
-      if (vestRow["Vest Date FMV"] == null || isNaN(vestRow["Vest Date FMV"])) {
-        const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(vestRow["Date"]);
-        if (usdPrice != null) {
-          vestRow["Vest Date FMV"] = usdPrice;
-          vestRow["GBP_Price"] = (gbpPrice != null) ? gbpPrice : null;
-          vestRow["USD_GBP_Rate"] = fxRate;
-          vestRow["Actual_Vest_Date"] = actualDate;
-          this.validationStats.calculated_prices++;
-        } else {
-          vestRow["Vest Date FMV"] = null;
-          this.validationStats.missing_fmv++;
+    /**
+     * Handle Forex File Upload
+     * Parses the Forex file upon upload and populates the forexRatesMap.
+     */
+    async function handleForexFileUpload() {
+      const forexFile = document.getElementById('forexFile').files[0];
+      const display = document.getElementById('forexFileName');
+      if (forexFile) {
+        display.textContent = "Chosen File: " + forexFile.name;
+        try {
+          const forexData = await parseCSVFile(forexFile);
+          // Build forexRatesMap with 'YYYY-MM-DD' keys
+          forexRatesMap = {};
+          forexData.forEach(row => {
+            if (row['Date'] && row['Average']) {
+              const isoDate = toISODate(row['Date']);
+              if (isoDate) {
+                forexRatesMap[isoDate] = parseFloatSafe(row['Average']);
+              }
+            }
+          });
+          alert("Forex Rates file processed successfully.");
+          // Enable manual transactions form
+          enableManualTransactionsForm(true);
+        } catch (err) {
+          alert(`Error processing Forex Rates file: ${err.message}`);
+          console.error(err);
+          // Clear forexRatesMap
+          forexRatesMap = {};
+          // Disable manual transactions form
+          enableManualTransactionsForm(false);
         }
       } else {
-        // We have a FMV => also compute GBP if we can get an fxRate
-        const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(vestRow["Date"]);
-        if (fxRate != null) {
-          vestRow["GBP_Price"] = vestRow["Vest Date FMV"] / fxRate;
-          vestRow["USD_GBP_Rate"] = fxRate;
-          vestRow["Actual_Vest_Date"] = actualDate;
-        }
-      }
-    });
-
-    // Track unmatched vests
-    vestsData.forEach(vestRow => {
-      if (vestRow["Vest Date FMV"] == null || isNaN(vestRow["Vest Date FMV"])) {
-        this.validationStats.unmatched_vests++;
-      }
-    });
-
-    // 4) Convert vests => "Buy" records
-    const buyRecords = vestsData.map(vestRow => {
-      const actualVestDate = vestRow["Actual_Vest_Date"] || vestRow["Date"];
-      return {
-        'Record Type': 'Buy',
-        'Qty.': vestRow["Qty. or Amount"],
-        'Date': actualVestDate,
-        'Price Per Share': vestRow["Vest Date FMV"],
-        'Price Per Share GBP': vestRow["GBP_Price"] || null,
-        'Exchange Rate': vestRow["USD_GBP_Rate"] || null,
-        'Order Type': 'Vest',
-        'Type': 'Restricted Stock Unit',
-        'Grant Number': vestRow["Grant Number"]
-      };
-    });
-
-    // 4a) Add manual transactions as Buy records
-    manualTransactions.forEach(tx => {
-      buyRecords.push({
-        'Record Type': 'Buy',
-        'Qty.': tx.quantity,
-        'Date': tx.date,
-        'Price Per Share': tx.priceUSD,
-        'Price Per Share GBP': tx.priceGBP,
-        'Exchange Rate': tx.exchangeRate,
-        'Order Type': 'Manual',
-        'Type': 'Restricted Stock Unit',
-        'Grant Number': tx.grantNumber
-      });
-    });
-
-    // 5) Convert sells => "Sell" records
-    const sellRecords = salesData.map(sellRow => {
-      const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(sellRow["Date Sold"]);
-      let pricePerShareGBP = null;
-      let exchangeRate = null;
-      if (fxRate != null) {
-        pricePerShareGBP = parseFloatSafe(sellRow["Proceeds Per Share"]) / fxRate;
-        exchangeRate = fxRate;
-      }
-      return {
-        'Record Type': 'Sell',
-        'Qty.': parseFloatSafe(sellRow["Qty."]),
-        'Date': sellRow["Date Sold"],
-        'Price Per Share': parseFloatSafe(sellRow["Proceeds Per Share"]),
-        'Price Per Share GBP': pricePerShareGBP,
-        'Exchange Rate': exchangeRate,
-        'Order Type': sellRow["Order Type"],
-        'Type': sellRow["Type"],
-        'Grant Number': sellRow["Grant Number"]
-      };
-    });
-
-    // Combine
-    let allRecords = [...buyRecords, ...sellRecords];
-
-    // Standardize date => for sorting
-    allRecords.forEach(r => {
-      let d = new Date(r.Date);
-      if (isNaN(d.valueOf())) {
-        d = new Date();
-      }
-      r._dateObj = d;
-    });
-
-    // Consolidate similar prices
-    allRecords = this.consolidateSimilarPrices(allRecords);
-
-    // Sort
-    allRecords.sort((a, b) => a._dateObj - b._dateObj);
-
-    // Final date format
-    allRecords.forEach(r => {
-      r.Date = formatDate(r._dateObj);
-      delete r._dateObj;
-    });
-
-    // Final columns
-    const finalCols = [
-      'Record Type', 'Date', 'Qty.', 'Price Per Share',
-      'Price Per Share GBP', 'Exchange Rate',
-      'Order Type', 'Type', 'Grant Number'
-    ];
-
-    return allRecords.map(rec => {
-      const rowObj = {};
-      finalCols.forEach(c => {
-        rowObj[c] = (rec[c] !== undefined) ? rec[c] : null;
-      });
-      return rowObj;
-    });
-  }
-
-  consolidateSimilarPrices(records, priceTolerance = 0.01) {
-    const grouped = {};
-    records.forEach(r => {
-      const key = `${r.Date}||${r['Record Type']}||${r['Order Type']}||${r['Type']}`;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(r);
-    });
-
-    const result = [];
-    for (const key in grouped) {
-      const [date, recordType, orderType, secType] = key.split('||');
-      const group = grouped[key];
-      if (recordType === 'Buy') {
-        // no consolidation for buys
-        result.push(...group);
-        continue;
-      }
-      // For sells
-      let local = [...group];
-      while (local.length > 0) {
-        const ref = local[0];
-        const refPrice = parseFloatSafe(ref['Price Per Share'] || 0);
-        const similar = local.filter(r => {
-          const p = parseFloatSafe(r['Price Per Share']);
-          if (refPrice === 0) return (p === 0);
-          const diff = Math.abs(p - refPrice) / refPrice;
-          return diff <= priceTolerance;
-        });
-        if (similar.length > 1) {
-          let sumQty = 0, sumUSD = 0, sumGBP = 0, sumGBPRecords = 0;
-          let usedFxRate = null;
-          const allGrants = new Set();
-          similar.forEach(s => {
-            const qty = parseFloatSafe(s['Qty.']);
-            const pUSD = parseFloatSafe(s['Price Per Share'] || 0);
-            sumQty += qty;
-            sumUSD += (pUSD * qty);
-            if (s['Price Per Share GBP'] != null) {
-              const pGBP = parseFloatSafe(s['Price Per Share GBP']);
-              sumGBP += (pGBP * qty);
-              sumGBPRecords++;
-            }
-            if (s['Exchange Rate'] != null && usedFxRate == null) {
-              usedFxRate = s['Exchange Rate'];
-            }
-            const gns = ("" + (s['Grant Number'] || "")).split('-').map(x => x.trim()).filter(x => x);
-            gns.forEach(g => allGrants.add(g));
-          });
-          const avgUSD = (sumQty !== 0) ? (sumUSD / sumQty) : 0;
-          const avgGBP = (sumQty !== 0 && sumGBPRecords > 0) ? (sumGBP / sumQty) : null;
-
-          result.push({
-            'Record Type': recordType,
-            'Date': date,
-            'Qty.': sumQty,
-            'Price Per Share': parseFloat(avgUSD.toFixed(6)),
-            'Price Per Share GBP': (avgGBP != null) ? parseFloat(avgGBP.toFixed(6)) : null,
-            'Exchange Rate': usedFxRate,
-            'Order Type': orderType,
-            'Type': secType,
-            'Grant Number': Array.from(allGrants).sort().join('-'),
-            '_dateObj': new Date(date)
-          });
-          local = local.filter(r => !similar.includes(r));
-        } else {
-          result.push(ref);
-          local.splice(0, 1);
-        }
+        display.textContent = "";
+        forexRatesMap = {};
+        enableManualTransactionsForm(false);
       }
     }
-    return result;
-  }
 
-  generateValidationReport() {
-    const vs = this.validationStats;
-    return `Validation Report:
+    /********************************************************************
+     * 1) UTILITY HELPERS
+     ********************************************************************/
+
+    function parseIntSafe(value) {
+      const num = parseInt(value, 10);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function parseFloatSafe(value) {
+      const num = parseFloat(value);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function parseExcelFile(file, skipSummaryRow = false) {
+      // Returns a Promise that resolves to an array of row objects (like CSV).
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            let jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: null });
+
+            if (skipSummaryRow) {
+              // Filter out summary row
+              jsonData = jsonData.filter(row => row['Record Type'] !== 'Summary');
+            }
+            resolve(jsonData);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function parseCSVFile(file) {
+      // Returns a Promise that resolves to an array of row objects.
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const text = e.target.result;
+          resolve(csvToJson(text));
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsText(file);
+      });
+    }
+
+    function parseJSONFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const jsonObj = JSON.parse(e.target.result);
+            resolve(jsonObj);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = err => reject(err);
+        reader.readAsText(file);
+      });
+    }
+
+    function csvToJson(csvText) {
+      // Simple CSV-to-JSON conversion, assuming first row is headers
+      const lines = csvText.trim().split(/\r?\n/);
+      const headers = lines[0].split(',');
+      const data = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = {};
+        const cols = lines[i].split(',');
+        headers.forEach((h, idx) => {
+          row[h.trim()] = (cols[idx] !== undefined) ? cols[idx].trim() : '';
+        });
+        data.push(row);
+      }
+      return data;
+    }
+
+    function formatDate(dateObj) {
+      if (!(dateObj instanceof Date) || isNaN(dateObj.valueOf())) {
+        return null;
+      }
+      // Force UTC handling to avoid timezone shifts
+      const yyyy = dateObj.getUTCFullYear();
+      const mm = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getUTCDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function toISODate(dateStr) {
+      if (!dateStr) return null;
+
+      // Handle Excel's US date format (MM/DD/YYYY)
+      if (dateStr.includes('/')) {
+        const [month, day, year] = dateStr.split('/');
+        // Create date in UTC to avoid timezone shifts
+        return formatDate(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day))));
+      }
+
+      // Handle ISO format (YYYY-MM-DD)
+      if (dateStr.includes('-')) {
+        const [year, month, day] = dateStr.split('-');
+        return formatDate(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day))));
+      }
+
+      // For any other format, try parsing but force UTC
+      const parsed = new Date(dateStr);
+      if (isNaN(parsed.valueOf())) return null;
+      return formatDate(new Date(Date.UTC(
+        parsed.getFullYear(),
+        parsed.getMonth(),
+        parsed.getDate()
+      )));
+    }
+
+    /********************************************************************
+     * 2) VEST PRICE CALCULATOR
+     ********************************************************************/
+    class VestPriceCalculator {
+      constructor(stockData, forexData, holidaysSet) {
+        this.stockPrices = this._buildStockMap(stockData);
+        this.forexRates = this._buildForexMap(forexData);
+        this.holidays = holidaysSet;
+      }
+
+      _buildStockMap(stockData) {
+        const map = {};
+        stockData.forEach(row => {
+          if (!row['Date']) return;  // Skip if no date
+          const dateStr = toISODate(row['Date']);
+          if (dateStr) {
+            map[dateStr] = parseFloatSafe(row['Close_Price']);
+          }
+        });
+        return map;
+      }
+
+      _buildForexMap(forexData) {
+        const map = {};
+        forexData.forEach(row => {
+          if (!row['Date']) return;  // Skip if no date
+          const dateStr = toISODate(row['Date']);
+          if (dateStr) {
+            map[dateStr] = parseFloatSafe(row['Average']);
+          }
+        });
+        return map;
+      }
+
+      _isBusinessDay(date) {
+        // Use UTC days to avoid timezone issues
+        if (date.getUTCDay() === 6 || date.getUTCDay() === 0) {
+          return false;
+        }
+        const dateStr = formatDate(date);
+        return !this.holidays.has(dateStr);
+      }
+
+      _getNextBusinessDay(date) {
+        let next = new Date(Date.UTC(
+          date.getUTCFullYear(),
+          date.getUTCMonth(),
+          date.getUTCDate()
+        ));
+
+        while (!this._isBusinessDay(next)) {
+          next.setUTCDate(next.getUTCDate() + 1);
+        }
+        return next;
+      }
+
+      getVestPrice(vestDateStr) {
+        // Returns [usdPrice, fxRate, gbpPrice, actualDateStr]
+        if (!vestDateStr) {
+          return [null, null, null, vestDateStr];
+        }
+
+        // Parse the vest date using UTC
+        const [year, month, day] = vestDateStr.split('-');
+        const dateObj = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+
+        if (isNaN(dateObj.valueOf())) {
+          return [null, null, null, vestDateStr];
+        }
+
+        const actualDate = this._getNextBusinessDay(dateObj);
+        const actualDateStr = formatDate(actualDate);
+
+        const usdPrice = this.stockPrices[actualDateStr];
+        if (usdPrice === undefined) {
+          return [null, null, null, actualDateStr];
+        }
+
+        const fxRate = this.forexRates[actualDateStr];
+        if (fxRate === undefined) {
+          return [usdPrice, null, null, actualDateStr];
+        }
+
+        const gbpPrice = usdPrice / fxRate;
+        return [usdPrice, fxRate, gbpPrice, actualDateStr];
+      }
+    }
+
+    /********************************************************************
+     * 3) ETradeDataProcessor
+     ********************************************************************/
+    class ETradeDataProcessor {
+      constructor(stockData, forexData, holidaysData) {
+        this.gainsColumns = [
+          "Record Type", "Date Acquired", "Date Sold", "Qty.",
+          "Proceeds Per Share", "Vest Date", "Vest Date FMV",
+          "Grant Date FMV", "Grant Number", "Order Type", "Type"
+        ];
+        this.dateColumns = ["Date Acquired", "Date Sold", "Vest Date"];
+        this.validationStats = {
+          unmatched_vests: 0,
+          missing_fmv: 0,
+          negative_quantities: 0,
+          zero_prices: 0,
+          calculated_prices: 0
+        };
+
+        // Build a set of holiday date strings
+        const holidaysSet = new Set();
+        holidaysData.forEach(h => {
+          // only add if global or not 'Optional'
+          if (h.global || !h.types.includes("Optional")) {
+            holidaysSet.add(h.date);
+          }
+        });
+
+        this.priceCalculator = new VestPriceCalculator(stockData, forexData, holidaysSet);
+      }
+
+      processGainsLosses(gainsData) {
+        this._validateRequiredColumns(gainsData, this.gainsColumns, "gains/losses file");
+        gainsData = this._standardizeDates(gainsData, this.dateColumns);
+        this._validateNumericValues(gainsData, "Qty.");
+        return gainsData;
+      }
+
+      processBenefits(benefitsData) {
+        const requiredColumns = ['Grant Number', 'Date', 'Event Type', 'Qty. or Amount'];
+        this._validateRequiredColumns(benefitsData, requiredColumns, "benefits file");
+
+        // Standardize date and quantity
+        benefitsData.forEach(row => {
+          row['Date'] = toISODate(row['Date']);
+          row["Qty. or Amount"] = parseIntSafe(row["Qty. or Amount"]);
+        });
+
+        // Filter for 'Shares released'
+        const filtered = benefitsData.filter(row => row['Event Type'] === 'Shares released');
+        return filtered;
+      }
+
+      consolidateTransactions(salesData, vestsData, manualTransactions = []) {
+        // 1) Build FMV mapping from sales data
+        const fmvMapping = {};
+        salesData.forEach(row => {
+          const gn = String(row["Grant Number"] || "").trim();
+          const vd = String(row["Vest Date"] || "").trim();
+          const fmv = parseFloatSafe(row["Vest Date FMV"]);
+          if (gn && vd) {
+            fmvMapping[`${gn}::${vd}`] = fmv;
+          }
+        });
+
+        // 2) Merge vests with that FMV
+        vestsData.forEach(vestRow => {
+          const gn = String(vestRow["Grant Number"] || "").trim();
+          const d = String(vestRow["Date"] || "").trim();
+          const key = `${gn}::${d}`;
+          vestRow["Vest Date FMV"] = (fmvMapping[key] !== undefined) ? fmvMapping[key] : null;
+        });
+
+        // 3) Calculate missing FMV
+        vestsData.forEach(vestRow => {
+          if (vestRow["Vest Date FMV"] == null || isNaN(vestRow["Vest Date FMV"])) {
+            const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(vestRow["Date"]);
+            if (usdPrice != null) {
+              vestRow["Vest Date FMV"] = usdPrice;
+              vestRow["GBP_Price"] = (gbpPrice != null) ? gbpPrice : null;
+              vestRow["USD_GBP_Rate"] = fxRate;
+              vestRow["Actual_Vest_Date"] = actualDate;
+              this.validationStats.calculated_prices++;
+            } else {
+              vestRow["Vest Date FMV"] = null;
+              this.validationStats.missing_fmv++;
+            }
+          } else {
+            // We have a FMV => also compute GBP if we can get an fxRate
+            const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(vestRow["Date"]);
+            if (fxRate != null) {
+              vestRow["GBP_Price"] = vestRow["Vest Date FMV"] / fxRate;
+              vestRow["USD_GBP_Rate"] = fxRate;
+              vestRow["Actual_Vest_Date"] = actualDate;
+            }
+          }
+        });
+
+        // Track unmatched vests
+        vestsData.forEach(vestRow => {
+          if (vestRow["Vest Date FMV"] == null || isNaN(vestRow["Vest Date FMV"])) {
+            this.validationStats.unmatched_vests++;
+          }
+        });
+
+        // 4) Convert vests => "Buy" records
+        const buyRecords = vestsData.map(vestRow => {
+          const actualVestDate = vestRow["Actual_Vest_Date"] || vestRow["Date"];
+          return {
+            'Record Type': 'Buy',
+            'Qty.': vestRow["Qty. or Amount"],
+            'Date': actualVestDate,
+            'Price Per Share': vestRow["Vest Date FMV"],
+            'Price Per Share GBP': vestRow["GBP_Price"] || null,
+            'Exchange Rate': vestRow["USD_GBP_Rate"] || null,
+            'Order Type': 'Vest',
+            'Type': 'Restricted Stock Unit',
+            'Grant Number': vestRow["Grant Number"]
+          };
+        });
+
+        // 4a) Add manual transactions as Buy records
+        manualTransactions.forEach(tx => {
+          buyRecords.push({
+            'Record Type': 'Buy',
+            'Qty.': tx.quantity,
+            'Date': tx.date,
+            'Price Per Share': tx.priceUSD,
+            'Price Per Share GBP': tx.priceGBP,
+            'Exchange Rate': tx.exchangeRate,
+            'Order Type': 'Manual',
+            'Type': 'Restricted Stock Unit',
+            'Grant Number': tx.grantNumber
+          });
+        });
+
+        // 5) Convert sells => "Sell" records
+        const sellRecords = salesData.map(sellRow => {
+          const [usdPrice, fxRate, gbpPrice, actualDate] = this.priceCalculator.getVestPrice(sellRow["Date Sold"]);
+          let pricePerShareGBP = null;
+          let exchangeRate = null;
+          if (fxRate != null) {
+            pricePerShareGBP = parseFloatSafe(sellRow["Proceeds Per Share"]) / fxRate;
+            exchangeRate = fxRate;
+          }
+          return {
+            'Record Type': 'Sell',
+            'Qty.': parseFloatSafe(sellRow["Qty."]),
+            'Date': sellRow["Date Sold"],
+            'Price Per Share': parseFloatSafe(sellRow["Proceeds Per Share"]),
+            'Price Per Share GBP': pricePerShareGBP,
+            'Exchange Rate': exchangeRate,
+            'Order Type': sellRow["Order Type"],
+            'Type': sellRow["Type"],
+            'Grant Number': sellRow["Grant Number"]
+          };
+        });
+
+        // Combine
+        let allRecords = [...buyRecords, ...sellRecords];
+
+        // Standardize date => for sorting
+        allRecords.forEach(r => {
+          let d = new Date(r.Date);
+          if (isNaN(d.valueOf())) {
+            d = new Date();
+          }
+          r._dateObj = d;
+        });
+
+        // Consolidate similar prices
+        allRecords = this.consolidateSimilarPrices(allRecords);
+
+        // Sort
+        allRecords.sort((a, b) => a._dateObj - b._dateObj);
+
+        // Final date format
+        allRecords.forEach(r => {
+          r.Date = formatDate(r._dateObj);
+          delete r._dateObj;
+        });
+
+        // Final columns
+        const finalCols = [
+          'Record Type', 'Date', 'Qty.', 'Price Per Share',
+          'Price Per Share GBP', 'Exchange Rate',
+          'Order Type', 'Type', 'Grant Number'
+        ];
+
+        return allRecords.map(rec => {
+          const rowObj = {};
+          finalCols.forEach(c => {
+            rowObj[c] = (rec[c] !== undefined) ? rec[c] : null;
+          });
+          return rowObj;
+        });
+      }
+
+      consolidateSimilarPrices(records, priceTolerance = 0.01) {
+        const grouped = {};
+        records.forEach(r => {
+          const key = `${r.Date}||${r['Record Type']}||${r['Order Type']}||${r['Type']}`;
+          if (!grouped[key]) grouped[key] = [];
+          grouped[key].push(r);
+        });
+
+        const result = [];
+        for (const key in grouped) {
+          const [date, recordType, orderType, secType] = key.split('||');
+          const group = grouped[key];
+          if (recordType === 'Buy') {
+            // no consolidation for buys
+            result.push(...group);
+            continue;
+          }
+          // For sells
+          let local = [...group];
+          while (local.length > 0) {
+            const ref = local[0];
+            const refPrice = parseFloatSafe(ref['Price Per Share'] || 0);
+            const similar = local.filter(r => {
+              const p = parseFloatSafe(r['Price Per Share']);
+              if (refPrice === 0) return (p === 0);
+              const diff = Math.abs(p - refPrice) / refPrice;
+              return diff <= priceTolerance;
+            });
+            if (similar.length > 1) {
+              let sumQty = 0, sumUSD = 0, sumGBP = 0, sumGBPRecords = 0;
+              let usedFxRate = null;
+              const allGrants = new Set();
+              similar.forEach(s => {
+                const qty = parseFloatSafe(s['Qty.']);
+                const pUSD = parseFloatSafe(s['Price Per Share'] || 0);
+                sumQty += qty;
+                sumUSD += (pUSD * qty);
+                if (s['Price Per Share GBP'] != null) {
+                  const pGBP = parseFloatSafe(s['Price Per Share GBP']);
+                  sumGBP += (pGBP * qty);
+                  sumGBPRecords++;
+                }
+                if (s['Exchange Rate'] != null && usedFxRate == null) {
+                  usedFxRate = s['Exchange Rate'];
+                }
+                const gns = ("" + (s['Grant Number'] || "")).split('-').map(x => x.trim()).filter(x => x);
+                gns.forEach(g => allGrants.add(g));
+              });
+              const avgUSD = (sumQty !== 0) ? (sumUSD / sumQty) : 0;
+              const avgGBP = (sumQty !== 0 && sumGBPRecords > 0) ? (sumGBP / sumQty) : null;
+
+              result.push({
+                'Record Type': recordType,
+                'Date': date,
+                'Qty.': sumQty,
+                'Price Per Share': parseFloat(avgUSD.toFixed(6)),
+                'Price Per Share GBP': (avgGBP != null) ? parseFloat(avgGBP.toFixed(6)) : null,
+                'Exchange Rate': usedFxRate,
+                'Order Type': orderType,
+                'Type': secType,
+                'Grant Number': Array.from(allGrants).sort().join('-'),
+                '_dateObj': new Date(date)
+              });
+              local = local.filter(r => !similar.includes(r));
+            } else {
+              result.push(ref);
+              local.splice(0, 1);
+            }
+          }
+        }
+        return result;
+      }
+
+      generateValidationReport() {
+        const vs = this.validationStats;
+        return `Validation Report:
 - Unmatched vests: ${vs.unmatched_vests}
 - Records with missing FMV: ${vs.missing_fmv}
 - Records with negative quantities: ${vs.negative_quantities}
 - Records with zero/negative prices: ${vs.zero_prices}
 - Calculated FMVs from Stock & Forex: ${vs.calculated_prices}`;
-  }
-
-  _validateRequiredColumns(dataArr, required, context) {
-    if (dataArr.length === 0) {
-      throw new Error(`No data found in ${context}.`);
-    }
-    const keys = new Set(Object.keys(dataArr[0]));
-    required.forEach(col => {
-      if (!keys.has(col)) {
-        throw new Error(`Missing required column '${col}' in ${context}.`);
       }
-    });
-  }
 
-  _standardizeDates(dataArr, dateCols) {
-    dataArr.forEach(row => {
-      dateCols.forEach(dc => {
-        if (row[dc]) {
-          const iso = toISODate(row[dc]);
-          row[dc] = iso;
+      _validateRequiredColumns(dataArr, required, context) {
+        if (dataArr.length === 0) {
+          throw new Error(`No data found in ${context}.`);
         }
-      });
-    });
-    return dataArr;
-  }
-
-  _validateNumericValues(dataArr, qtyField) {
-    dataArr.forEach(row => {
-      const qtyVal = parseFloatSafe(row[qtyField]);
-      if (qtyVal < 0) {
-        this.validationStats.negative_quantities++;
+        const keys = new Set(Object.keys(dataArr[0]));
+        required.forEach(col => {
+          if (!keys.has(col)) {
+            throw new Error(`Missing required column '${col}' in ${context}.`);
+          }
+        });
       }
-      if (row["Price Per Share"] !== undefined) {
-        const priceVal = parseFloatSafe(row["Price Per Share"]);
-        if (priceVal <= 0) {
-          this.validationStats.zero_prices++;
-        }
+
+      _standardizeDates(dataArr, dateCols) {
+        dataArr.forEach(row => {
+          dateCols.forEach(dc => {
+            if (row[dc]) {
+              const iso = toISODate(row[dc]);
+              row[dc] = iso;
+            }
+          });
+        });
+        return dataArr;
       }
-    });
-  }
-}
 
-/********************************************************************
- * 4) SECTION 104 CGT LOGIC
- ********************************************************************/
-class Transaction {
-  constructor(row) {
-    this.type = (row["Record Type"] || "").toUpperCase();  // BUY or SELL
-    // Create date in UTC to avoid timezone shifts
-    const [year, month, day] = row["Date"].split('-');
-    this.date = new Date(Date.UTC(year, month - 1, day));
-    this.quantity = parseFloat(row["Qty."]) || 0;
-    this.priceGBP = parseFloat(row["Price Per Share GBP"]) || 0;
-    this.priceUSD = parseFloat(row["Price Per Share"]) || 0;
-    this.exchangeRate = parseFloat(row["Exchange Rate"]) || 0;
-    this.orderType = row["Order Type"] || "";
-    this.securityType = row["Type"] || "";
-    this.grantNumber = row["Grant Number"] || "";
-    this.addedToPool = false;
-  }
-
-  isValid() {
-    return !isNaN(this.quantity) && 
-           !isNaN(this.priceGBP) && 
-           !isNaN(this.priceUSD) && 
-           !isNaN(this.exchangeRate) &&
-           this.date instanceof Date && 
-           !isNaN(this.date);
-  }
-}
-
-class Section104Pool {
-  constructor() {
-    this.totalShares = 0.0;
-    this.avgCostGBP = 0.0;
-  }
-
-  addShares(quantity, costPerShareGBP) {
-    if (quantity <= 0) return;
-    const totalExistingCost = this.avgCostGBP * this.totalShares;
-    const totalNewCost = costPerShareGBP * quantity;
-    const newTotal = this.totalShares + quantity;
-
-    if (newTotal > 0) {
-      this.avgCostGBP = (totalExistingCost + totalNewCost) / newTotal;
-      this.totalShares = newTotal;
-    } else {
-      this.totalShares = 0;
-      this.avgCostGBP = 0;
-    }
-  }
-
-  removeShares(quantity) {
-    if (quantity > this.totalShares) {
-      throw new Error(`Not enough shares in S.104 pool. Need ${quantity}, have ${this.totalShares}`);
-    }
-    const cost = this.avgCostGBP * quantity;
-    this.totalShares -= quantity;
-    return cost;
-  }
-}
-
-function processCGT(transactions) {
-  const s104Pool = new Section104Pool();
-  const realized = [];
-  const transactionLog = [];
-
-  // Separate buys & sells
-  const buys = transactions.filter(t => t.type === "BUY" && t.isValid());
-  const sells = transactions.filter(t => t.type === "SELL" && t.isValid())
-    .sort((a, b) => a.date - b.date);
-
-  // Process each sell
-  for (const s of sells) {
-    const disposalDate = s.date;
-    const disposalQty = s.quantity;
-    const disposalProceedsGBP = s.priceGBP * s.quantity;
-    let matchedCostGBP = 0.0;
-    let remainingQty = disposalQty;
-
-    // 1) Add older buys to pool
-    for (const b of buys) {
-      if (b.date < disposalDate && !b.addedToPool && b.quantity > 0) {
-        s104Pool.addShares(b.quantity, b.priceGBP);
-        b.addedToPool = true;
-        transactionLog.push({
-          Date: formatDate(b.date),
-          Action: 'ADD TO POOL',
-          Quantity: parseFloat(b.quantity.toFixed(2)),
-          PriceGBP: parseFloat(b.priceGBP.toFixed(2)),
-          PriceUSD: parseFloat(s.priceUSD.toFixed(2)),
-          ExchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
-          PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
-          PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
-          Grant: b.grantNumber
+      _validateNumericValues(dataArr, qtyField) {
+        dataArr.forEach(row => {
+          const qtyVal = parseFloatSafe(row[qtyField]);
+          if (qtyVal < 0) {
+            this.validationStats.negative_quantities++;
+          }
+          if (row["Price Per Share"] !== undefined) {
+            const priceVal = parseFloatSafe(row["Price Per Share"]);
+            if (priceVal <= 0) {
+              this.validationStats.zero_prices++;
+            }
+          }
         });
       }
     }
 
-    // 2) Same-day match
-    const sameDayMatches = [];
-    for (const b of buys) {
-      // Compare dates using formatDate to ignore time components
-      if (formatDate(b.date) === formatDate(disposalDate) && !b.addedToPool && b.quantity > 0) {
-        const matchable = Math.min(remainingQty, b.quantity);
-        if (matchable > 0) {
-          matchedCostGBP += matchable * b.priceGBP;
-          remainingQty -= matchable;
-          b.quantity -= matchable;
-          sameDayMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
-        }
+    /********************************************************************
+     * 4) SECTION 104 CGT LOGIC
+     ********************************************************************/
+    class Transaction {
+      constructor(row) {
+        this.type = (row["Record Type"] || "").toUpperCase();  // BUY or SELL
+        // Create date in UTC to avoid timezone shifts
+        const [year, month, day] = row["Date"].split('-');
+        this.date = new Date(Date.UTC(year, month - 1, day));
+        this.quantity = parseFloat(row["Qty."]) || 0;
+        this.priceGBP = parseFloat(row["Price Per Share GBP"]) || 0;
+        this.priceUSD = parseFloat(row["Price Per Share"]) || 0;
+        this.exchangeRate = parseFloat(row["Exchange Rate"]) || 0;
+        this.orderType = row["Order Type"] || "";
+        this.securityType = row["Type"] || "";
+        this.grantNumber = row["Grant Number"] || "";
+        this.addedToPool = false;
+      }
+
+      isValid() {
+        return !isNaN(this.quantity) &&
+          !isNaN(this.priceGBP) &&
+          !isNaN(this.priceUSD) &&
+          !isNaN(this.exchangeRate) &&
+          this.date instanceof Date &&
+          !isNaN(this.date);
       }
     }
-    // Log same-day matches
-    for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of sameDayMatches) {
-      transactionLog.push({
-        Date: formatDate(disposalDate),
-        Action: 'SAME-DAY MATCH',
-        Quantity: parseFloat(qty.toFixed(2)),
-        PriceGBP: parseFloat(priceGBP.toFixed(2)),
-        PriceUSD: parseFloat(priceUSD.toFixed(2)),
-        ExchangeRate: parseFloat(exchangeRate.toFixed(4)),
-        PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
-        PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
-        Grant: grant
-      });
+
+    class Section104Pool {
+      constructor() {
+        this.totalShares = 0.0;
+        this.avgCostGBP = 0.0;
+      }
+
+      addShares(quantity, costPerShareGBP) {
+        if (quantity <= 0) return;
+        const totalExistingCost = this.avgCostGBP * this.totalShares;
+        const totalNewCost = costPerShareGBP * quantity;
+        const newTotal = this.totalShares + quantity;
+
+        if (newTotal > 0) {
+          this.avgCostGBP = (totalExistingCost + totalNewCost) / newTotal;
+          this.totalShares = newTotal;
+        } else {
+          this.totalShares = 0;
+          this.avgCostGBP = 0;
+        }
+      }
+
+      removeShares(quantity) {
+        if (quantity > this.totalShares) {
+          throw new Error(`Not enough shares in S.104 pool. Need ${quantity}, have ${this.totalShares}`);
+        }
+        const cost = this.avgCostGBP * quantity;
+        this.totalShares -= quantity;
+        return cost;
+      }
     }
 
-    // 3) Bed & Breakfast (30-day match)
-    if (remainingQty > 0) {
-      // Create bnbCutoff date using UTC
-      const bnbCutoff = new Date(Date.UTC(
-        disposalDate.getUTCFullYear(),
-        disposalDate.getUTCMonth(),
-        disposalDate.getUTCDate() + 30
-      ));
-      
-      const bnbMatches = [];
+    function processCGT(transactions) {
+      const s104Pool = new Section104Pool();
+      const realized = [];
+      const transactionLog = [];
 
-      for (const b of buys) {
-        if (b.date > disposalDate && b.date <= bnbCutoff && !b.addedToPool && b.quantity > 0) {
-          const matchable = Math.min(remainingQty, b.quantity);
-          if (matchable > 0) {
-            matchedCostGBP += matchable * b.priceGBP;
-            remainingQty -= matchable;
-            b.quantity -= matchable;
-            bnbMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+      // Separate buys & sells
+      const buys = transactions.filter(t => t.type === "BUY" && t.isValid());
+      const sells = transactions.filter(t => t.type === "SELL" && t.isValid())
+        .sort((a, b) => a.date - b.date);
+
+      // Process each sell
+      for (const s of sells) {
+        const disposalDate = s.date;
+        const disposalQty = s.quantity;
+        const disposalProceedsGBP = s.priceGBP * s.quantity;
+        let matchedCostGBP = 0.0;
+        let remainingQty = disposalQty;
+
+        // 1) Add older buys to pool
+        for (const b of buys) {
+          if (b.date < disposalDate && !b.addedToPool && b.quantity > 0) {
+            s104Pool.addShares(b.quantity, b.priceGBP);
+            b.addedToPool = true;
+            transactionLog.push({
+              Date: formatDate(b.date),
+              Action: 'ADD TO POOL',
+              Quantity: parseFloat(b.quantity.toFixed(2)),
+              PriceGBP: parseFloat(b.priceGBP.toFixed(2)),
+              PriceUSD: parseFloat(s.priceUSD.toFixed(2)),
+              ExchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
+              PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+              PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+              Grant: b.grantNumber
+            });
           }
         }
-      }
-      // Log B&B matches
-      for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of bnbMatches) {
-        transactionLog.push({
-          Date: formatDate(disposalDate),
-          Action: 'B&B MATCH',
-          Quantity: parseFloat(qty.toFixed(2)),
-          PriceGBP: parseFloat(priceGBP.toFixed(2)),
-          PriceUSD: parseFloat(priceUSD.toFixed(2)),
-          ExchangeRate: parseFloat(exchangeRate.toFixed(4)),
-          PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
-          PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
-          Grant: grant
+
+        // 2) Same-day match
+        const sameDayMatches = [];
+        for (const b of buys) {
+          // Compare dates using formatDate to ignore time components
+          if (formatDate(b.date) === formatDate(disposalDate) && !b.addedToPool && b.quantity > 0) {
+            const matchable = Math.min(remainingQty, b.quantity);
+            if (matchable > 0) {
+              matchedCostGBP += matchable * b.priceGBP;
+              remainingQty -= matchable;
+              b.quantity -= matchable;
+              sameDayMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+            }
+          }
+        }
+        // Log same-day matches
+        for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of sameDayMatches) {
+          transactionLog.push({
+            Date: formatDate(disposalDate),
+            Action: 'SAME-DAY MATCH',
+            Quantity: parseFloat(qty.toFixed(2)),
+            PriceGBP: parseFloat(priceGBP.toFixed(2)),
+            PriceUSD: parseFloat(priceUSD.toFixed(2)),
+            ExchangeRate: parseFloat(exchangeRate.toFixed(4)),
+            PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+            PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+            Grant: grant
+          });
+        }
+
+        // 3) Bed & Breakfast (30-day match)
+        if (remainingQty > 0) {
+          // Create bnbCutoff date using UTC
+          const bnbCutoff = new Date(Date.UTC(
+            disposalDate.getUTCFullYear(),
+            disposalDate.getUTCMonth(),
+            disposalDate.getUTCDate() + 30
+          ));
+
+          const bnbMatches = [];
+
+          for (const b of buys) {
+            if (b.date > disposalDate && b.date <= bnbCutoff && !b.addedToPool && b.quantity > 0) {
+              const matchable = Math.min(remainingQty, b.quantity);
+              if (matchable > 0) {
+                matchedCostGBP += matchable * b.priceGBP;
+                remainingQty -= matchable;
+                b.quantity -= matchable;
+                bnbMatches.push([matchable, b.priceGBP, b.priceUSD, b.exchangeRate, b.grantNumber]);
+              }
+            }
+          }
+          // Log B&B matches
+          for (const [qty, priceGBP, priceUSD, exchangeRate, grant] of bnbMatches) {
+            transactionLog.push({
+              Date: formatDate(disposalDate),
+              Action: 'B&B MATCH',
+              Quantity: parseFloat(qty.toFixed(2)),
+              PriceGBP: parseFloat(priceGBP.toFixed(2)),
+              PriceUSD: parseFloat(priceUSD.toFixed(2)),
+              ExchangeRate: parseFloat(exchangeRate.toFixed(4)),
+              PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+              PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+              Grant: grant
+            });
+          }
+        }
+
+        // 4) Use the pool for any remainder
+        if (remainingQty > 0) {
+          const costFromPool = s104Pool.removeShares(remainingQty);
+          matchedCostGBP += costFromPool;
+
+          // Log the pool sale
+          transactionLog.push({
+            Date: formatDate(disposalDate),
+            Action: 'POOL SALE',
+            Quantity: parseFloat((-remainingQty).toFixed(2)),
+            PriceGBP: parseFloat(s.priceGBP.toFixed(2)),
+            PriceUSD: parseFloat(s.priceUSD.toFixed(2)),
+            ExchangeRate: parseFloat(s.exchangeRate.toFixed(4)),
+            PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+            PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+            Grant: s.grantNumber
+          });
+        }
+
+        const gainLossGBP = disposalProceedsGBP - matchedCostGBP;
+        realized.push({
+          date: disposalDate,
+          qty: parseFloat(disposalQty.toFixed(2)),
+          sellPriceGBP: parseFloat(s.priceGBP.toFixed(2)),
+          sellPriceUSD: parseFloat(s.priceUSD.toFixed(2)),
+          exchangeRate: parseFloat(s.exchangeRate.toFixed(4)),
+          proceedsGBP: parseFloat(disposalProceedsGBP.toFixed(2)),
+          matchedCostGBP: parseFloat(matchedCostGBP.toFixed(2)),
+          gainLossGBP: parseFloat(gainLossGBP.toFixed(2))
         });
       }
-    }
 
-    // 4) Use the pool for any remainder
-    if (remainingQty > 0) {
-      const costFromPool = s104Pool.removeShares(remainingQty);
-      matchedCostGBP += costFromPool;
-
-      // Log the pool sale
-      transactionLog.push({
-        Date: formatDate(disposalDate),
-        Action: 'POOL SALE',
-        Quantity: parseFloat((-remainingQty).toFixed(2)),
-        PriceGBP: parseFloat(s.priceGBP.toFixed(2)),
-        PriceUSD: parseFloat(s.priceUSD.toFixed(2)),
-        ExchangeRate: parseFloat(s.exchangeRate.toFixed(4)),
-        PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
-        PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
-        Grant: s.grantNumber
-      });
-    }
-
-    const gainLossGBP = disposalProceedsGBP - matchedCostGBP;
-    realized.push({
-      date: disposalDate,
-      qty: parseFloat(disposalQty.toFixed(2)),
-      sellPriceGBP: parseFloat(s.priceGBP.toFixed(2)),
-      sellPriceUSD: parseFloat(s.priceUSD.toFixed(2)),
-      exchangeRate: parseFloat(s.exchangeRate.toFixed(4)),
-      proceedsGBP: parseFloat(disposalProceedsGBP.toFixed(2)),
-      matchedCostGBP: parseFloat(matchedCostGBP.toFixed(2)),
-      gainLossGBP: parseFloat(gainLossGBP.toFixed(2))
-    });
-  }
-
-  // 5) Add remaining unmatched buys to pool
-  for (const b of buys) {
-    if (b.quantity > 0 && !b.addedToPool) {
-      s104Pool.addShares(b.quantity, b.priceGBP);
-      transactionLog.push({
-        Date: formatDate(b.date),
-        Action: 'ADD TO POOL',
-        Quantity: parseFloat(b.quantity.toFixed(2)),
-        PriceGBP: parseFloat(b.priceGBP.toFixed(2)),
-        PriceUSD: parseFloat(b.priceUSD.toFixed(2)),
-        ExchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
-        PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
-        PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
-        Grant: b.grantNumber
-      });
-    }
-  }
-
-  return { realized, s104Pool, transactionLog };
-}
-
-/********************************************************************
- * 5) MAIN WORKFLOW
- ********************************************************************/
-const manualTransactions = []; // Array to store manual transactions
-let forexRatesMap = {}; // To store forex rates after parsing
-
-function enableManualTransactionsForm(enable) {
-  document.getElementById('manualDate').disabled = !enable;
-  document.getElementById('manualQuantity').disabled = !enable;
-  document.getElementById('manualPriceUSD').disabled = !enable;
-  document.getElementById('manualGrantNumber').disabled = !enable;
-  document.querySelector('.add-transaction-button').disabled = !enable;
-}
-
-function addManualTransaction() {
-  const dateInput = document.getElementById('manualDate');
-  const quantityInput = document.getElementById('manualQuantity');
-  const priceUSDInput = document.getElementById('manualPriceUSD');
-  const grantNumberInput = document.getElementById('manualGrantNumber');
-
-  const date = dateInput.value;
-  const quantity = parseFloat(quantityInput.value);
-  const priceUSD = parseFloat(priceUSDInput.value);
-  const grantNumber = grantNumberInput.value.trim();
-
-  if (!date || isNaN(quantity) || isNaN(priceUSD) || !grantNumber) {
-    alert("Please fill in all fields correctly.");
-    return;
-  }
-
-  if (!forexRatesMap || Object.keys(forexRatesMap).length === 0) {
-    alert("Forex Rates data is not loaded. Please upload the Forex Rates file first.");
-    return;
-  }
-
-  // Ensure the date is in 'YYYY-MM-DD' format
-  const formattedDate = toISODate(date);
-  if (!formattedDate) {
-    alert("Invalid date format.");
-    return;
-  }
-
-  // Get the forex rate for the given date
-  const fxRate = forexRatesMap[formattedDate];
-  if (!fxRate) {
-    const proceed = confirm(`Exchange rate for ${formattedDate} not found. Proceed with GBP Price as 0?`);
-    if (!proceed) {
-      return;
-    }
-  }
-
-  const priceGBP = fxRate ? (priceUSD / fxRate) : 0;
-
-  // Add to manualTransactions array
-  manualTransactions.push({
-    date: formattedDate,
-    quantity,
-    priceUSD,
-    priceGBP,
-    grantNumber,
-    exchangeRate: fxRate || 0
-  });
-
-  // Clear input fields
-  dateInput.value = '';
-  quantityInput.value = '';
-  priceUSDInput.value = '';
-  grantNumberInput.value = '';
-
-  // Render the manual transactions table
-  renderManualTransactions();
-}
-
-function renderManualTransactions() {
-  const tbody = document.getElementById('manualTransactionsBody');
-  tbody.innerHTML = '';
-
-  manualTransactions.forEach((tx, index) => {
-    const tr = document.createElement('tr');
-
-    const dateTd = document.createElement('td');
-    dateTd.textContent = tx.date;
-    tr.appendChild(dateTd);
-
-    const qtyTd = document.createElement('td');
-    qtyTd.textContent = tx.quantity.toFixed(2);
-    tr.appendChild(qtyTd);
-
-    const priceUSDTd = document.createElement('td');
-    priceUSDTd.textContent = `$${tx.priceUSD.toFixed(2)}`;
-    tr.appendChild(priceUSDTd);
-
-    const priceGBPTd = document.createElement('td');
-    priceGBPTd.textContent = `£${tx.priceGBP.toFixed(2)}`;
-    tr.appendChild(priceGBPTd);
-
-    const grantTd = document.createElement('td');
-    grantTd.textContent = tx.grantNumber;
-    tr.appendChild(grantTd);
-
-    const actionTd = document.createElement('td');
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = 'Remove';
-    removeBtn.classList.add('remove-transaction-button');
-    removeBtn.onclick = () => {
-      manualTransactions.splice(index, 1);
-      renderManualTransactions();
-    };
-    actionTd.appendChild(removeBtn);
-    tr.appendChild(actionTd);
-
-    tbody.appendChild(tr);
-  });
-}
-
-document.getElementById('processBtn').addEventListener('click', async () => {
-  try {
-    const gainsFile = document.getElementById('gainsFile').files[0];
-    const benefitsFile = document.getElementById('benefitsFile').files[0];
-    const stockFile = document.getElementById('stockFile').files[0];
-    const forexFile = document.getElementById('forexFile').files[0];
-    const holidaysFile = document.getElementById('holidaysFile').files[0];
-
-    if (!gainsFile || !benefitsFile || !stockFile || !forexFile || !holidaysFile) {
-      alert("Please upload all 5 files before processing.");
-      return;
-    }
-
-    // 1) Parse files
-    const gainsData = await parseExcelFile(gainsFile, true);
-    const benefitsData = await parseExcelFile(benefitsFile);
-    const stockData = await parseCSVFile(stockFile);
-    const forexData = await parseCSVFile(forexFile);
-    const holidaysData = await parseJSONFile(holidaysFile);
-
-    // Rebuild forexRatesMap to ensure it's up-to-date
-    forexRatesMap = {};
-    forexData.forEach(row => {
-      if (row['Date'] && row['Average']) {
-        const isoDate = toISODate(row['Date']);
-        if (isoDate) {
-          forexRatesMap[isoDate] = parseFloatSafe(row['Average']);
+      // 5) Add remaining unmatched buys to pool
+      for (const b of buys) {
+        if (b.quantity > 0 && !b.addedToPool) {
+          s104Pool.addShares(b.quantity, b.priceGBP);
+          transactionLog.push({
+            Date: formatDate(b.date),
+            Action: 'ADD TO POOL',
+            Quantity: parseFloat(b.quantity.toFixed(2)),
+            PriceGBP: parseFloat(b.priceGBP.toFixed(2)),
+            PriceUSD: parseFloat(b.priceUSD.toFixed(2)),
+            ExchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
+            PoolSizeAfter: parseFloat(s104Pool.totalShares.toFixed(2)),
+            PoolAvgCostGBP: parseFloat(s104Pool.avgCostGBP.toFixed(2)),
+            Grant: b.grantNumber
+          });
         }
+      }
+
+      return { realized, s104Pool, transactionLog };
+    }
+
+    /********************************************************************
+     * 5) MAIN WORKFLOW
+     ********************************************************************/
+    const manualTransactions = []; // Array to store manual transactions
+    let forexRatesMap = {}; // To store forex rates after parsing
+
+    function enableManualTransactionsForm(enable) {
+      document.getElementById('manualDate').disabled = !enable;
+      document.getElementById('manualQuantity').disabled = !enable;
+      document.getElementById('manualPriceUSD').disabled = !enable;
+      document.getElementById('manualGrantNumber').disabled = !enable;
+      document.querySelector('.add-transaction-button').disabled = !enable;
+    }
+
+    function addManualTransaction() {
+      const dateInput = document.getElementById('manualDate');
+      const quantityInput = document.getElementById('manualQuantity');
+      const priceUSDInput = document.getElementById('manualPriceUSD');
+      const grantNumberInput = document.getElementById('manualGrantNumber');
+
+      const date = dateInput.value;
+      const quantity = parseFloat(quantityInput.value);
+      const priceUSD = parseFloat(priceUSDInput.value);
+      const grantNumber = grantNumberInput.value.trim();
+
+      if (!date || isNaN(quantity) || isNaN(priceUSD) || !grantNumber) {
+        alert("Please fill in all fields correctly.");
+        return;
+      }
+
+      if (!forexRatesMap || Object.keys(forexRatesMap).length === 0) {
+        alert("Forex Rates data is not loaded. Please upload the Forex Rates file first.");
+        return;
+      }
+
+      // Ensure the date is in 'YYYY-MM-DD' format
+      const formattedDate = toISODate(date);
+      if (!formattedDate) {
+        alert("Invalid date format.");
+        return;
+      }
+
+      // Get the forex rate for the given date
+      const fxRate = forexRatesMap[formattedDate];
+      if (!fxRate) {
+        const proceed = confirm(`Exchange rate for ${formattedDate} not found. Proceed with GBP Price as 0?`);
+        if (!proceed) {
+          return;
+        }
+      }
+
+      const priceGBP = fxRate ? (priceUSD / fxRate) : 0;
+
+      // Add to manualTransactions array
+      manualTransactions.push({
+        date: formattedDate,
+        quantity,
+        priceUSD,
+        priceGBP,
+        grantNumber,
+        exchangeRate: fxRate || 0
+      });
+
+      // Clear input fields
+      dateInput.value = '';
+      quantityInput.value = '';
+      priceUSDInput.value = '';
+      grantNumberInput.value = '';
+
+      // Render the manual transactions table
+      renderManualTransactions();
+    }
+
+    function renderManualTransactions() {
+      const tbody = document.getElementById('manualTransactionsBody');
+      tbody.innerHTML = '';
+
+      manualTransactions.forEach((tx, index) => {
+        const tr = document.createElement('tr');
+
+        const dateTd = document.createElement('td');
+        dateTd.textContent = tx.date;
+        tr.appendChild(dateTd);
+
+        const qtyTd = document.createElement('td');
+        qtyTd.textContent = tx.quantity.toFixed(2);
+        tr.appendChild(qtyTd);
+
+        const priceUSDTd = document.createElement('td');
+        priceUSDTd.textContent = `$${tx.priceUSD.toFixed(2)}`;
+        tr.appendChild(priceUSDTd);
+
+        const priceGBPTd = document.createElement('td');
+        priceGBPTd.textContent = `£${tx.priceGBP.toFixed(2)}`;
+        tr.appendChild(priceGBPTd);
+
+        const grantTd = document.createElement('td');
+        grantTd.textContent = tx.grantNumber;
+        tr.appendChild(grantTd);
+
+        const actionTd = document.createElement('td');
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Remove';
+        removeBtn.classList.add('remove-transaction-button');
+        removeBtn.onclick = () => {
+          manualTransactions.splice(index, 1);
+          renderManualTransactions();
+        };
+        actionTd.appendChild(removeBtn);
+        tr.appendChild(actionTd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('processBtn').addEventListener('click', async () => {
+      try {
+        const gainsFile = document.getElementById('gainsFile').files[0];
+        const benefitsFile = document.getElementById('benefitsFile').files[0];
+        const stockFile = document.getElementById('stockFile').files[0];
+        const forexFile = document.getElementById('forexFile').files[0];
+        const holidaysFile = document.getElementById('holidaysFile').files[0];
+
+        if (!gainsFile || !benefitsFile || !stockFile || !forexFile || !holidaysFile) {
+          alert("Please upload all 5 files before processing.");
+          return;
+        }
+
+        // 1) Parse files
+        const gainsData = await parseExcelFile(gainsFile, true);
+        const benefitsData = await parseExcelFile(benefitsFile);
+        const stockData = await parseCSVFile(stockFile);
+        const forexData = await parseCSVFile(forexFile);
+        const holidaysData = await parseJSONFile(holidaysFile);
+
+        // Rebuild forexRatesMap to ensure it's up-to-date
+        forexRatesMap = {};
+        forexData.forEach(row => {
+          if (row['Date'] && row['Average']) {
+            const isoDate = toISODate(row['Date']);
+            if (isoDate) {
+              forexRatesMap[isoDate] = parseFloatSafe(row['Average']);
+            }
+          }
+        });
+
+        // 2) Construct ETradeDataProcessor
+        const processor = new ETradeDataProcessor(stockData, forexData, holidaysData);
+
+        // 3) Process Gains/Losses
+        const gains = processor.processGainsLosses(gainsData);
+
+        // 4) Process Benefits
+        const benefits = processor.processBenefits(benefitsData);
+
+        // 5) Consolidate, including manual transactions
+        const consolidated = processor.consolidateTransactions(gains, benefits, manualTransactions);
+
+        // 6) Render the consolidated table
+        renderOutputTable(consolidated);
+
+        // 7) Show validation report
+        document.getElementById('validationReport').textContent = processor.generateValidationReport();
+
+        // 8) Convert consolidated => Transactions for CGT
+        //    (Exclude anything that is "Non-Qualified Stock Option" if that logic is desired)
+        const transactions = consolidated
+          .filter(row => row["Type"] !== "Non-Qualified Stock Option")
+          .map(row => new Transaction(row))
+          .filter(tx => tx.isValid())
+          .sort((a, b) => a.date - b.date);
+
+        // 9) Run CGT process
+        const cgtResults = processCGT(transactions);
+        displayCGTResults(cgtResults);
+
+        // 10) Render CGT Summary
+        renderCGTSummary(cgtResults.realized);
+
+      } catch (err) {
+        alert(`Error: ${err.message}`);
+        console.error(err);
       }
     });
 
-    // 2) Construct ETradeDataProcessor
-    const processor = new ETradeDataProcessor(stockData, forexData, holidaysData);
+    /********************************************************************
+     * 6) RENDERING FUNCTIONS
+     ********************************************************************/
+    function renderOutputTable(consolidated) {
+      const table = document.getElementById('outputTable');
+      const thead = table.querySelector('thead');
+      const tbody = table.querySelector('tbody');
+      thead.innerHTML = '';
+      tbody.innerHTML = '';
 
-    // 3) Process Gains/Losses
-    const gains = processor.processGainsLosses(gainsData);
+      if (!consolidated || consolidated.length === 0) {
+        thead.innerHTML = '<tr><th>No records found</th></tr>';
+        return;
+      }
 
-    // 4) Process Benefits
-    const benefits = processor.processBenefits(benefitsData);
+      const columns = Object.keys(consolidated[0]);
+      // Header row
+      const headerRow = document.createElement('tr');
+      columns.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
 
-    // 5) Consolidate, including manual transactions
-    const consolidated = processor.consolidateTransactions(gains, benefits, manualTransactions);
+      // Rows
+      consolidated.forEach(rowObj => {
+        const tr = document.createElement('tr');
+        columns.forEach(col => {
+          const td = document.createElement('td');
+          td.textContent = (rowObj[col] !== null && rowObj[col] !== undefined) ? rowObj[col] : '';
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
 
-    // 6) Render the consolidated table
-    renderOutputTable(consolidated);
+    function displayCGTResults({ realized, s104Pool, transactionLog }) {
+      // Store current CGT results for CSV downloads
+      window.currentCGTResults = { realized, s104Pool, transactionLog };
 
-    // 7) Show validation report
-    document.getElementById('validationReport').textContent = processor.generateValidationReport();
+      // 1) Pool status
+      document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
+      document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
 
-    // 8) Convert consolidated => Transactions for CGT
-    //    (Exclude anything that is "Non-Qualified Stock Option" if that logic is desired)
-    const transactions = consolidated
-      .filter(row => row["Type"] !== "Non-Qualified Stock Option")
-      .map(row => new Transaction(row))
-      .filter(tx => tx.isValid())
-      .sort((a, b) => a.date - b.date);
+      // 2) Disposal results
+      const disposalDiv = document.getElementById('disposalResults');
+      disposalDiv.innerHTML = '';
+      if (realized.length === 0) {
+        disposalDiv.textContent = 'No disposals.';
+        return;
+      }
+      const disposalTable = document.createElement('table');
+      disposalTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Quantity</th>
+        <th>Sale Price (GBP)</th>
+        <th>Sale Price (USD)</th>
+        <th>Exchange Rate</th>
+        <th>Proceeds (GBP)</th>
+        <th>Cost (GBP)</th>
+        <th>Gain/Loss (GBP)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${realized.map(r => `
+        <tr>
+          <td>${formatDate(r.date)}</td>
+          <td>${r.qty.toFixed(2)}</td>
+          <td>${formatCurrency(r.sellPriceGBP)}</td>
+          <td>$${r.sellPriceUSD.toFixed(2)}</td>
+          <td>${r.exchangeRate.toFixed(4)}</td>
+          <td>${formatCurrency(r.proceedsGBP)}</td>
+          <td>${formatCurrency(r.matchedCostGBP)}</td>
+          <td>${formatCurrency(r.gainLossGBP)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+      disposalDiv.appendChild(disposalTable);
 
-    // 9) Run CGT process
-    const cgtResults = processCGT(transactions);
-    displayCGTResults(cgtResults);
+      // 3) Transaction log
+      const logDiv = document.getElementById('transactionLog');
+      logDiv.innerHTML = '';
+      if (transactionLog.length === 0) {
+        logDiv.textContent = 'No transaction log.';
+        return;
+      }
+      const logTable = document.createElement('table');
+      logTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Action</th>
+        <th>Quantity</th>
+        <th>Price (GBP)</th>
+        <th>Price (USD)</th>
+        <th>Exchange Rate</th>
+        <th>Pool Size After</th>
+        <th>Pool Avg Cost (GBP)</th>
+        <th>Grant</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${transactionLog.map(t => `
+        <tr>
+          <td>${t.Date}</td>
+          <td>${t.Action}</td>
+          <td>${t.Quantity.toFixed(2)}</td>
+          <td>£${t.PriceGBP.toFixed(2)}</td>
+          <td>$${t.PriceUSD.toFixed(2)}</td>
+          <td>${t.ExchangeRate.toFixed(4)}</td>
+          <td>${t.PoolSizeAfter.toFixed(2)}</td>
+          <td>£${t.PoolAvgCostGBP.toFixed(2)}</td>
+          <td>${t.Grant || ''}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+      logDiv.appendChild(logTable);
+    }
 
-    // 10) Render CGT Summary
-    renderCGTSummary(cgtResults.realized);
+    /********************************************************************
+     * 7) CSV DOWNLOAD FUNCTIONS
+     ********************************************************************/
 
-  } catch (err) {
-    alert(`Error: ${err.message}`);
-    console.error(err);
-  }
-});
+    function downloadCGTDisposalsCSV() {
+      // Assuming 'realized' data is available globally
+      // You might need to store 'realized' data globally or pass it appropriately
+      // For simplicity, we'll assume it's stored in a global variable 'currentCGTResults'
+      if (!window.currentCGTResults || !window.currentCGTResults.realized) {
+        alert("No CGT Disposals data available to download.");
+        return;
+      }
 
-/********************************************************************
- * 6) RENDERING FUNCTIONS
- ********************************************************************/
-function renderOutputTable(consolidated) {
-  const table = document.getElementById('outputTable');
-  const thead = table.querySelector('thead');
-  const tbody = table.querySelector('tbody');
-  thead.innerHTML = '';
-  tbody.innerHTML = '';
+      const data = window.currentCGTResults.realized;
+      if (data.length === 0) {
+        alert("No CGT Disposals data available to download.");
+        return;
+      }
 
-  if (!consolidated || consolidated.length === 0) {
-    thead.innerHTML = '<tr><th>No records found</th></tr>';
-    return;
-  }
+      const headers = [
+        "Date",
+        "Quantity",
+        "Sale Price (GBP)",
+        "Sale Price (USD)",
+        "Exchange Rate",
+        "Proceeds (GBP)",
+        "Cost (GBP)",
+        "Gain/Loss (GBP)"
+      ];
 
-  const columns = Object.keys(consolidated[0]);
-  // Header row
-  const headerRow = document.createElement('tr');
-  columns.forEach(col => {
-    const th = document.createElement('th');
-    th.textContent = col;
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
+      const csvRows = [
+        headers.join(','), // header row first
+        ...data.map(row => [
+          formatDate(row.date),
+          row.qty.toFixed(2),
+          row.sellPriceGBP.toFixed(2),
+          row.sellPriceUSD.toFixed(2),
+          row.exchangeRate.toFixed(4),
+          row.proceedsGBP.toFixed(2),
+          row.matchedCostGBP.toFixed(2),
+          row.gainLossGBP.toFixed(2)
+        ].join(','))
+      ];
 
-  // Rows
-  consolidated.forEach(rowObj => {
-    const tr = document.createElement('tr');
-    columns.forEach(col => {
-      const td = document.createElement('td');
-      td.textContent = (rowObj[col] !== null && rowObj[col] !== undefined) ? rowObj[col] : '';
-      tr.appendChild(td);
+      const csvContent = csvRows.join('\n');
+      downloadCSV(csvContent, 'cgt_disposals.csv');
+    }
+
+    function downloadTransactionLogCSV() {
+      // Assuming 'transactionLog' data is available globally
+      // You might need to store 'transactionLog' data globally or pass it appropriately
+      // For simplicity, we'll assume it's stored in a global variable 'currentCGTResults'
+      if (!window.currentCGTResults || !window.currentCGTResults.transactionLog) {
+        alert("No Transaction Log data available to download.");
+        return;
+      }
+
+      const data = window.currentCGTResults.transactionLog;
+      if (data.length === 0) {
+        alert("No Transaction Log data available to download.");
+        return;
+      }
+
+      const headers = [
+        "Date",
+        "Action",
+        "Quantity",
+        "Price GBP",
+        "Price USD",
+        "Exchange Rate",
+        "Pool Size After",
+        "Pool Avg Cost GBP",
+        "Grant"
+      ];
+
+      const csvRows = [
+        headers.join(','), // header row first
+        ...data.map(row => [
+          row.Date,
+          row.Action,
+          row.Quantity.toFixed(2),
+          parseFloat(row.PriceGBP.toFixed(2)),
+          parseFloat(row.PriceUSD.toFixed(2)),
+          row.ExchangeRate.toFixed(4),
+          parseFloat(row.PoolSizeAfter.toFixed(2)),
+          parseFloat(row.PoolAvgCostGBP.toFixed(2)),
+          row.Grant || ''
+        ].join(','))
+      ];
+
+      const csvContent = csvRows.join('\n');
+      downloadCSV(csvContent, 'transaction_log.csv');
+    }
+
+    function downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, filename);
+      } else {
+        const link = document.createElement("a");
+        if (link.download !== undefined) { // feature detection
+          // Browsers that support HTML5 download attribute
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", filename);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      }
+    }
+
+    /********************************************************************
+     * 8) TAB SWITCHING
+     ********************************************************************/
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active from all
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        // Add active to clicked
+        tab.classList.add('active');
+        const tabContent = document.getElementById(tab.getAttribute('data-tab'));
+        tabContent.classList.add('active');
+      });
     });
-    tbody.appendChild(tr);
-  });
-}
 
-function displayCGTResults({ realized, s104Pool, transactionLog }) {
-  // Store current CGT results for CSV downloads
-  window.currentCGTResults = { realized, s104Pool, transactionLog };
+    // Main app tab switching
+    document.querySelectorAll('.main-app-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.main-app-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.main-app-content').forEach(c => c.classList.remove('active'));
 
-  // 1) Pool status
-  document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
-  document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+        // Add active class to clicked tab and corresponding content
+        tab.classList.add('active');
+        const tabContent = document.getElementById(tab.getAttribute('data-tab'));
+        tabContent.classList.add('active');
+      });
+    });
 
-  // 2) Disposal results
-  const disposalDiv = document.getElementById('disposalResults');
-  disposalDiv.innerHTML = '';
-  if (realized.length === 0) {
-    disposalDiv.textContent = 'No disposals.';
-    return;
-  }
-  const disposalTable = document.createElement('table');
-  disposalTable.innerHTML = `
+    /********************************************************************
+     * 9) USD to GBP Conversion Function
+     ********************************************************************/
+    function convertUSDToGBP(date, amount) {
+      const fxRate = forexRatesMap[date];
+      if (!fxRate) {
+        return null;
+      }
+      return amount / fxRate;
+    }
+
+    /********************************************************************
+     * 10) Format Currency Function (Updated)
+     ********************************************************************/
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    /********************************************************************
+     * 11) Display CGT Results and Store for CSV Downloads
+     ********************************************************************/
+    let currentCGTResults = null;
+
+    function displayCGTResults({ realized, s104Pool, transactionLog }) {
+      // Store current CGT results for CSV downloads
+      window.currentCGTResults = { realized, s104Pool, transactionLog };
+
+      // 1) Pool status
+      document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
+      document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+
+      // 2) Disposal results
+      const disposalDiv = document.getElementById('disposalResults');
+      disposalDiv.innerHTML = '';
+      if (realized.length === 0) {
+        disposalDiv.textContent = 'No disposals.';
+        return;
+      }
+      const disposalTable = document.createElement('table');
+      disposalTable.innerHTML = `
     <thead>
       <tr>
         <th>Date</th>
@@ -2662,17 +2997,17 @@ function displayCGTResults({ realized, s104Pool, transactionLog }) {
       `).join('')}
     </tbody>
   `;
-  disposalDiv.appendChild(disposalTable);
+      disposalDiv.appendChild(disposalTable);
 
-  // 3) Transaction log
-  const logDiv = document.getElementById('transactionLog');
-  logDiv.innerHTML = '';
-  if (transactionLog.length === 0) {
-    logDiv.textContent = 'No transaction log.';
-    return;
-  }
-  const logTable = document.createElement('table');
-  logTable.innerHTML = `
+      // 3) Transaction log
+      const logDiv = document.getElementById('transactionLog');
+      logDiv.innerHTML = '';
+      if (transactionLog.length === 0) {
+        logDiv.textContent = 'No transaction log.';
+        return;
+      }
+      const logTable = document.createElement('table');
+      logTable.innerHTML = `
     <thead>
       <tr>
         <th>Date</th>
@@ -2702,324 +3037,68 @@ function displayCGTResults({ realized, s104Pool, transactionLog }) {
       `).join('')}
     </tbody>
   `;
-  logDiv.appendChild(logTable);
-}
-
-/********************************************************************
- * 7) CSV DOWNLOAD FUNCTIONS
- ********************************************************************/
-
-function downloadCGTDisposalsCSV() {
-  // Assuming 'realized' data is available globally
-  // You might need to store 'realized' data globally or pass it appropriately
-  // For simplicity, we'll assume it's stored in a global variable 'currentCGTResults'
-  if (!window.currentCGTResults || !window.currentCGTResults.realized) {
-    alert("No CGT Disposals data available to download.");
-    return;
-  }
-
-  const data = window.currentCGTResults.realized;
-  if (data.length === 0) {
-    alert("No CGT Disposals data available to download.");
-    return;
-  }
-
-  const headers = [
-    "Date",
-    "Quantity",
-    "Sale Price (GBP)",
-    "Sale Price (USD)",
-    "Exchange Rate",
-    "Proceeds (GBP)",
-    "Cost (GBP)",
-    "Gain/Loss (GBP)"
-  ];
-
-  const csvRows = [
-    headers.join(','), // header row first
-    ...data.map(row => [
-      formatDate(row.date),
-      row.qty.toFixed(2),
-      row.sellPriceGBP.toFixed(2),
-      row.sellPriceUSD.toFixed(2),
-      row.exchangeRate.toFixed(4),
-      row.proceedsGBP.toFixed(2),
-      row.matchedCostGBP.toFixed(2),
-      row.gainLossGBP.toFixed(2)
-    ].join(','))
-  ];
-
-  const csvContent = csvRows.join('\n');
-  downloadCSV(csvContent, 'cgt_disposals.csv');
-}
-
-function downloadTransactionLogCSV() {
-  // Assuming 'transactionLog' data is available globally
-  // You might need to store 'transactionLog' data globally or pass it appropriately
-  // For simplicity, we'll assume it's stored in a global variable 'currentCGTResults'
-  if (!window.currentCGTResults || !window.currentCGTResults.transactionLog) {
-    alert("No Transaction Log data available to download.");
-    return;
-  }
-
-  const data = window.currentCGTResults.transactionLog;
-  if (data.length === 0) {
-    alert("No Transaction Log data available to download.");
-    return;
-  }
-
-  const headers = [
-    "Date",
-    "Action",
-    "Quantity",
-    "Price GBP",
-    "Price USD",
-    "Exchange Rate",
-    "Pool Size After",
-    "Pool Avg Cost GBP",
-    "Grant"
-  ];
-
-  const csvRows = [
-    headers.join(','), // header row first
-    ...data.map(row => [
-      row.Date,
-      row.Action,
-      row.Quantity.toFixed(2),
-      parseFloat(row.PriceGBP.toFixed(2)),
-      parseFloat(row.PriceUSD.toFixed(2)),
-      row.ExchangeRate.toFixed(4),
-      parseFloat(row.PoolSizeAfter.toFixed(2)),
-      parseFloat(row.PoolAvgCostGBP.toFixed(2)),
-      row.Grant || ''
-    ].join(','))
-  ];
-
-  const csvContent = csvRows.join('\n');
-  downloadCSV(csvContent, 'transaction_log.csv');
-}
-
-function downloadCSV(csvContent, filename) {
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  if (navigator.msSaveBlob) { // IE 10+
-    navigator.msSaveBlob(blob, filename);
-  } else {
-    const link = document.createElement("a");
-    if (link.download !== undefined) { // feature detection
-      // Browsers that support HTML5 download attribute
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      logDiv.appendChild(logTable);
     }
-  }
-}
 
-/********************************************************************
- * 8) TAB SWITCHING
- ********************************************************************/
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    // Remove active from all
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    // Add active to clicked
-    tab.classList.add('active');
-    const tabContent = document.getElementById(tab.getAttribute('data-tab'));
-    tabContent.classList.add('active');
-  });
-});
+    /********************************************************************
+     * 12) RENDER CGT SUMMARY FUNCTION
+     ********************************************************************/
+    function renderCGTSummary(realized) {
+      const summaryTableBody = document.querySelector('#cgtSummaryTable tbody');
+      summaryTableBody.innerHTML = '';
 
-// Main app tab switching
-document.querySelectorAll('.main-app-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    // Remove active class from all tabs and content
-    document.querySelectorAll('.main-app-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.main-app-content').forEach(c => c.classList.remove('active'));
-    
-    // Add active class to clicked tab and corresponding content
-    tab.classList.add('active');
-    const tabContent = document.getElementById(tab.getAttribute('data-tab'));
-    tabContent.classList.add('active');
-  });
-});
+      if (!realized || realized.length === 0) {
+        summaryTableBody.innerHTML = '<tr><td colspan="2">No CGT disposals data available.</td></tr>';
+        document.getElementById('totalGainLoss').textContent = formatCurrency(0);
+        return;
+      }
 
-/********************************************************************
- * 9) USD to GBP Conversion Function
- ********************************************************************/
-function convertUSDToGBP(date, amount) {
-  const fxRate = forexRatesMap[date];
-  if (!fxRate) {
-    return null;
-  }
-  return amount / fxRate;
-}
+      // Helper function to determine UK tax year
+      function getTaxYear(date) {
+        const year = date.getUTCFullYear();
+        const month = date.getUTCMonth() + 1; // 1-12
+        const day = date.getUTCDate();
+        if (month > 4 || (month === 4 && day >= 6)) {
+          return `${year}-${year + 1}`;
+        } else {
+          return `${year - 1}-${year}`;
+        }
+      }
 
-/********************************************************************
- * 10) Format Currency Function (Updated)
- ********************************************************************/
-function formatCurrency(value) {
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value);
-}
+      // Calculate total gain/loss
+      let totalGainLoss = 0;
+      const taxYearMap = {};
 
-/********************************************************************
- * 11) Display CGT Results and Store for CSV Downloads
- ********************************************************************/
-let currentCGTResults = null;
+      realized.forEach(r => {
+        totalGainLoss += r.gainLossGBP;
+        const taxYear = getTaxYear(r.date);
+        if (!taxYearMap[taxYear]) {
+          taxYearMap[taxYear] = 0;
+        }
+        taxYearMap[taxYear] += r.gainLossGBP;
+      });
 
-function displayCGTResults({ realized, s104Pool, transactionLog }) {
-  // Store current CGT results for CSV downloads
-  window.currentCGTResults = { realized, s104Pool, transactionLog };
+      // Update total gain/loss
+      document.getElementById('totalGainLoss').textContent = formatCurrency(totalGainLoss);
 
-  // 1) Pool status
-  document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
-  document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+      // Populate tax year breakdown
+      for (const [taxYear, gainLoss] of Object.entries(taxYearMap)) {
+        const tr = document.createElement('tr');
 
-  // 2) Disposal results
-  const disposalDiv = document.getElementById('disposalResults');
-  disposalDiv.innerHTML = '';
-  if (realized.length === 0) {
-    disposalDiv.textContent = 'No disposals.';
-    return;
-  }
-  const disposalTable = document.createElement('table');
-  disposalTable.innerHTML = `
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Quantity</th>
-        <th>Sale Price (GBP)</th>
-        <th>Sale Price (USD)</th>
-        <th>Exchange Rate</th>
-        <th>Proceeds (GBP)</th>
-        <th>Cost (GBP)</th>
-        <th>Gain/Loss (GBP)</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${realized.map(r => `
-        <tr>
-          <td>${formatDate(r.date)}</td>
-          <td>${r.qty.toFixed(2)}</td>
-          <td>${formatCurrency(r.sellPriceGBP)}</td>
-          <td>$${r.sellPriceUSD.toFixed(2)}</td>
-          <td>${r.exchangeRate.toFixed(4)}</td>
-          <td>${formatCurrency(r.proceedsGBP)}</td>
-          <td>${formatCurrency(r.matchedCostGBP)}</td>
-          <td>${formatCurrency(r.gainLossGBP)}</td>
-        </tr>
-      `).join('')}
-    </tbody>
-  `;
-  disposalDiv.appendChild(disposalTable);
+        const taxYearTd = document.createElement('td');
+        taxYearTd.textContent = taxYear;
+        tr.appendChild(taxYearTd);
 
-  // 3) Transaction log
-  const logDiv = document.getElementById('transactionLog');
-  logDiv.innerHTML = '';
-  if (transactionLog.length === 0) {
-    logDiv.textContent = 'No transaction log.';
-    return;
-  }
-  const logTable = document.createElement('table');
-  logTable.innerHTML = `
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Action</th>
-        <th>Quantity</th>
-        <th>Price (GBP)</th>
-        <th>Price (USD)</th>
-        <th>Exchange Rate</th>
-        <th>Pool Size After</th>
-        <th>Pool Avg Cost (GBP)</th>
-        <th>Grant</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${transactionLog.map(t => `
-        <tr>
-          <td>${t.Date}</td>
-          <td>${t.Action}</td>
-          <td>${t.Quantity.toFixed(2)}</td>
-          <td>£${t.PriceGBP.toFixed(2)}</td>
-          <td>$${t.PriceUSD.toFixed(2)}</td>
-          <td>${t.ExchangeRate.toFixed(4)}</td>
-          <td>${t.PoolSizeAfter.toFixed(2)}</td>
-          <td>£${t.PoolAvgCostGBP.toFixed(2)}</td>
-          <td>${t.Grant || ''}</td>
-        </tr>
-      `).join('')}
-    </tbody>
-  `;
-  logDiv.appendChild(logTable);
-}
+        const gainLossTd = document.createElement('td');
+        gainLossTd.textContent = formatCurrency(gainLoss);
+        tr.appendChild(gainLossTd);
 
-/********************************************************************
- * 12) RENDER CGT SUMMARY FUNCTION
- ********************************************************************/
-function renderCGTSummary(realized) {
-  const summaryTableBody = document.querySelector('#cgtSummaryTable tbody');
-  summaryTableBody.innerHTML = '';
-
-  if (!realized || realized.length === 0) {
-    summaryTableBody.innerHTML = '<tr><td colspan="2">No CGT disposals data available.</td></tr>';
-    document.getElementById('totalGainLoss').textContent = formatCurrency(0);
-    return;
-  }
-
-  // Helper function to determine UK tax year
-  function getTaxYear(date) {
-    const year = date.getUTCFullYear();
-    const month = date.getUTCMonth() + 1; // 1-12
-    const day = date.getUTCDate();
-    if (month > 4 || (month === 4 && day >=6)) {
-      return `${year}-${year + 1}`;
-    } else {
-      return `${year -1}-${year}`;
+        summaryTableBody.appendChild(tr);
+      }
     }
-  }
 
-  // Calculate total gain/loss
-  let totalGainLoss = 0;
-  const taxYearMap = {};
-
-  realized.forEach(r => {
-    totalGainLoss += r.gainLossGBP;
-    const taxYear = getTaxYear(r.date);
-    if (!taxYearMap[taxYear]) {
-      taxYearMap[taxYear] = 0;
-    }
-    taxYearMap[taxYear] += r.gainLossGBP;
-  });
-
-  // Update total gain/loss
-  document.getElementById('totalGainLoss').textContent = formatCurrency(totalGainLoss);
-
-  // Populate tax year breakdown
-  for (const [taxYear, gainLoss] of Object.entries(taxYearMap)) {
-    const tr = document.createElement('tr');
-
-    const taxYearTd = document.createElement('td');
-    taxYearTd.textContent = taxYear;
-    tr.appendChild(taxYearTd);
-
-    const gainLossTd = document.createElement('td');
-    gainLossTd.textContent = formatCurrency(gainLoss);
-    tr.appendChild(gainLossTd);
-
-    summaryTableBody.appendChild(tr);
-  }
-}
-
-</script>
+  </script>
 
 </body>
+
 </html>
