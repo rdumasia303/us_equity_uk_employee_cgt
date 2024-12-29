@@ -1,6 +1,6 @@
 # US Equity Compensation for UK Workers: E*Trade Handler & CGT Calculator
 
-Welcome to the **US Equity Compensation Fun for UK Workers** project. This tool is designed to simplify the complex world of RSUs (Restricted Stock Units), stock options, and capital gains tax (CGT) for UK taxpayers. Built with love (and frustration) over the bureaucratic maze of E*Trade reports and HMRC rules, this app consolidates your data into clear, actionable insights.
+Welcome to the **Handling US Equity Compensation for UK Workers** project. This tool is designed to simplify the complex world of RSUs (Restricted Stock Units), stock options, and capital gains tax (CGT) for UK taxpayers. Built with love (and frustration) over the bureaucratic maze of E*Trade reports and HMRC rules, this app consolidates your data into clear, actionable insights.
 
 ## 🎯 **What This App Does**
 - **Connects fragmented E*Trade reports** into a single, consolidated view.
