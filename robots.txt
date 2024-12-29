@@ -1,0 +1,6 @@
+# Allow all bots
+User-agent: *
+Disallow:
+
+# Explicitly allow access to the favicon
+Allow: /favicon.ico
