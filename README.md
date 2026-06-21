@@ -23,24 +23,61 @@ it serves the page and relays the one thing a browser can't do itself: fetch
 Yahoo Finance prices (CORS). Your `BenefitHistory.xlsx` is parsed **in the browser**,
 so it never leaves the page.
 
-## Deploy it (serverless, optional)
+## Deploying the hosted version — *FOR AUTHOR ONLY*
 
-You don't need `serve.py` at all if you'd rather host the app statically. The page
-is fully self-contained except for the Yahoo price/FX lookup, which a tiny
-**Cloudflare Worker** relays:
+> **Cloned this repo? Just run it locally** (see **Run it** above) — that's the
+> supported way to use it, and it needs nothing but Python 3. The notes below are
+> my own runbook for the official hosted instance. Please don't stand up your own
+> public copy off the back of this.
+
+The page is fully self-contained except for the Yahoo price/FX lookup, which a tiny
+**Cloudflare Worker** relays. Holidays come straight from `date.nager.at` and the
+`.xlsx` is parsed in the browser, so even the hosted version keeps vesting data on
+the user's own device — only a ticker + date range ever reaches the worker.
+
+The same `index.html` works both ways: served from `localhost` it uses `serve.py`'s
+relay; served from anywhere else it uses the worker. So in source `WORKER_URL` is
+left **blank** and the deploy fills it in (see below).
+
+### 1. Deploy the price relay (Cloudflare Worker)
+
+You need a **Cloudflare account** — it's free, no credit card, no domain:
+sign up at <https://dash.cloudflare.com/sign-up> and confirm your email. The free
+plan allows 100,000 worker requests/day (this app uses ~2 per "Fetch").
+
+Then, from this folder (uses the bundled `worker.js` + `wrangler.toml`):
 
 ```bash
-npm install -g wrangler   # once
-wrangler deploy           # deploys worker.js using wrangler.toml
+npx wrangler login    # opens a browser to authorise — run it in your own terminal
+npx wrangler deploy   # first run picks a free <subdomain>.workers.dev for you
 ```
 
-Then set `WORKER_URL` near the top of the `<script>` in `index.html` to the printed
-`https://<name>.<subdomain>.workers.dev` URL, and host `index.html` (and the images)
-on any static host — Cloudflare Pages, GitHub Pages, S3, etc. Holidays come straight
-from `date.nager.at`, prices/FX go through your worker, and the `.xlsx` is parsed in
-the browser — so even the hosted version keeps your vesting data on your own device.
-Run locally with `serve.py` and deployed with the worker from the **same** file:
-when served from `localhost` it uses `serve.py`'s relay, otherwise the worker.
+It prints your worker URL, e.g. `https://cgt-yahoo-relay.<subdomain>.workers.dev`.
+Sanity-check it in a browser:
+`…workers.dev/api/yahoo?symbol=AAPL&period1=1704067200&period2=1704153600` should
+return Yahoo JSON. Re-deploy any time with `npx wrangler deploy`.
+
+### 2a. Host the page yourself (any static host)
+
+Set `WORKER_URL` near the top of the `<script>` in `index.html` to that URL (no
+trailing slash), then upload `index.html` plus the images to any static host —
+Cloudflare Pages, S3, Netlify, etc.
+
+### 2b. Host on GitHub Pages (automated — included)
+
+This repo ships `.github/workflows/deploy.yml`, which builds the site and injects
+your worker URL into the **deployed copy only** (source stays blank, so clones and
+local `serve.py` users are never routed through your worker). One-time setup:
+
+1. **Worker URL as a repo variable** — Settings → Secrets and variables → Actions →
+   **Variables** → New repository variable: name `WORKER_URL`, value your
+   `https://…workers.dev` URL. (A variable, not a secret — it's public anyway.)
+2. **Pages source** — Settings → Pages → Build and deployment → Source =
+   **GitHub Actions**. (Repo must be public for free Pages.)
+
+Then push to `main`. The workflow publishes to
+`https://<user>.github.io/<repo>/`. If `WORKER_URL` isn't set yet the run fails
+with a clear message — set it and re-run the job (no new push needed).
 
 ## The workflow
 
@@ -97,6 +134,7 @@ version of the same tax explanation.
 | `serve.py` | Local server: serves the app and relays Yahoo prices |
 | `worker.js` | Cloudflare Worker: the same Yahoo relay, for serverless/static hosting |
 | `wrangler.toml` | Cloudflare deploy config for `worker.js` |
+| `.github/workflows/deploy.yml` | GitHub Pages build: injects `WORKER_URL` and publishes the static site |
 | `*.png` / `*.jpg` | The in-app "how to get your data" screenshots |
 | `logo.webp`, `favicon.png` | Branding |
 
