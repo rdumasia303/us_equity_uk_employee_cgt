@@ -7,6 +7,10 @@ __pycache__/
 .wrangler/
 node_modules/
 
+# Built static site (worker URL baked in) — produced by build.sh, not source
+dist/
+dist.zip
+
 # Personal financial exports — never commit these
 BenefitHistory.xlsx
 *.xlsx
