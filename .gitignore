@@ -1,3 +1,18 @@
 .DS_Store
 ._*
+*.swp
+__pycache__/
 
+# Cloudflare Wrangler local state / Node deps
+.wrangler/
+node_modules/
+
+# Personal financial exports — never commit these
+BenefitHistory.xlsx
+*.xlsx
+stock.csv
+04_vesting_log.csv
+*_stock_prices.csv
+gbpusd_rates.csv
+us_holidays.json
+output/

@@ -1,157 +1,117 @@
-# US Equity Compensation for UK Workers: E*Trade Handler & CGT Calculator
+# US Equity Comp for UK Workers — E\*Trade Handler & CGT Calculator
 
-Welcome to the **Handling US Equity Compensation for UK Workers** project. This tool is designed to simplify the complex world of RSUs (Restricted Stock Units), stock options, and capital gains tax (CGT) for UK taxpayers. Built with love (and frustration) over the bureaucratic maze of E*Trade reports and HMRC rules, this app consolidates your data into clear, actionable insights.
+A UK **Capital Gains Tax** calculator for US equity compensation (RSUs and stock
+options) held in **E\*Trade**. Feed it your benefit history and your orders, and it
+untangles E\*Trade's fragmented exports and HMRC's share-matching rules for you —
+income-at-vest cost basis, same-day / 30-day / Section 104 matching, GBP
+conversion, US-holiday adjustments, gains by tax year, and reports you can file.
 
-## 🎯 **What This App Does**
-- **Connects fragmented E*Trade reports** into a single, consolidated view.
-- **Handles UK tax rules** for RSUs, including:
-  - Income tax at vest.
-  - CGT calculations using HMRC Section 104 pooling rules.
-  - Daily forex rates and accurate GBP conversions.
-  - Adjustments for US holidays and non-business days.
-- **Supports manual entries** for stock options and other transactions.
-- **Generates detailed reports** for:
-  - Consolidated transactions.
-  - Validation logs.
-  - CGT disposals.
-  - Tax-year breakdown of gains/losses.
+Everything runs **on your own machine**. The only thing that ever leaves it is a
+ticker symbol and a date range (to look up prices). Your benefit history, vests
+and sales never go anywhere.
 
-## 🚀 **How to Use**
-1. **Prepare Your Files**
-   - Download the required files from E*Trade:
-     - `Gains/Losses Report`
-     - `Benefits Report`
-   - Collect additional required data:
-     - `Stock Prices` (daily close values for your company's stock)
-     - `Forex Rates` (GBP/USD daily average rates)
-     - `US Holidays` (to adjust vesting dates)
+## Run it
 
-2. **Upload Files**
-   - Drag and drop or select your files in the respective sections.
+You need **Python 3** — nothing else, no `pip install`, no accounts, no cloud.
 
-3. **Add Manual Transactions (Optional)**
-   - Use this feature to input additional transactions, such as exercised stock options.
+```bash
+python3 serve.py
+```
 
-4. **Process and Review**
-   - Click the `Process Files` button.
-   - Review:
-     - Consolidated transaction data.
-     - Validation report.
-     - CGT disposals and gains/losses.
+It opens the app at `http://localhost:8000`. `serve.py` is pure standard library;
+it serves the page and relays the one thing a browser can't do itself: fetch
+Yahoo Finance prices (CORS). Your `BenefitHistory.xlsx` is parsed **in the browser**,
+so it never leaves the page.
 
-5. **Export Data**
-   - Download reports as CSV files for further analysis or submission.
+## Deploy it (serverless, optional)
 
-## 📦 **Features**
-### **Data Consolidation**
-- Combines data from multiple E*Trade reports into a single, cohesive output.
+You don't need `serve.py` at all if you'd rather host the app statically. The page
+is fully self-contained except for the Yahoo price/FX lookup, which a tiny
+**Cloudflare Worker** relays:
 
-### **Automated Calculations**
-- Calculates FMV (Fair Market Value) and GBP prices based on forex and stock data.
-- Adjusts for UK tax-specific rules, including:
-  - Same-day matching.
-  - 30-day "Bed and Breakfasting" rules.
-  - Section 104 pooling.
+```bash
+npm install -g wrangler   # once
+wrangler deploy           # deploys worker.js using wrangler.toml
+```
 
-### **Validation**
-- Highlights:
-  - Missing FMV values.
-  - Unmatched vest dates.
-  - Negative or zero values in transactions.
+Then set `WORKER_URL` near the top of the `<script>` in `index.html` to the printed
+`https://<name>.<subdomain>.workers.dev` URL, and host `index.html` (and the images)
+on any static host — Cloudflare Pages, GitHub Pages, S3, etc. Holidays come straight
+from `date.nager.at`, prices/FX go through your worker, and the `.xlsx` is parsed in
+the browser — so even the hosted version keeps your vesting data on your own device.
+Run locally with `serve.py` and deployed with the worker from the **same** file:
+when served from `localhost` it uses `serve.py`'s relay, otherwise the worker.
 
-### **Detailed Reporting**
-- Outputs include:
-  - Transaction history.
-  - CGT summary by tax year.
-  - Consolidated disposals with gain/loss calculations.
+## The workflow
 
-### **Local Processing**
-- All data is processed client-side for security. No data is sent to external servers.
+1. **Fetch market data** — enter your ticker (e.g. `ROKU`) and a start date. It
+   pulls daily close prices, GBP/USD averages and US market holidays, and shows a
+   sample of each so you can see it worked.
+2. **Import vests** — drop in E\*Trade's `BenefitHistory.xlsx`
+   (*At Work → My Account → Benefit History → Download Expanded*). RSU vests become
+   acquisitions at the **shares released** (delivered) quantity, valued on the vest
+   date. Screenshots of where to click are right there in the app.
+3. **Paste orders** — copy the table on E\*Trade's *Orders / Transactions* page
+   (set the date range back to your first order) and paste it in. Sells, cash
+   exercises and same-day sales are turned into the right transactions; cancelled
+   rows are ignored.
+4. **Calculate** — get gains/losses by UK tax year, the Section 104 pool position,
+   a full matching audit log, and exports.
 
-## 🛠️ **Setup & Requirements**
-### **Prerequisites**
-- A modern browser (e.g., Chrome, Edge, Firefox).
-- Your E*Trade data files, along with stock prices, forex rates, and US holidays.
+Anything can also be typed in by hand, and you can paste market-data CSVs offline
+via the **Advanced** panel.
 
-### **Optional Python Scripts**
-- Use these scripts to fetch additional data:
-  - `stock_price_downloader.py` (Fetch daily stock prices).
-  - `gbpusdyahoo.py` (Fetch daily forex rates).
-  - `holiday_downloader.py` (Fetch US holidays).
+## What it works out
 
-### **Hosted at**
-[absolutelynotfinancialadvice.co.uk](https://www.absolutelynotfinancialadvice.co.uk)
+- **Cost basis = market value on the vesting date** (the figure you were taxed on
+  as income; TCGA 1992 s.119A), rolled to the next trading day for weekend/holiday
+  vests so the date and value stay pinned together.
+- **HMRC share identification** in strict order: **same-day → 30-day "bed &
+  breakfast" → Section 104 pool**. A *Matched via* column shows which rule each
+  disposal used, so you can see which sales were genuine same-day non-events and
+  which came out of the pool.
+- **Options** treated as shares once exercised (cash-exercise-and-hold pools;
+  same-day exercise-and-sell nets to ~£0).
+- **USD → GBP** at the daily exchange rate.
 
-### **Run Locally**
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/rsu-cgt-calculator.git
-   ```
-2. Open `index.html` in your browser.
+## Exports
 
-## 📖 **Documentation**
-### **E*Trade Reports**
-- **Gains/Losses Report**: Provides details of stock sales.
-- **Benefits Report**: Contains vesting details.
+- **HMRC report (editable Word)** — a per-tax-year summary, detailed disposals and
+  the Section 104 closing position, plus a **capital-loss four-year-claim** check
+  that flags, for each loss-making year, the deadline to notify HMRC and whether
+  it has passed.
+- **CSVs** — disposals, the matching/audit log, the consolidated transactions, and
+  your imported orders (re-importable).
 
-### **Additional Data**
-- **Stock Prices**: Historical daily close prices.
-- **Forex Rates**: Daily average GBP/USD exchange rates.
-- **US Holidays**: Adjust vest dates to the next valid business day.
+## Themes
 
-### **UK Tax Rules Covered**
-- **Income Tax**: Applied at vest based on FMV.
-- **CGT Rules**:
-  - Same-day rule.
-  - Bed and breakfasting (30-day matching).
-  - Section 104 pooling.
+Toggle between a **Cyberpunk** and a **Corporate** look (top-right). The *How it
+works* tab has both a plain-English/irreverent guide and a sober, statute-cited
+version of the same tax explanation.
 
-## 🎨 **Design Philosophy**
-- All data is processed client-side, ensuring user privacy.
+## Files
 
-## 🎨 **Themes: Cyberpunk vs Corporate Mode**
+| File | What it is |
+|------|------------|
+| `index.html` | The whole app — UI + calculation engine + in-browser `.xlsx` parser, single file |
+| `serve.py` | Local server: serves the app and relays Yahoo prices |
+| `worker.js` | Cloudflare Worker: the same Yahoo relay, for serverless/static hosting |
+| `wrangler.toml` | Cloudflare deploy config for `worker.js` |
+| `*.png` / `*.jpg` | The in-app "how to get your data" screenshots |
+| `logo.webp`, `favicon.png` | Branding |
 
-This app offers two distinct themes to suit your aesthetic and professional needs:
+## Privacy
 
-### **Cyberpunk Mode**
-- **Aesthetic**: Bright neon colors, glowing accents, and a retro-futuristic vibe.
-- **Intended Audience**: Tech enthusiasts and users who enjoy a playful, unconventional interface.
-- **Key Features**:
-  - Neon text and glowing effects.
-  - Dark background with high-contrast visuals.
-  - A nod to the chaos and complexity of modern finance.
+All data lives in your browser's local storage and never leaves your machine.
+The only outbound request carrying anything is a ticker symbol + date range to
+Yahoo for prices — forwarded by `serve.py` locally, or by your Cloudflare Worker
+when deployed (the worker deliberately has **no** benefit-history endpoint). Your
+`BenefitHistory.xlsx` is parsed entirely in the browser. `.gitignore` keeps any personal exports
+(`BenefitHistory.xlsx`, `stock.csv`, vesting logs, etc.) out of version control.
 
-### **Corporate Mode**
-- **Aesthetic**: Clean, professional, and minimalist.
-- **Intended Audience**: Professionals looking for a distraction-free, business-friendly appearance.
-- **Key Features**:
-  - Neutral color palette with light backgrounds and subtle accents.
-  - Sans-serif fonts for readability.
-  - No glowing effects or animations—focused on clarity and precision.
+## Disclaimer
 
-### **Switching Themes**
-- Use the theme toggle button to instantly switch between Cyberpunk and Corporate modes.
-- The theme preference is applied globally to the app for a consistent experience.
-
-Whether you prefer the playful glow of Cyberpunk or the sleek professionalism of Corporate Mode, this app provides a flexible design to match your style.
-
-
-## 📢 **Disclaimer**
-- This tool is not financial or tax advice. Always consult a qualified professional.
-- The app is provided "as is," without any warranty of accuracy or reliability.
-
-## 🤝 **Contributing**
-Contributions are welcome! Submit a pull request or raise an issue to discuss improvements or bug fixes.
-
-## 💖 **Support This Project**
-If you find this tool helpful, consider supporting its development by clicking the 'SUPPORT' button at :
-- [absolutelynotfinancialadvice.co.uk](https://www.absolutelynotfinancialadvice.co.uk)
-
----
-### **Acknowledgments**
-- Inspired by the labyrinth of RSU taxation and E*Trade's fragmented data.
-- Built for individuals trying to navigate the complex world of equity compensation.
-
----
-### **License**
-This software is licensed for personal, non-commercial use only. For commercial use, please contact the author. See LICENSE for more details.
+This is **not** financial or tax advice. It's a calculator to help you understand
+and compute your position — always verify the figures and consult a qualified
+professional before submitting anything to HMRC. Provided "as is", with no
+warranty of accuracy. See `LICENSE`.

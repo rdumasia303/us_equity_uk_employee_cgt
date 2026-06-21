@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+# Builds a static copy of the app and publishes it to GitHub Pages. The source
+# index.html keeps WORKER_URL = '' (so local/serve.py users never route through a
+# worker); this workflow patches in the real Cloudflare Worker URL for the hosted
+# copy only. Set that URL as a repository *variable* named WORKER_URL:
+#   Settings → Secrets and variables → Actions → Variables → New repository variable
+#   Name: WORKER_URL   Value: https://cgt-yahoo-relay.<your-subdomain>.workers.dev
+# And set Pages source to "GitHub Actions": Settings → Pages → Build and deployment.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a newer deploy supersede an in-progress one, but don't cancel a run mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage and patch site
+        env:
+          WORKER_URL: ${{ vars.WORKER_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WORKER_URL}" ]; then
+            echo "::error::No WORKER_URL repository variable set. Add it under Settings → Secrets and variables → Actions → Variables (value = your Cloudflare Worker URL)."
+            exit 1
+          fi
+
+          mkdir -p _site
+          shopt -s nullglob
+          # The app plus its images and metadata — but not serve.py, worker.js, etc.
+          cp index.html _site/
+          cp -t _site/ robots.txt *.png *.jpg *.jpeg *.webp *.ico *.svg
+
+          # Inject the worker URL into the deployed copy only (source stays blank).
+          sed -i "s|const WORKER_URL = '';|const WORKER_URL = '${WORKER_URL}';|" _site/index.html
+          # LC_ALL=C + -aF: the file has non-ASCII content that trips locale-aware grep.
+          LC_ALL=C grep -aqF "const WORKER_URL = '${WORKER_URL}';" _site/index.html \
+            || { echo "::error::Could not patch WORKER_URL into index.html (did the source line change?)"; exit 1; }
+          echo "Patched WORKER_URL = ${WORKER_URL}"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
