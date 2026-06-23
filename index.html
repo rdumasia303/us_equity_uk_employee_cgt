@@ -223,6 +223,42 @@
     .lightbox img { max-width: 96vw; max-height: 92vh; border: 1px solid var(--accent); border-radius: 8px; box-shadow: var(--glow); }
     .lightbox .lb-close { position: absolute; top: 14px; right: 22px; color: var(--accent); font-size: 2rem; line-height: 1; cursor: pointer; }
 
+    /* "Story of your shares" replay modal */
+    .modal { position: fixed; inset: 0; z-index: 1100; display: none; align-items: flex-start; justify-content: center;
+      background: rgba(0,0,0,.85); padding: 4vh 16px; overflow-y: auto; }
+    .modal.open { display: flex; }
+    .modal-panel { background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; box-shadow: var(--glow);
+      width: 100%; max-width: 720px; padding: 22px 24px 28px; margin: auto 0; }
+    body.corporate-mode .modal-panel { box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .modal-head h2 { color: var(--accent); font-family: var(--font); font-size: 1.3rem; margin: 0; letter-spacing: .5px; text-shadow: var(--glow); }
+    body.corporate-mode .modal-head h2 { text-shadow: none; }
+    .modal-close { color: var(--accent); font-size: 1.9rem; line-height: 1; cursor: pointer; padding: 0 4px; }
+    .modal-sub { color: var(--muted); font-size: .86rem; margin: 4px 0 16px; }
+    .modal-body { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Each scene = one event in the share's life, on a vertical timeline */
+    .scene { position: relative; padding: 12px 14px 14px 18px; background: var(--panel-2); border: 1px solid var(--border);
+      border-left: 4px solid var(--accent-2); border-radius: 8px; }
+    .scene.acquire { border-left-color: var(--ok); }
+    .scene.dispose { border-left-color: var(--accent-2); }
+    .scene-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+    .scene-date { font-family: var(--font); font-size: .8rem; color: var(--muted); }
+    .scene-kind { font-weight: 700; font-size: .82rem; letter-spacing: .5px; text-transform: uppercase; }
+    .scene.acquire .scene-kind { color: var(--ok); }
+    .scene.dispose .scene-kind { color: var(--accent-2); }
+    .scene-lead { color: var(--text); font-size: .95rem; margin: 0 0 6px; }
+    .scene-legs { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+    .scene-legs li { font-size: .86rem; color: var(--text); padding-left: 14px; position: relative; }
+    .scene-legs li::before { content: '•'; position: absolute; left: 0; color: var(--accent-2); }
+    .scene-net { margin-top: 8px; font-size: .9rem; font-weight: 700; }
+    .scene-net.gain { color: var(--ok); }
+    .scene-net.loss { color: var(--err); }
+    .scene-net.nil { color: var(--muted); }
+    .scene-pool { margin-top: 8px; font-size: .8rem; color: var(--muted); border-top: 1px dashed var(--border); padding-top: 7px; }
+    .scene-pool b { color: var(--text); }
+    .scene-epilogue { color: var(--muted); font-size: .9rem; text-align: center; padding: 6px 4px; }
+
     label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
     input, select, textarea {
       font-family: var(--font); font-size: .95rem;
@@ -550,6 +586,7 @@
         <div class="table-scroll" id="transactionLog"></div>
 
         <div class="btn-row">
+          <button onclick="openStoryReplay()">▶ Replay the story of your shares</button>
           <button onclick="downloadHMRCReport()">⬇ HMRC report (Word)</button>
           <button class="secondary" onclick="downloadCGTDisposalsCSV()">⬇ Disposals CSV</button>
           <button class="secondary" onclick="downloadTransactionLogCSV()">⬇ Matching log CSV</button>
@@ -822,13 +859,13 @@
         <p>Not an accountant. Just someone who once had a 116% effective marginal tax rate on part of their income.</p>
         <h2>Jeez. Any advice?</h2>
         <p>I strongly suggest checking my working.</p>
-        <h2>Why a little Python server?</h2>
-        <p>Look into CORS. Browsers can't call Yahoo Finance directly, so <code>serve.py</code> relays the price lookups
-          for you &mdash; locally, with nothing to install beyond Python 3. Your transactions never touch it.</p>
-        <h2>Why not a proper cloud backend?</h2>
-        <p>Because I want this to run on your own machine, privately, with no accounts and no third-party servers holding
-          your data. The optional Cloudflare worker exists only if <i>you</i> choose to host it online.</p>
-        <h2>Just add more features!</h2>
+        <h2>Can I run it locally?</h2>
+        <p>Absolutely &mdash; and I'd encourage it. Grab the source from
+          <a href="https://github.com/rdumasia303/us_equity_uk_employee_cgt">GitHub</a> and run
+          <code>python3 serve.py</code> &mdash; nothing to install beyond Python 3, no accounts, no cloud. Everything stays
+          on your machine; the little server just relays Yahoo price lookups because browsers can't call them directly
+          (look into CORS). Your transactions never leave your computer.</p>
+        <h2>Can we have more features?</h2>
         <p>Remember Goodfellas? &mdash; sufficient clicks of that Support button and I might think about it!</p>
         <h2>How can I contact you?</h2>
         <p>Contact details and the license are <a href="LICENSE">here</a>.</p>
@@ -841,14 +878,13 @@
           systems &mdash; including managing scenarios like effective marginal tax rates exceeding 100%.</p>
         <h2>Do You Offer Advice?</h2>
         <p>I strongly encourage you to verify any calculations and seek formal guidance from a qualified accountant.</p>
-        <h2>Why Include a Local Server?</h2>
-        <p>Stock prices and forex rates come from Yahoo Finance, which browsers cannot call directly (CORS). A small,
-          standard-library Python server relays those lookups locally, requiring no installation and keeping your
-          transaction data entirely on your machine.</p>
-        <h2>Why Keep It Local?</h2>
-        <p>The focus is privacy and simplicity. Running locally avoids reliance on external servers. Hosting online is
-          possible via an optional Cloudflare worker, at your discretion.</p>
-        <h2>Can You Add More Features?</h2>
+        <h2>Can I run it locally?</h2>
+        <p>Yes &mdash; and it's the recommended way. The full source is on
+          <a href="https://github.com/rdumasia303/us_equity_uk_employee_cgt">GitHub</a>; clone it and run
+          <code>python3 serve.py</code> (standard library only &mdash; no installation, no accounts, no cloud). All
+          processing happens on your machine; the small local server only relays Yahoo price and forex lookups, which
+          browsers can't request directly due to CORS. Your transaction data never leaves your computer.</p>
+        <h2>Can we have more features?</h2>
         <p>With enough community support, further development is possible. Every little helps &mdash; especially the
           Support button!</p>
         <h2>How can I contact you?</h2>
@@ -862,6 +898,18 @@
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <span class="lb-close" aria-hidden="true">&times;</span>
     <img alt="" />
+  </div>
+
+  <!-- The "story of your shares" replay modal -->
+  <div class="modal" id="storyModal" onclick="if(event.target===this)closeStoryReplay()">
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="The story of your shares">
+      <div class="modal-head">
+        <h2 id="storyTitle">The story of your shares</h2>
+        <span class="modal-close" onclick="closeStoryReplay()" title="Close" aria-label="Close">&times;</span>
+      </div>
+      <p class="modal-sub" id="storySub"></p>
+      <div class="modal-body" id="storyBody"></div>
+    </div>
   </div>
 
   <script>
@@ -1200,9 +1248,14 @@
     const buys = transactions.filter(t => t.type === "BUY" && t.isValid());
     const sells = transactions.filter(t => t.type === "SELL" && t.isValid()).sort((a, b) => a.date - b.date);
 
-    // Per-disposal running state (matched cost so far, quantity still to match,
-    // and how the match split across the rules — for the "Matched via" column).
-    const state = sells.map(s => ({ sell: s, remaining: s.quantity, cost: 0, via: { sameDay: 0, bnb: 0, pool: 0 } }));
+    // Remember each acquisition's original size and track how it gets consumed, so
+    // the "story" replay can say how much of each vest was matched away vs pooled.
+    buys.forEach(b => { b.origQty = b.quantity; b.sameDayUsed = 0; b.bnbUsed = 0; });
+
+    // Per-disposal running state (matched cost so far, quantity still to match, how
+    // the match split across the rules — for the "Matched via" column — and a list
+    // of legs capturing each individual match for the narrated replay).
+    const state = sells.map(s => ({ sell: s, remaining: s.quantity, cost: 0, via: { sameDay: 0, bnb: 0, pool: 0 }, legs: [] }));
 
     // HMRC share-identification order is applied in strict PRIORITY passes across
     // ALL disposals, not one disposal at a time. This matters: doing it per-disposal
@@ -1219,7 +1272,8 @@
         if (e.remaining <= 0) break;
         if (b.quantity > 0 && b.pairId && b.pairId === e.sell.pairId) {
           const m = Math.min(e.remaining, b.quantity);
-          e.cost += m * b.priceGBP; e.remaining -= m; b.quantity -= m; e.via.sameDay += m;
+          e.cost += m * b.priceGBP; e.remaining -= m; b.quantity -= m; b.sameDayUsed += m; e.via.sameDay += m;
+          e.legs.push({ rule: 'sameday', qty: m, costGBP: m * b.priceGBP, acqDate: formatDate(b.date), priceGBP: b.priceGBP, priceUSD: b.priceUSD, grant: b.grantNumber, paired: true });
           transactionLog.push(logRow(formatDate(e.sell.date), 'SAME-DAY MATCH', m, b.priceGBP, b.priceUSD, b.exchangeRate, s104Pool, b.grantNumber));
         }
       }
@@ -1232,7 +1286,8 @@
         if (e.remaining <= 0) break;
         if (b.quantity > 0 && formatDate(b.date) === formatDate(e.sell.date)) {
           const m = Math.min(e.remaining, b.quantity);
-          e.cost += m * b.priceGBP; e.remaining -= m; b.quantity -= m; e.via.sameDay += m;
+          e.cost += m * b.priceGBP; e.remaining -= m; b.quantity -= m; b.sameDayUsed += m; e.via.sameDay += m;
+          e.legs.push({ rule: 'sameday', qty: m, costGBP: m * b.priceGBP, acqDate: formatDate(b.date), priceGBP: b.priceGBP, priceUSD: b.priceUSD, grant: b.grantNumber });
           transactionLog.push(logRow(formatDate(e.sell.date), 'SAME-DAY MATCH', m, b.priceGBP, b.priceUSD, b.exchangeRate, s104Pool, b.grantNumber));
         }
       }
@@ -1248,7 +1303,8 @@
         if (e.remaining <= 0) break;
         if (b.quantity > 0 && b.date > dd && b.date <= cutoff) {
           const m = Math.min(e.remaining, b.quantity);
-          e.cost += m * b.priceGBP; e.remaining -= m; b.quantity -= m; e.via.bnb += m;
+          e.cost += m * b.priceGBP; e.remaining -= m; b.quantity -= m; b.bnbUsed += m; e.via.bnb += m;
+          e.legs.push({ rule: 'bnb', qty: m, costGBP: m * b.priceGBP, acqDate: formatDate(b.date), priceGBP: b.priceGBP, priceUSD: b.priceUSD, grant: b.grantNumber });
           transactionLog.push(logRow(formatDate(dd), 'B&B MATCH', m, b.priceGBP, b.priceUSD, b.exchangeRate, s104Pool, b.grantNumber));
         }
       }
@@ -1267,8 +1323,11 @@
       }
       if (e.remaining > 0) {
         const poolQty = e.remaining;
-        e.cost += s104Pool.removeShares(poolQty);
+        const poolAvgBefore = s104Pool.avgCostGBP;
+        const poolCost = s104Pool.removeShares(poolQty);
+        e.cost += poolCost;
         e.via.pool += poolQty;
+        e.legs.push({ rule: 'pool', qty: poolQty, costGBP: poolCost, poolAvgCostGBP: poolAvgBefore });
         transactionLog.push(logRow(formatDate(dd), 'POOL SALE', -poolQty, e.sell.priceGBP, e.sell.priceUSD, e.sell.exchangeRate, s104Pool, e.sell.grantNumber));
         e.remaining = 0;
       }
@@ -1282,7 +1341,9 @@
         proceedsGBP: parseFloat(proceeds.toFixed(2)),
         matchedCostGBP: parseFloat(e.cost.toFixed(2)),
         gainLossGBP: parseFloat((proceeds - e.cost).toFixed(2)),
-        matchedVia: describeMatch(e.via)
+        matchedVia: describeMatch(e.via),
+        grant: e.sell.grantNumber || '',
+        legs: e.legs
       });
     }
 
@@ -1294,10 +1355,26 @@
       }
     }
 
+    // Acquisition timeline for the "story" replay: each vest/buy with how it was
+    // split (matched same-day, bed-&-breakfast, or pooled).
+    const acquisitions = buys.map(b => ({
+      date: b.date,
+      qty: parseFloat(b.origQty.toFixed(2)),
+      pooledQty: parseFloat(Math.max(0, b.origQty - b.sameDayUsed - b.bnbUsed).toFixed(2)),
+      sameDayUsed: parseFloat(b.sameDayUsed.toFixed(2)),
+      bnbUsed: parseFloat(b.bnbUsed.toFixed(2)),
+      priceGBP: parseFloat(b.priceGBP.toFixed(2)),
+      priceUSD: parseFloat(b.priceUSD.toFixed(2)),
+      exchangeRate: parseFloat(b.exchangeRate.toFixed(4)),
+      grant: b.grantNumber || '',
+      securityType: b.securityType || '',
+      orderType: b.orderType || ''
+    })).sort((a, b) => a.date - b.date);
+
     // Present the audit log in date order (the passes above build it out of sequence).
     realized.sort((a, b) => a.date - b.date);
     transactionLog.sort((a, b) => (a.Date < b.Date ? -1 : a.Date > b.Date ? 1 : 0));
-    return { realized, s104Pool, transactionLog };
+    return { realized, s104Pool, transactionLog, acquisitions };
   }
 
   // "Matched via" label: which rule(s) the disposal was set against. Pure same-day
@@ -2005,8 +2082,8 @@
     });
   }
 
-  function displayCGTResults({ realized, s104Pool, transactionLog }) {
-    window.currentCGTResults = { realized, s104Pool, transactionLog };
+  function displayCGTResults({ realized, s104Pool, transactionLog, acquisitions }) {
+    window.currentCGTResults = { realized, s104Pool, transactionLog, acquisitions };
     document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
     document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
 
@@ -2266,7 +2343,113 @@
     lb.classList.add('open');
   }
   function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeStoryReplay(); } });
+
+  /********************************************************************
+   * "STORY OF YOUR SHARES" — a narrated, chronological replay of every
+   * acquisition and disposal, built from the same authoritative figures
+   * the report uses (per-disposal match legs + the acquisition timeline).
+   * The Section 104 pool is re-walked here purely to show how it grew and
+   * shrank at each step — the gains/costs themselves come from processCGT.
+   ********************************************************************/
+  function buildShareStory(realized, acquisitions) {
+    const ticker = (val('ticker') || '').toUpperCase() || 'your';
+    const events = [];
+    (acquisitions || []).forEach(a => events.push({ kind: 'acquire', date: a.date, a }));
+    (realized || []).forEach(r => events.push({ kind: 'dispose', date: r.date, r }));
+    // Date order; on a same-day tie, process the disposal before the acquisition so a
+    // same-day vest isn't counted in that day's pool draw (mirrors the engine's
+    // b.date < sale-date rule). Display order follows the same sequence.
+    events.sort((x, y) => (x.date - y.date) || (x.kind === 'dispose' ? -1 : 1));
+
+    const pool = new Section104Pool();
+    const scenes = [];
+    events.forEach(ev => {
+      if (ev.kind === 'acquire') {
+        if (ev.a.pooledQty > 0) pool.addShares(ev.a.pooledQty, ev.a.priceGBP);
+      } else {
+        (ev.r.legs || []).forEach(leg => { if (leg.rule === 'pool') pool.removeShares(leg.qty); });
+      }
+      scenes.push(Object.assign({}, ev, { poolShares: pool.totalShares, poolAvg: pool.avgCostGBP }));
+    });
+    const totalGain = (realized || []).reduce((s, r) => s + r.gainLossGBP, 0);
+    return { ticker, scenes, totalGain, finalShares: pool.totalShares, finalAvg: pool.avgCostGBP };
+  }
+
+  const _q = n => { const r = Math.round((n + 0) * 100) / 100; return Number.isInteger(r) ? String(r) : r.toFixed(2); };
+
+  function sceneHTML(s) {
+    const dateStr = formatDate(s.date);
+    const poolLine = s.poolShares > 0.005
+      ? `Section 104 pool now holds <b>${_q(s.poolShares)}</b> shares at <b>${formatCurrency(s.poolAvg)}</b> average cost.`
+      : `Section 104 pool is now empty.`;
+
+    if (s.kind === 'acquire') {
+      const a = s.a;
+      const vested = /vest/i.test(a.orderType) || /restricted/i.test(a.securityType);
+      const verb = vested ? 'vested' : 'acquired';
+      const legs = [];
+      if (a.pooledQty > 0) legs.push(`<b>${_q(a.pooledQty)}</b> added to your Section 104 pool.`);
+      if (a.sameDayUsed > 0) legs.push(`<b>${_q(a.sameDayUsed)}</b> matched <b>same-day</b> against a sale that day — these never touched the pool.`);
+      if (a.bnbUsed > 0) legs.push(`<b>${_q(a.bnbUsed)}</b> matched under the <b>30-day rule</b> against an earlier sale.`);
+      return `<div class="scene acquire">
+        <div class="scene-head"><span class="scene-kind">${vested ? 'Vested' : 'Acquired'}</span><span class="scene-date">${dateStr}</span></div>
+        <p class="scene-lead"><b>${_q(a.qty)}</b> shares ${verb} at $${a.priceUSD.toFixed(2)} (${formatCurrency(a.priceGBP)} at FX ${a.exchangeRate.toFixed(4)})${a.grant ? ` · grant ${a.grant}` : ''}.</p>
+        ${legs.length ? `<ul class="scene-legs">${legs.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+        <div class="scene-pool">${poolLine}</div>
+      </div>`;
+    }
+
+    const r = s.r;
+    const agg = { sameday: { qty: 0, cost: 0 }, bnb: { qty: 0, cost: 0 }, pool: { qty: 0, cost: 0, avg: 0 } };
+    (r.legs || []).forEach(l => { const k = agg[l.rule]; if (!k) return; k.qty += l.qty; k.cost += l.costGBP; if (l.rule === 'pool') k.avg = l.poolAvgCostGBP; });
+    const legs = [];
+    if (agg.sameday.qty > 0) legs.push(`<b>${_q(agg.sameday.qty)}</b> matched <b>same-day</b> (bought and sold the same day) — a CGT non-event, so no gain or loss on these.`);
+    if (agg.bnb.qty > 0) legs.push(`<b>${_q(agg.bnb.qty)}</b> matched under the <b>30-day "bed &amp; breakfast" rule</b> against an acquisition within 30 days → cost ${formatCurrency(agg.bnb.cost)}.`);
+    if (agg.pool.qty > 0) legs.push(`<b>${_q(agg.pool.qty)}</b> drawn from the <b>Section 104 pool</b> at ${formatCurrency(agg.pool.avg)} average → cost ${formatCurrency(agg.pool.cost)}.`);
+
+    const g = r.gainLossGBP;
+    const netClass = Math.abs(g) < 0.005 ? 'nil' : (g > 0 ? 'gain' : 'loss');
+    const netText = Math.abs(g) < 0.005 ? 'Net: no taxable gain or loss.'
+      : (g > 0 ? `Net gain: ${formatCurrency(g)}` : `Net loss: ${formatCurrency(Math.abs(g))}`);
+    return `<div class="scene dispose">
+      <div class="scene-head"><span class="scene-kind">Sold</span><span class="scene-date">${dateStr}</span></div>
+      <p class="scene-lead"><b>${_q(r.qty)}</b> shares sold at $${r.sellPriceUSD.toFixed(2)} (${formatCurrency(r.sellPriceGBP)} at FX ${r.exchangeRate.toFixed(4)}) → <b>${formatCurrency(r.proceedsGBP)}</b> proceeds${r.grant ? ` · grant ${r.grant}` : ''}.</p>
+      ${legs.length ? `<ul class="scene-legs">${legs.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+      <div class="scene-net ${netClass}">${netText}</div>
+      <div class="scene-pool">${poolLine}</div>
+    </div>`;
+  }
+
+  function renderStory(story) {
+    const tickerName = story.ticker === 'your' ? 'your shares' : `your ${story.ticker} shares`;
+    document.getElementById('storyTitle').textContent = `The story of ${tickerName}`;
+    const nAcq = story.scenes.filter(s => s.kind === 'acquire').length;
+    const nSell = story.scenes.filter(s => s.kind === 'dispose').length;
+    document.getElementById('storySub').textContent =
+      `${nAcq} acquisition${nAcq === 1 ? '' : 's'} and ${nSell} disposal${nSell === 1 ? '' : 's'}, in the order HMRC matches them. Each step shows how the shares were matched and how your Section 104 pool changed.`;
+
+    const g = story.totalGain;
+    const gClass = Math.abs(g) < 0.005 ? 'nil' : (g > 0 ? 'gain' : 'loss');
+    const gWord = Math.abs(g) < 0.005 ? 'broke even' : (g > 0 ? `a total gain of ${formatCurrency(g)}` : `a total loss of ${formatCurrency(Math.abs(g))}`);
+    const holding = story.finalShares > 0.005
+      ? `You still hold <b>${_q(story.finalShares)}</b> shares (pool average ${formatCurrency(story.finalAvg)}).`
+      : `You hold no shares in the pool now.`;
+    const epilogue = `<div class="scene"><div class="scene-net ${gClass}">Across it all you ${gWord}.</div><div class="scene-pool">${holding}</div></div>`;
+
+    const body = document.getElementById('storyBody');
+    body.innerHTML = story.scenes.length ? story.scenes.map(sceneHTML).join('') + epilogue
+      : '<p class="scene-epilogue">No acquisitions or disposals to replay.</p>';
+    body.scrollTop = 0;
+  }
+
+  function openStoryReplay() {
+    const res = window.currentCGTResults;
+    if (!res || !res.realized) { alert('Process your transactions first — there is no story to tell yet.'); return; }
+    renderStory(buildShareStory(res.realized, res.acquisitions));
+    document.getElementById('storyModal').classList.add('open');
+  }
+  function closeStoryReplay() { const m = document.getElementById('storyModal'); if (m) m.classList.remove('open'); }
 
   /* Main-app tab switching + persisted theme toggle (cyberpunk <-> corporate) */
   (function () {
