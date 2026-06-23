@@ -6,6 +6,10 @@ untangles E\*Trade's fragmented exports and HMRC's share-matching rules for you 
 income-at-vest cost basis, same-day / 30-day / Section 104 matching, GBP
 conversion, US-holiday adjustments, gains by tax year, and reports you can file.
 
+**Try it now:** <https://www.absolutelynotfinancialadvice.co.uk/> — the hosted
+version runs entirely in your browser (your benefit history, vests and sales
+never leave your device). Prefer to run it yourself? See **Run it** below.
+
 Everything runs **on your own machine**. The only thing that ever leaves it is a
 ticker symbol and a date range (to look up prices). Your benefit history, vests
 and sales never go anywhere.
