@@ -207,6 +207,10 @@
     .howto-title { color: var(--accent-2); font-size: .82rem; font-weight: 600; }
     body.corporate-mode .howto-title { color: var(--accent); }
     .muted-note { color: var(--muted); font-weight: normal; }
+    /* Bigger, bolder sub-step titles inside a panel (e.g. the two E*Trade imports) */
+    label.substep { font-size: 1.1rem; font-weight: 700; color: var(--accent-2); margin-bottom: 8px; }
+    body.corporate-mode label.substep { color: var(--accent); }
+    .substep .help { font-weight: normal; }
     .steps { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
     .step-img { width: 210px; margin: 0; }
     .step-img img { width: 100%; display: block; border: 1px solid var(--border); border-radius: 8px; cursor: zoom-in; transition: box-shadow .2s, border-color .2s; }
@@ -307,6 +311,10 @@
 
     /* ===================== DOCS ===================== */
     .docs-container, .about-container { max-width: 860px; margin: 0 auto; }
+    .docs-container .callout, .about-container .callout { background: var(--panel-2); border: 1px solid var(--accent-2); border-left: 4px solid var(--accent-2); border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+    body.corporate-mode .docs-container .callout, body.corporate-mode .about-container .callout { border-color: var(--accent); border-left-color: var(--accent); }
+    .callout .callout-title { display: block; font-weight: 700; color: var(--accent-2); margin-bottom: 4px; }
+    body.corporate-mode .callout .callout-title { color: var(--accent); }
     .docs-container h2, .about-container h2 { color: var(--accent); font-family: var(--font); margin: 28px 0 8px; font-size: 1.25rem; letter-spacing: 1px; text-shadow: var(--glow); }
     body.corporate-mode .docs-container h2, body.corporate-mode .about-container h2 { text-shadow: none; letter-spacing: normal; }
     .docs-container h3, .about-container h3 { color: var(--accent-2); font-family: var(--font); margin: 22px 0 6px; font-size: 1.02rem; letter-spacing: .5px; text-shadow: var(--glow-cyan); }
@@ -391,24 +399,24 @@
 
     <!-- STEP 1: MARKET DATA -->
     <section class="panel">
-      <h2><span class="step">1</span>Market data <span class="help" title="Run python3 serve.py, then enter your ticker and click Fetch. It pulls daily close prices, GBP/USD rates and US holidays. Only the ticker and dates leave your machine — never your transactions.">ⓘ</span></h2>
+      <h2><span class="step">1</span>Where do you work? <span class="help" title="We pull the daily close prices, GBP/USD rates and US market holidays for your stock. Only the ticker and the dates ever leave your machine — never your transactions.">ⓘ</span></h2>
+      <p class="hint">What's the ticker for the company you work for? (e.g. <b>AAPL</b> for Apple, <b>ROKU</b> for Roku, <b>MSFT</b> for Microsoft) — and roughly since when have you been getting RSUs? We'll quietly fetch the share prices, exchange rates and holidays for you.</p>
       <div class="row grid-3">
         <div>
-          <label>Ticker</label>
+          <label>Your company's ticker</label>
           <input id="ticker" placeholder="ROKU" autocomplete="off" title="Your company's stock symbol, e.g. ROKU, MSFT, AMZN" />
         </div>
         <div>
-          <label>History from</label>
-          <input id="startDate" type="date" title="Earliest date to fetch — set to your first vest" />
+          <label>Getting RSUs since…</label>
+          <input id="startDate" type="date" title="Roughly when your first shares vested — we fetch prices from here" />
         </div>
         <div>
-          <label>to</label>
+          <label>…up to</label>
           <input id="endDate" type="date" />
         </div>
       </div>
       <div class="btn-row">
-        <button id="fetchBtn" onclick="fetchMarketData()">Fetch market data</button>
-        <button class="secondary" onclick="document.getElementById('manualData').open = true">Advanced</button>
+        <button id="fetchBtn" onclick="fetchMarketData()">Get my share prices</button>
       </div>
 
       <div class="status" id="dataStatus">
@@ -417,45 +425,22 @@
         <span class="chip" id="chipHol">US holiday <b>—</b></span>
       </div>
       <div class="msg" id="dataMsg"></div>
-
-      <details id="manualData">
-        <summary>Advanced — paste market data offline</summary>
-        <p class="hint" style="margin-top:12px;">
-          No <code>serve.py</code> handy? If you already have the figures, paste daily close prices, GBP/USD averages and
-          US holidays below. Headers must match exactly.
-        </p>
-        <div class="row" style="grid-template-columns:1fr 1fr 1fr;">
-          <div>
-            <label>Stock prices CSV — headers: <code>Date,Close_Price</code></label>
-            <textarea id="stockCsv" placeholder="Date,Close_Price&#10;2024-01-02,370.87"></textarea>
-          </div>
-          <div>
-            <label>Forex CSV — headers: <code>Date,Average</code></label>
-            <textarea id="forexCsv" placeholder="Date,Average&#10;2024-01-02,1.2715"></textarea>
-          </div>
-          <div>
-            <label>US holidays JSON (nager.at format)</label>
-            <textarea id="holJson" placeholder='[{"date":"2024-01-01","name":"New Year","global":true,"types":["Public"]}]'></textarea>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="secondary" onclick="loadPastedData()">Load pasted data</button>
-        </div>
-      </details>
     </section>
 
     <!-- STEP 2: TRANSACTIONS -->
     <section class="panel">
-      <h2><span class="step">2</span>Your vests &amp; sales
-        <span class="help" title="Import your two E*Trade CSVs, or type rows by hand. Acquisitions use the VEST date (the income-tax date); sales use the actual trade date. Because you can't sell until after the vest, most RSU sales come out of the Section 104 pool, not same-day.">ⓘ</span>
+      <h2><span class="step">2</span>Go and grab your history from E*Trade
+        <span class="help" title="Import your two E*Trade exports, or type rows by hand. Acquisitions use the VEST date (the income-tax date); sales use the actual trade date. Because you can't sell until after the vest, most RSU sales come out of the Section 104 pool, not same-day.">ⓘ</span>
         <a class="tablink" href="#" onclick="document.querySelector('[data-tab=docs]').click();return false;">column mappings</a>
       </h2>
+      <p class="hint">Two things to fetch from E*Trade: your <b>benefit history</b> (every time shares vested) and your <b>orders</b> (every time you sold). The screenshots show exactly where to click — it only takes a minute.</p>
 
       <div class="row" style="grid-template-columns: 1fr auto; align-items:end; gap:10px; max-width:560px;">
-        <div><label>① Vests — BenefitHistory.xlsx <span class="help" title="E*Trade's At Work → My Account → Benefit History → Download Expanded. Drop the .xlsx straight in (it's parsed right here in your browser — it never leaves the page). RSU rows become acquisitions at the Shares Released/delivered quantity; option rows skipped. A vesting-log CSV also works.">ⓘ</span></label>
+        <div><label class="substep">① Drop in your benefit history (BenefitHistory.xlsx) <span class="help" title="E*Trade's At Work → My Account → Benefit History → Download Expanded. Drop the .xlsx straight in (it's parsed right here in your browser — it never leaves the page). RSU rows become acquisitions at the Shares Released/delivered quantity; option rows skipped. A vesting-log CSV also works.">ⓘ</span></label>
           <input type="file" id="vestFile" accept=".xlsx,.xls,.csv,text/csv" /></div>
-        <button onclick="importVestingLog()">Import vests</button>
+        <button onclick="importVestingLog()">Import my vests</button>
       </div>
+      <div class="msg" id="vestMsg"></div>
       <div class="howto">
         <div class="howto-title">How to get BenefitHistory.xlsx <span class="muted-note">(click any image to enlarge)</span></div>
         <div class="steps">
@@ -466,10 +451,10 @@
       </div>
 
       <div style="margin-top:14px;">
-        <label>② Orders — paste your E*Trade orders table <span class="help" title="On E*Trade's Stock Plan → Orders page, set the date range back to your first order, select the whole table (header row is fine) and copy. Paste here. Settled sells and option exercises become disposals/acquisitions; cancelled rows are ignored. Pasting CSV works too.">ⓘ</span></label>
-        <textarea id="ordersPaste" rows="4" placeholder="Copy the rows on E*Trade's Orders / Transactions page (Ctrl/Cmd-A in the table, then copy) and paste them here — header row optional."></textarea>
+        <label class="substep">② Now paste your orders (every sale you made) <span class="help" title="On E*Trade's Orders page, set the date range back to your first order. Easiest way to grab the table: drag-select across the rows with your mouse, then copy (right-click → Copy, or Ctrl/Cmd-C). Paste here. Settled sells and option exercises become disposals/acquisitions; cancelled rows are ignored. Pasting CSV works too.">ⓘ</span></label>
+        <textarea id="ordersPaste" rows="4" placeholder="On E*Trade's Orders page, drag-select across the rows with your mouse, copy them (right-click → Copy, or Ctrl/Cmd-C) and paste here — header row optional."></textarea>
         <div class="btn-row">
-          <button onclick="importEtradeOrders()">Import orders</button>
+          <button onclick="importEtradeOrders()">Import my orders</button>
           <button class="secondary" onclick="downloadOrdersCSV()">⬇ Export orders (CSV)</button>
         </div>
       </div>
@@ -478,12 +463,14 @@
         <div class="steps">
           <figure class="step-img"><img loading="lazy" src="open_orders_redacted.png" alt="My Account → Orders" onclick="openLightbox(this)"><figcaption><span class="step-num">1.</span> <b>My Account → Orders</b>.</figcaption></figure>
           <figure class="step-img"><img loading="lazy" src="orders_all_the_way_back_redacted.png" alt="Set the date range back to your first order" onclick="openLightbox(this)"><figcaption><span class="step-num">2.</span> Set the date range <b>back to your first order</b>, then Apply.</figcaption></figure>
-          <figure class="step-img"><img loading="lazy" src="orders_select_table.jpg" alt="Select and copy the entire table" onclick="openLightbox(this)"><figcaption><span class="step-num">3.</span> Select &amp; copy the <b>whole table</b> (cancelled rows are fine) and paste above.</figcaption></figure>
+          <figure class="step-img"><img loading="lazy" src="orders_select_table.jpg" alt="Select and copy the entire table" onclick="openLightbox(this)"><figcaption><span class="step-num">3.</span> <b>Drag-select</b> the rows with your mouse, copy (cancelled rows are fine) and paste above.</figcaption></figure>
         </div>
       </div>
       <div class="msg" id="importMsg"></div>
 
-      <div class="row grid-5" style="margin-top:16px;">
+      <label class="substep" style="margin-top:26px;">Anything else to add by hand?</label>
+      <p class="hint">If you need to add any manual buys / sells — for instance from a separate, non-ISA/SIPP account — add them here.</p>
+      <div class="row grid-5" style="margin-top:6px;">
         <div>
           <label>Action</label>
           <select id="txAction">
@@ -529,9 +516,10 @@
 
     <!-- STEP 3: PROCESS -->
     <section class="panel">
-      <h2><span class="step">3</span>Calculate CGT</h2>
+      <h2><span class="step">3</span>That's everything — let's do the maths</h2>
+      <p class="hint">When you've fetched your prices and imported your vests and orders, hit the button and we'll work out your gains, the Section 104 pool and a full audit trail you can file.</p>
       <div class="btn-row">
-        <button id="processBtn" onclick="runCalculation()">Process &amp; calculate gains</button>
+        <button id="processBtn" onclick="runCalculation()">Work out my gains</button>
       </div>
       <div class="msg" id="resultMsg"></div>
 
@@ -595,10 +583,15 @@
 
         <h3>THE FISCAL MEAT GRINDER: UK STOCK TAX</h3>
         <ul>
-          <li><b>Income Tax + NI at Vest:</b> The Tax Overlords intercept up to 47% (or 62% if you're stuck in the child benefit trap) of your shares before they even land in your wallet. You are taxed on the theoretical peak value on vesting day under the <a href="https://www.gov.uk/hmrc-internal-manuals/employment-related-securities/ersm110000" target="_blank" rel="noopener">HMRC Securities Options Manual (ERSM110000)</a>, which covers RSUs and LTIPs. If the stock plunges five minutes later, you still owe tax on that high-water mark. Oh, and your employer might legally dump the Employer's National Insurance levy onto you via a Joint NICs Election (see <a href="https://www.gov.uk/guidance/transfer-employers-national-insurance-to-employees" target="_blank" rel="noopener">HMRC's guidance on transferring secondary NICs</a>). Delightful.</li>
+          <li><b>Income Tax + NI at Vest:</b> The Tax Overlords intercept a chunk of your shares before they even land in your wallet, and they usually sell-to-cover the <i>whole</i> stack at the top of the scale. First comes <b>15% Employer's National Insurance</b> on the full gross value — yes, many employers legally hand <i>their</i> NIC bill to <i>you</i> via a <a href="https://www.gov.uk/guidance/transfer-employers-national-insurance-to-employees" target="_blank" rel="noopener">Joint NICs Election</a>, which inflates the total withheld. Then your employee NI. Then income tax at your <b>top marginal rate</b>. That's the maximum, not necessarily your actual rate — so once the dust settles you might owe a little more, or be owed a refund of the difference. It trues up through payroll or your Self Assessment, and it's on you to check it. <i>This tool is about CGT, not your income-tax position.</i></li>
+          <li><b>Taxed on the close:</b> The value you're taxed on is the share price on vesting day — usually the <b>closing price</b> that day — under the <a href="https://www.gov.uk/hmrc-internal-manuals/employment-related-securities/ersm110000" target="_blank" rel="noopener">HMRC Securities Options Manual (ERSM110000)</a>, which covers RSUs and LTIPs. If the stock craters after the market closes, tough: you still owe tax on that high-water mark.</li>
           <li><b>CGT When You Liquidate:</b> If you survive the initial vesting tax and the stock somehow goes up, you get hit with Capital Gains Tax. This is calculated using a matching algorithm that feels like it was designed by a sadistic AI.</li>
           <li><b>The Currency Matrix:</b> Your assets trade in greenbacks (USD), but the tax-drone syndicate requires calculations in Sterling (GBP). Every transaction must be converted to GBP using daily averages. No, you can't use the conversion rate you actually received when you withdrew it. That would make too much sense.</li>
         </ul>
+        <div class="callout">
+          <span class="callout-title">⚠️ Mind the £100k+ income traps (a separate problem from CGT)</span>
+          A fat vest can spike your <i>income</i> for the year and tip you into the <b>personal-allowance taper</b> (£100k–£125k, an effective ~60% marginal rate) or the <b>High Income Child Benefit Charge</b>. The sell-to-cover withholding doesn't reckon with either, so they can leave you owing more — or, in other situations, due money back — at Self Assessment. Either way that's an <b>income-tax</b> reckoning, not a CGT one: this tool won't work it out for you, but don't get blindsided by it.
+        </div>
 
         <h3>THE ACQUISITION DATE &mdash; WHERE WAGE-SLAVES FAINT</h3>
         <p>Repeat after me: <i>Your acquisition date is NOT the settlement date.</i> Under the sacred text of <a href="https://www.gov.uk/hmrc-internal-manuals/capital-gains-manual/cg56321a" target="_blank" rel="noopener">TCGA 1992 s.119A</a>, your acquisition date and cost basis are welded to the <b>vesting date</b> (rolled to the next active trading day if the market was shut). That vest-day value is what you paid Income Tax on, and it becomes your CGT base cost (see the <a href="https://www.gov.uk/government/publications/employee-share-and-security-schemes-and-capital-gains-tax-hs287-self-assessment-helpsheet" target="_blank" rel="noopener">HMRC HS287 Helpsheet</a>). Do not listen to the slackers in the company chat room telling you it's the date the shares actually arrived in your account (usually 2-3 days later). That's just latency. Basing your CGT on the settlement price is a one-way ticket to an audit.</p>
@@ -1088,21 +1081,6 @@
     return formatDate(new Date(Date.UTC(parsed.getFullYear(), parsed.getMonth(), parsed.getDate())));
   }
 
-  function csvToJson(csvText) {
-    const lines = csvText.trim().split(/\r?\n/);
-    if (lines.length < 2) return [];
-    const headers = lines[0].split(',').map(h => h.trim());
-    const data = [];
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      const cols = lines[i].split(',');
-      const row = {};
-      headers.forEach((h, idx) => { row[h] = (cols[idx] !== undefined) ? cols[idx].trim() : ''; });
-      data.push(row);
-    }
-    return data;
-  }
-
   function formatCurrency(value) {
     return new Intl.NumberFormat('en-GB', {
       style: 'currency', currency: 'GBP', minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -1406,10 +1384,10 @@
 
     // 2) Stock + forex — relayed by serve.py or the Cloudflare Worker (browsers
     //    can't call Yahoo directly — CORS). Opened from disk with no worker set,
-    //    there's nothing to relay through, so ask for serve.py or pasted CSVs.
+    //    there's nothing to relay through, so ask for serve.py.
     if (location.protocol === 'file:' && !apiBase()) {
       priceErr = "This page was opened directly from disk, so it can't fetch prices. " +
-        "Run  python3 serve.py  in this folder and use the http://localhost page it opens — or paste CSVs in the panel below.";
+        "Run  python3 serve.py  in this folder and use the http://localhost page it opens.";
     } else {
       try {
         const [stock, forex] = await Promise.all([
@@ -1419,18 +1397,18 @@
         market.stock = stock;
         market.forex = forex;
       } catch (e) {
-        priceErr = 'Price fetch failed: ' + e.message + ' — is serve.py still running? You can also paste CSVs below.';
+        priceErr = 'Price fetch failed: ' + e.message + ' — is serve.py still running?';
       }
     }
 
     saveMarket();
     refreshDataStatus();
-    btn.disabled = false; btn.textContent = 'Fetch market data';
+    btn.disabled = false; btn.textContent = 'Get my share prices';
 
     if (priceErr && holErr) setMsg('dataMsg', priceErr + ' Holidays also failed: ' + holErr, 'error');
     else if (priceErr) setMsg('dataMsg', priceErr, 'warn');
     else if (holErr) setMsg('dataMsg', 'Holidays failed: ' + holErr + ' (prices loaded OK).', 'warn');
-    else clearMsg('dataMsg');
+    else setMsg('dataMsg', `Thanks! Got ${ticker}'s share prices, the GBP/USD rates and the US market holidays — all set. ✓`, 'ok');
 
     renderEntries(); // recompute previews now that prices exist
   }
@@ -1499,24 +1477,6 @@
     // de-dupe by date (keep first)
     const seen = new Set();
     return out.filter(r => (seen.has(r.Date) ? false : (seen.add(r.Date), true)));
-  }
-
-  function loadPastedData() {
-    try {
-      const sc = val('stockCsv'), fc = val('forexCsv'), hj = val('holJson');
-      if (sc) market.stock = csvToJson(sc);
-      if (fc) market.forex = csvToJson(fc);
-      if (hj) {
-        const parsed = JSON.parse(hj);
-        market.holidays = parsed.map(h => ({ date: h.date, name: h.name, types: h.types || [], global: !!h.global }));
-      }
-      saveMarket();
-      refreshDataStatus();
-      renderEntries();
-      setMsg('dataMsg', `Loaded pasted data: ${market.stock.length} prices, ${market.forex.length} FX, ${market.holidays.length} holidays.`, 'ok');
-    } catch (e) {
-      setMsg('dataMsg', 'Could not parse pasted data: ' + e.message, 'error');
-    }
   }
 
   function niceDate(iso) {
@@ -1739,12 +1699,12 @@
     if (skipped.unrecognized) skips.push(`${skipped.unrecognized} unrecognized`);
     if (skipped.unreadable) skips.push(`${skipped.unreadable} unreadable`);
 
-    let msg = `Imported ${newEntries.length} order row${newEntries.length > 1 ? 's' : ''}: ${made.join(', ')}.`;
+    let msg = `Thanks! Read in ${newEntries.length} order${newEntries.length > 1 ? 's' : ''}: ${made.join(', ')}.`;
     if (skips.length) msg += ` Skipped ${skips.join(', ')}.`;
-    if (replaced) msg += ` (Replaced ${replaced} previously imported from orders.)`;
+    if (replaced) msg += ` (Replaced ${replaced} you'd imported before.)`;
     const acquires = entries.filter(e => e.action === 'acquire').length;
     if (!acquires || (counts.rsuSell && acquires <= counts.cashEx + counts.optSameDay)) {
-      msg += ' ⚠️ Now import your BenefitHistory.xlsx too, or the RSU sales will have no shares in the pool to match.';
+      msg += ' ⚠️ Don\'t forget to import your benefit history above too, or the RSU sales will have no shares in the pool to match.';
     }
     setMsg('importMsg', msg, 'ok');
   }
@@ -1754,7 +1714,7 @@
     clearMsg('importMsg');
     const ta = document.getElementById('ordersPaste');
     const text = (ta.value || '').trim();
-    if (!text) { setMsg('importMsg', 'Paste your E*Trade orders table into the box first.', 'error'); return; }
+    if (!text) { setMsg('importMsg', 'Paste your E*Trade orders into the box first.', 'error'); return; }
 
     // Accept the pasted website table OR raw CSV — build rows both ways and keep
     // whichever read more (each yields nothing on the wrong format, so no ambiguity).
@@ -1829,7 +1789,7 @@
   function applyVesting(parsed) {
     const { newEntries, skipped, symbol, earliest, withheldTotal } = parsed;
     if (!newEntries.length) {
-      setMsg('importMsg', 'No RSU vesting rows found — is this a BenefitHistory.xlsx or a vesting-log CSV?', 'warn');
+      setMsg('vestMsg', 'Hmm — no RSU vesting rows in there. Is this your BenefitHistory.xlsx (or a vesting-log CSV)?', 'warn');
       return;
     }
     // Idempotent: replace anything previously imported from a vesting log (keeps orders + typed rows).
@@ -1850,26 +1810,26 @@
     }
 
     const acquired = newEntries.reduce((a, e) => a + e.qty, 0);
-    let msg = `Imported ${newEntries.length} RSU vest${newEntries.length > 1 ? 's' : ''} = ${acquired} shares acquired (delivered).`;
-    if (withheldTotal > 0) msg += ` Excluded ${withheldTotal} shares withheld for tax at source (never delivered, so never in your pool).`;
-    if (replaced) msg += ` (Replaced ${replaced} previously imported.)`;
-    if (skipped.option) msg += ` Skipped ${skipped.option} option-vesting row${skipped.option > 1 ? 's' : ''} (options enter the pool only when exercised — that's the orders file).`;
-    msg += extra + ' Fetch market data so each vest gets its FMV, then paste your orders table.';
-    setMsg('importMsg', msg, 'ok');
+    let msg = `Got it! 🎉 ${newEntries.length} vest${newEntries.length > 1 ? 's' : ''} read in — ${acquired} shares delivered to you in total.`;
+    if (withheldTotal > 0) msg += ` (We left out ${withheldTotal} shares withheld for tax at source — those never reached you, so they're not in your pool.)`;
+    if (replaced) msg += ` (Replaced ${replaced} you'd imported before.)`;
+    if (skipped.option) msg += ` Skipped ${skipped.option} option-vesting row${skipped.option > 1 ? 's' : ''} — options only count once exercised, which is in your orders.`;
+    msg += extra + ' Next: grab your share prices up in step 1 (if you haven\'t), then paste your orders below.';
+    setMsg('vestMsg', msg, 'ok');
   }
 
   // Accepts BenefitHistory.xlsx (parsed by serve.py) OR a vesting-log CSV.
   function importVestingLog() {
-    clearMsg('importMsg');
+    clearMsg('vestMsg');
     const input = document.getElementById('vestFile');
     const file = input.files && input.files[0];
-    if (!file) { setMsg('importMsg', "Choose your BenefitHistory.xlsx (or a vesting CSV) first.", 'error'); return; }
+    if (!file) { setMsg('vestMsg', "Pick your BenefitHistory.xlsx (or a vesting CSV) first.", 'error'); return; }
     const name = (file.name || '').toLowerCase();
 
     if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
       // Binary export — extract the vesting log entirely in the browser, so your
       // benefit history never leaves this page (works local and deployed alike).
-      setMsg('importMsg', 'Reading BenefitHistory.xlsx…', 'warn');
+      setMsg('vestMsg', 'Reading your benefit history…', 'warn');
       const h = location.hostname;
       const isLocal = h === 'localhost' || h === '127.0.0.1';
       file.arrayBuffer()
@@ -1888,16 +1848,16 @@
           }
         })
         .then(csv => { applyVesting(parseVestingLog(csv)); input.value = ''; })
-        .catch(err => setMsg('importMsg', 'Could not read that .xlsx (' + err.message + '). Paste a vesting-log CSV instead.', 'error'));
+        .catch(err => setMsg('vestMsg', 'Could not read that .xlsx (' + err.message + '). Paste a vesting-log CSV instead.', 'error'));
       return;
     }
 
     const reader = new FileReader();
     reader.onload = ev => {
       try { applyVesting(parseVestingLog(ev.target.result)); input.value = ''; }
-      catch (err) { setMsg('importMsg', 'Could not read that file: ' + err.message, 'error'); }
+      catch (err) { setMsg('vestMsg', 'Could not read that file: ' + err.message, 'error'); }
     };
-    reader.onerror = () => setMsg('importMsg', 'Failed to read the file.', 'error');
+    reader.onerror = () => setMsg('vestMsg', 'Failed to read the file.', 'error');
     reader.readAsText(file);
   }
 
@@ -2265,7 +2225,8 @@
    * INIT
    ********************************************************************/
   function init() {
-    // Restore settings
+    // Restore settings. "Up to" always tracks today — reset it on every load so a
+    // stale stored value can never clip off recent prices.
     const today = new Date().toISOString().slice(0, 10);
     document.getElementById('endDate').value = today;
     document.getElementById('startDate').value = (new Date().getUTCFullYear() - 8) + '-01-01';
@@ -2273,7 +2234,6 @@
       const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}');
       if (s.ticker) document.getElementById('ticker').value = s.ticker;
       if (s.startDate) document.getElementById('startDate').value = s.startDate;
-      if (s.endDate) document.getElementById('endDate').value = s.endDate;
     } catch (e) { /* ignore */ }
 
     try { entries = JSON.parse(localStorage.getItem(LS_ENTRIES) || '[]') || []; } catch (e) { entries = []; }
