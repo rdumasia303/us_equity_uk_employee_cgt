@@ -1,4 +1,4 @@
-Copyright (c) Ray Dumasia, 2024
+Copyright (c) Ray Dumasia, 2024–2026
 
 Permission is hereby granted to individuals to use, copy, modify, and distribute this software for personal, non-commercial purposes, subject to the following conditions:
 
@@ -11,7 +11,15 @@ Permission is hereby granted to individuals to use, copy, modify, and distribute
    - Commercial purposes include, but are not limited to:
      - Integration into business systems or workflows.
      - Offering the software as part of a paid service or product.
+     - Hosting, deploying, distributing, or otherwise making the software (or any
+       modified version or derivative of it) available by or on behalf of any company,
+       employer, organisation, or other entity for use by its employees, contractors,
+       members, or customers — including internal-only and no-charge deployments.
      - Any activity intended to generate revenue.
+   - For the avoidance of doubt, use by an individual to manage their own personal
+     finances remains personal use even where their shares were granted by an employer;
+     it is an organisation hosting or distributing the software to others that is
+     commercial and requires prior written consent.
    - Unauthorized commercial use of this software is strictly prohibited and may result in legal action.
 
 3. Ownership:

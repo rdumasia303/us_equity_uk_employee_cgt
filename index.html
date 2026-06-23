@@ -111,7 +111,10 @@
       padding: 8px 14px; text-transform: uppercase; letter-spacing: 1.5px;
       transition: all .2s ease;
     }
-    .main-app-tab:hover { color: var(--accent); border-color: var(--border); }
+    /* Override the generic button:hover (solid accent fill) so the tab label stays
+       readable — without this the text and background are the same colour. */
+    .main-app-tab:hover { color: var(--accent); border-color: var(--accent); background: transparent; box-shadow: none; text-shadow: none; }
+    body.corporate-mode .main-app-tab:hover { color: var(--accent); background: rgba(37,99,235,.08); }
     .main-app-tab.active {
       color: var(--accent); border-color: var(--accent);
       box-shadow: var(--glow); text-shadow: var(--glow);
