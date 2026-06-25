@@ -1,8 +1,9 @@
 # US Equity Comp for UK Workers — E\*Trade Handler & CGT Calculator
 
-A UK **Capital Gains Tax** calculator for US equity compensation (RSUs and stock
-options) held in **E\*Trade**. Feed it your benefit history and your orders, and it
-untangles E\*Trade's fragmented exports and HMRC's share-matching rules for you —
+A UK **Capital Gains Tax** calculator for US equity compensation (RSUs, stock
+options, ESPP and OSPS) held in **E\*Trade**. Feed it your benefit history and your
+orders, and it untangles E\*Trade's fragmented exports and HMRC's share-matching
+rules for you —
 income-at-vest cost basis, same-day / 30-day / Section 104 matching, GBP
 conversion, US-holiday adjustments, gains by tax year, and reports you can file.
 

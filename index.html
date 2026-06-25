@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>US Equity Comp for UK Workers — E*Trade Handler &amp; CGT Calculator</title>
   <link rel="icon" href="favicon.png" />
-  <meta name="description" content="UK Capital Gains Tax calculator for US equity (RSUs and options) held in E*Trade. Import your benefit history and orders, auto-fetch prices, GBP/USD and US holidays, and compute CGT with Section 104, same-day and 30-day rules. All personal data stays in your browser." />
+  <meta name="description" content="UK Capital Gains Tax calculator for US equity (RSUs, options, ESPP and OSPS) held in E*Trade. Import your benefit history and orders, auto-fetch prices, GBP/USD and US holidays, and compute CGT with Section 104, same-day and 30-day rules. All personal data stays in your browser." />
   <style>
     /* ============================================================
        THEME ENGINE
@@ -396,7 +396,7 @@
   <nav class="main-app-tabs">
     <div class="brand">
       <img class="brand-logo" src="logo.webp" alt="" />
-      <span class="brand-name">RSU//CGT</span>
+      <span class="brand-name">EQUITY//CGT</span>
     </div>
     <div class="tab-group">
       <button class="main-app-tab active" data-tab="calculator">Calculator</button>
@@ -439,15 +439,15 @@
     <!-- STEP 1: MARKET DATA -->
     <section class="panel">
       <h2><span class="step">1</span>Where do you work? <span class="help" title="We pull the daily close prices, GBP/USD rates and US market holidays for your stock. Only the ticker and the dates ever leave your machine — never your transactions.">ⓘ</span></h2>
-      <p class="hint">What's the ticker for the company you work for? (e.g. <b>AAPL</b> for Apple, <b>ROKU</b> for Roku, <b>MSFT</b> for Microsoft) — and roughly since when have you been getting RSUs? We'll quietly fetch the share prices, exchange rates and holidays for you.</p>
+      <p class="hint">What's the ticker for the company you work for? (e.g. <b>AAPL</b> for Apple, <b>ROKU</b> for Roku, <b>MSFT</b> for Microsoft) — and roughly since when have you been getting company stock? We'll quietly fetch the share prices, exchange rates and holidays for you.</p>
       <div class="row grid-3">
         <div>
           <label>Your company's ticker</label>
           <input id="ticker" placeholder="ROKU" autocomplete="off" title="Your company's stock symbol, e.g. ROKU, MSFT, AMZN" />
         </div>
         <div>
-          <label>Getting RSUs since…</label>
-          <input id="startDate" type="date" title="Roughly when your first shares vested — we fetch prices from here" />
+          <label>Getting stock since…</label>
+          <input id="startDate" type="date" title="Roughly when you first got shares (vest, purchase or reinvestment) — we fetch prices from here" />
         </div>
         <div>
           <label>…up to</label>
@@ -469,7 +469,7 @@
     <!-- STEP 2: TRANSACTIONS -->
     <section class="panel">
       <h2><span class="step">2</span>Go and grab your history from E*Trade
-        <span class="help" title="Import your two E*Trade exports, or type rows by hand. Acquisitions use the VEST date (the income-tax date); sales use the actual trade date. Because you can't sell until after the vest, most RSU sales come out of the Section 104 pool, not same-day.">ⓘ</span>
+        <span class="help" title="Import your two E*Trade exports, or type rows by hand. Acquisitions use the VEST date (the income-tax date); sales use the actual trade date. Because you can't sell until after the vest, most sales come out of the Section 104 pool, not same-day.">ⓘ</span>
         <a class="tablink" href="#" onclick="document.querySelector('[data-tab=docs]').click();return false;">column mappings</a>
       </h2>
       <p class="hint">Two things to fetch from E*Trade: your <b>benefit history</b> (every time shares vested) and your <b>orders</b> (every time you sold). The screenshots show exactly where to click — it only takes a minute.</p>
@@ -687,7 +687,7 @@
       <!-- ===== CORPORATE doc ===== -->
       <div class="docs-container corp-content">
         <h2>How it works &amp; UK tax guide</h2>
-        <p>This tool computes UK Capital Gains Tax on US equity compensation (RSUs and options) held in E*Trade, from two
+        <p>This tool computes UK Capital Gains Tax on US equity compensation (RSUs, options, ESPP and OSPS) held in E*Trade, from two
           exports you provide. All processing is local to your machine.</p>
 
         <h3>1. Provide your data</h3>
@@ -1859,7 +1859,7 @@
     renderEntries();
 
     const made = [];
-    if (counts.rsuSell) made.push(`${counts.rsuSell} RSU sale${counts.rsuSell > 1 ? 's' : ''}`);
+    if (counts.rsuSell) made.push(`${counts.rsuSell} share sale${counts.rsuSell > 1 ? 's' : ''}`);
     if (counts.exSell) made.push(`${counts.exSell} exercised-share sale${counts.exSell > 1 ? 's' : ''}`);
     if (counts.cashEx) made.push(`${counts.cashEx} cash-exercise hold${counts.cashEx > 1 ? 's' : ''} → pool`);
     if (counts.optSameDay) made.push(`${counts.optSameDay} option same-day sale${counts.optSameDay > 1 ? 's' : ''} (paired)`);
@@ -1873,7 +1873,7 @@
     if (replaced) msg += ` (Replaced ${replaced} you'd imported before.)`;
     const acquires = entries.filter(e => e.action === 'acquire').length;
     if (!acquires || (counts.rsuSell && acquires <= counts.cashEx + counts.optSameDay)) {
-      msg += ' ⚠️ Don\'t forget to import your benefit history above too, or the RSU sales will have no shares in the pool to match.';
+      msg += ' ⚠️ Don\'t forget to import your benefit history above too, or those sales will have no shares in the pool to match.';
     }
     setMsg('importMsg', msg, 'ok');
   }
@@ -1969,7 +1969,7 @@
   function applyVesting(parsed) {
     const { newEntries, skipped, symbol, earliest, withheldTotal } = parsed;
     if (!newEntries.length) {
-      setMsg('vestMsg', 'Hmm — no RSU vesting rows in there. Is this your BenefitHistory.xlsx (or a vesting-log CSV)?', 'warn');
+      setMsg('vestMsg', 'Hmm — no vesting or purchase rows in there. Is this your BenefitHistory.xlsx (or a vesting-log CSV)?', 'warn');
       return;
     }
     // Idempotent: replace anything previously imported from a vesting log (keeps orders + typed rows).
