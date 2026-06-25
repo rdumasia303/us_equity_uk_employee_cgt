@@ -20,6 +20,12 @@ when a single disposal splits across all three, the 30-day window **boundary**
 that RSU cost basis uses the **delivered** quantity (net of shares withheld for
 tax, which never enter the pool).
 
+It also covers the **ESPP** and **OSPS** tabs of a multi-tab `BenefitHistory.xlsx`:
+each lot enters the Section 104 pool at its **own** per-share cost basis from the
+file (no Yahoo close needed). ESPP base cost is the market value at purchase (the
+price paid where the plan is undiscounted; the income-taxed FMV where it isn't);
+OSPS (dividend-reinvestment) lots use the stated cost basis per share.
+
 ## Run
 
 ```bash

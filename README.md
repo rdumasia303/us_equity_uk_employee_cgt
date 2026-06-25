@@ -35,7 +35,9 @@ so it never leaves the page.
 2. **Import vests** — drop in E\*Trade's `BenefitHistory.xlsx`
    (*At Work → My Account → Benefit History → Download Expanded*). RSU vests become
    acquisitions at the **shares released** (delivered) quantity, valued on the vest
-   date. Screenshots of where to click are right there in the app.
+   date. If your workbook also has **ESPP** and **OSPS** (dividend-reinvestment) tabs,
+   those purchases are picked up too — each pooled at its own cost basis straight from
+   the file. Screenshots of where to click are right there in the app.
 3. **Paste orders** — copy the table on E\*Trade's *Orders / Transactions* page
    (set the date range back to your first order) and paste it in. Sells, cash
    exercises and same-day sales are turned into the right transactions; cancelled
@@ -56,6 +58,9 @@ Any transaction can also be typed in by hand.
   which came out of the pool.
 - **Options** treated as shares once exercised (cash-exercise-and-hold pools;
   same-day exercise-and-sell nets to ~£0).
+- **ESPP & OSPS** lots (from a multi-tab benefit history) pooled at the cost basis
+  in the file — ESPP at market value on the purchase date, OSPS (reinvested
+  dividends) at the stated cost basis per share.
 - **USD → GBP** at the daily exchange rate.
 
 ## Exports

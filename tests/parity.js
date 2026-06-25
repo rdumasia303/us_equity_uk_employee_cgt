@@ -46,9 +46,9 @@ globalThis.window = {};
 globalThis.alert = () => {};
 
 let code = blocks.join('\n;\n').replace(/\binit\(\);/g, '/* init disabled for tests */');
-code += '\n;globalThis.__engine = { Transaction, processCGT, parseVestingLog, formatDate, Section104Pool };';
+code += '\n;globalThis.__engine = { Transaction, processCGT, parseVestingLog, benefitPurchaseEntries, formatDate, Section104Pool };';
 (0, eval)(code);
-const { Transaction, processCGT, parseVestingLog } = globalThis.__engine;
+const { Transaction, processCGT, parseVestingLog, benefitPurchaseEntries } = globalThis.__engine;
 
 // ---- helpers -------------------------------------------------------------
 // Work in GBP per share with FX 1 so expected figures are transparent; the
@@ -184,6 +184,48 @@ runCGT('31+ days is NOT bed & breakfast', [
   }
   near(parsed.withheldTotal, 40, SHARE_TOL, 'vesting basis: 40 shares excluded as withheld');
   console.log(`  ${failed === before ? '✓' : '✗'} delivered-shares cost basis (s.119A / HS287)`);
+})();
+
+// ---- ESPP / OSPS parser: each lot enters the pool at its OWN file cost basis ----
+// The multi-tab BenefitHistory.xlsx (P&G-style) carries explicit per-share cost for
+// ESPP purchases and OSPS dividend-reinvestment lots, so they don't depend on a Yahoo
+// close. ESPP base = market value at purchase (price paid when 0% discount; the
+// income-taxed FMV when discounted). OSPS base = the stated cost basis per share.
+(function esppOspsParser() {
+  const sheets = {
+    'ESPP': [
+      ['Record Type', 'Symbol', 'Purchase Date', 'Purchase Price', 'Purchased Qty.',
+        'Tax Collection Shares', 'Net Shares', 'Discount Percent', 'Grant Date FMV', 'Purchase Date FMV'],
+      // 0% discount: base = price paid, kept at full precision.
+      ['Purchase', 'PG', '05-APR-2022', '156.6915', '1.348', '0', '1.348', '0%', '156.6915', '$156.69'],
+      // 15% discount: paid £85 but income-taxed on the £100 FMV -> CGT base = £100.
+      ['Purchase', 'PG', '15-JAN-2021', '85.00', '10', '0', '10', '15%', '100.00', '$100.00'],
+      ['Event', '', '', '', '', '', '', '', '', ''],   // sub-row: must be ignored
+    ],
+    'OSPS': [
+      ['Record Type', 'Symbol', 'Acquired Date', 'Cost Basis per share', 'Acquired Qty.'],
+      ['Acquisition', 'PG', '15-AUG-2024', '168.511691', '4.448'],
+    ],
+  };
+  const before = failed;
+  const { entries, symbol, earliest } = benefitPurchaseEntries(sheets);
+  eq(entries.length, 3, 'espp/osps: 2 ESPP + 1 OSPS (Event row ignored)');
+  const espp = entries.filter(e => e.type === 'ESPP');
+  const osps = entries.filter(e => e.type === 'OSPS');
+  if (espp[0]) {
+    eq(espp[0].date, '2022-04-05', 'espp: DD-MON-YYYY date parsed');
+    near(espp[0].qty, 1.348, SHARE_TOL, 'espp: qty from Net Shares');
+    near(espp[0].price, 156.6915, MONEY_TOL, 'espp: 0% discount uses full-precision price paid');
+  }
+  if (espp[1]) near(espp[1].price, 100.00, MONEY_TOL, 'espp: discounted lot uses FMV (£100), not price paid (£85)');
+  if (osps[0]) {
+    eq(osps[0].date, '2024-08-15', 'osps: date parsed');
+    near(osps[0].qty, 4.448, SHARE_TOL, 'osps: qty from Acquired Qty.');
+    near(osps[0].price, 168.511691, MONEY_TOL, 'osps: stated cost basis per share');
+  }
+  eq(symbol, 'PG', 'espp/osps: symbol detected');
+  eq(earliest, '2021-01-15', 'espp/osps: earliest acquisition date');
+  console.log(`  ${failed === before ? '✓' : '✗'} ESPP & OSPS lots pooled at file cost basis`);
 })();
 
 // ======================================================================

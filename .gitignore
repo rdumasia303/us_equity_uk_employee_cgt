@@ -14,6 +14,7 @@ dist.zip
 # Personal financial exports — never commit these
 BenefitHistory.xlsx
 *.xlsx
+.~lock.*#
 stock.csv
 04_vesting_log.csv
 *_stock_prices.csv

@@ -475,7 +475,7 @@
       <p class="hint">Two things to fetch from E*Trade: your <b>benefit history</b> (every time shares vested) and your <b>orders</b> (every time you sold). The screenshots show exactly where to click — it only takes a minute.</p>
 
       <div class="row" style="grid-template-columns: 1fr auto; align-items:end; gap:10px; max-width:560px;">
-        <div><label class="substep">① Drop in your benefit history (BenefitHistory.xlsx) <span class="help" title="E*Trade's At Work → My Account → Benefit History → Download Expanded. Drop the .xlsx straight in (it's parsed right here in your browser — it never leaves the page). RSU rows become acquisitions at the Shares Released/delivered quantity; option rows skipped. A vesting-log CSV also works.">ⓘ</span></label>
+        <div><label class="substep">① Drop in your benefit history (BenefitHistory.xlsx) <span class="help" title="E*Trade's At Work → My Account → Benefit History → Download Expanded. Drop the .xlsx straight in (it's parsed right here in your browser — it never leaves the page). RSU rows become acquisitions at the Shares Released/delivered quantity; option rows skipped. ESPP purchases and OSPS dividend-reinvestment lots (if your workbook has those tabs) are picked up too, each at its own cost basis from the file. A vesting-log CSV also works.">ⓘ</span></label>
           <input type="file" id="vestFile" accept=".xlsx,.xls,.csv,text/csv" /></div>
         <button onclick="importVestingLog()">Import my vests</button>
       </div>
@@ -567,7 +567,27 @@
           <div class="card"><div class="lbl">Total gain / loss (all years)</div><div class="val" id="totalGainLoss">—</div></div>
           <div class="card"><div class="lbl">Section 104 pool — shares</div><div class="val" id="poolShares">—</div></div>
           <div class="card"><div class="lbl">Pool avg cost / share</div><div class="val" id="poolAvgCost">—</div></div>
+          <div class="card"><div class="lbl">Total held — pool cost (£)</div><div class="val" id="poolTotalCost">—</div></div>
         </div>
+
+        <h3 style="color:var(--accent-2);margin:22px 0 2px;">If you sold the whole pool today
+          <span class="help" title="A rough what-if on your remaining Section 104 pool, valued at the latest close we fetched. This is NOT part of your filed gains — it's a forward look at what selling everything now might trigger.">ⓘ</span></h3>
+        <div class="summary-cards">
+          <div class="card"><div class="lbl">Current price (latest close)</div><div class="val" id="curPrice">—</div></div>
+          <div class="card"><div class="lbl">Current value ($)</div><div class="val" id="curValueUsd">—</div></div>
+          <div class="card"><div class="lbl">Current value (£)</div><div class="val" id="curValueGbp">—</div></div>
+          <div class="card"><div class="lbl">Unrealised gain (£)</div><div class="val" id="curGain">—</div></div>
+          <div class="card">
+            <div class="lbl">Potential CGT
+              <select id="cgtBand" onchange="updatePotentialCGT()" style="font:inherit;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:0 2px;margin-left:4px;">
+                <option value="0.24">higher 24%</option>
+                <option value="0.18">basic 18%</option>
+              </select>
+            </div>
+            <div class="val" id="curCgt">—</div>
+          </div>
+        </div>
+        <p class="muted" id="curValueNote" style="margin:6px 2px 0;font-size:.8rem;"></p>
 
         <h3 style="color:var(--accent-2);margin-top:22px;">Gain / loss by UK tax year</h3>
         <div class="table-scroll">
@@ -1050,7 +1070,18 @@
     if (!m) return d || '';
     return `${m[3]}-${String(+m[1]).padStart(2, '0')}-${String(+m[2]).padStart(2, '0')}`;
   }
+  const _MON = { JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12 };
+  // The ESPP/OSPS tabs date as "05-APR-2022" (DD-MON-YYYY); fall back to M/D/Y.
+  function _isoDMY(d) {
+    const m = String(d || '').match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})/);
+    if (!m) return _isoEvent(d);
+    const mon = _MON[m[2].toUpperCase()];
+    if (!mon) return '';
+    return `${m[3]}-${String(mon).padStart(2, '0')}-${String(+m[1]).padStart(2, '0')}`;
+  }
   function _num(x) { const f = parseFloat(x); return isNaN(f) ? 0 : f; }
+  // Money cell -> number, tolerant of "$156.69", "1,182.00", "0%".
+  function _money(x) { const n = parseFloat(String(x || '').replace(/[$,£%\s]/g, '')); return isFinite(n) ? n : NaN; }
 
   // Build the 04_vesting_log.csv content from parsed BenefitHistory sheets.
   function benefitToVestingCsv(sheets) {
@@ -1107,6 +1138,64 @@
       'Shares Released (delivered),Withheld for Tax,% Withheld'];
     for (const row of vests) lines.push(row.map(c => String(c)).join(','));
     return lines.join('\n') + '\n';
+  }
+
+  // ESPP purchases and OSPS (dividend-reinvestment) acquisitions from the multi-tab
+  // BenefitHistory.xlsx. Unlike RSU vests — which we value at the Yahoo close on the
+  // vest date (the income-taxed FMV) — these lots carry their OWN per-share cost basis
+  // in the file, so each becomes a Section 104 pool acquisition priced straight from
+  // the sheet (USD). That's both authoritative and means we only need the FX rate for
+  // the day, not a stock close for every old purchase date.
+  //   ESPP  -> base cost = market value at purchase (Purchase Date FMV; equals the
+  //            price paid when the discount is 0%, and absorbs the income-taxed
+  //            discount for genuinely discounted plans).
+  //   OSPS  -> base cost = the stated Cost Basis per share (the dividend was already
+  //            taxed as income when paid; the reinvested amount is the CGT base).
+  function benefitPurchaseEntries(sheets) {
+    const out = [];
+    let symbol = null, earliest = null;
+    const seen = (sym, date) => {
+      if (sym && !symbol) symbol = sym;
+      if (date && (!earliest || date < earliest)) earliest = date;
+    };
+
+    const espp = sheets['ESPP'] || [];
+    if (espp.length) {
+      const H = _headerMap(espp[0]);
+      for (let k = 1; k < espp.length; k++) {
+        const r = espp[k];
+        if (r[0] !== 'Purchase') continue;
+        const date = _isoDMY(r[H['Purchase Date']]);
+        const net = _num(r[H['Net Shares']]);
+        const purchased = _num(r[H['Purchased Qty.']]);
+        const qty = net > 0 ? net : purchased;          // shares you keep
+        const disc = _money(r[H['Discount Percent']]);   // "0%" -> 0
+        const fmv = _money(r[H['Purchase Date FMV']]);   // "$156.69"
+        const paid = _money(r[H['Purchase Price']]);     // full precision
+        // CGT base = market value at acquisition. With no discount that's the price
+        // paid (kept at full precision); with a discount the income-taxed FMV is base.
+        const price = (disc > 0 && isFinite(fmv)) ? fmv : (isFinite(paid) ? paid : fmv);
+        if (!date || !(qty > 0) || !isFinite(price)) continue;
+        out.push({ action: 'acquire', date, qty, price, grant: 'ESPP', src: 'vest', type: 'ESPP', orderType: 'ESPP Purchase' });
+        seen(r[H['Symbol']], date);
+      }
+    }
+
+    const osps = sheets['OSPS'] || [];
+    if (osps.length) {
+      const H = _headerMap(osps[0]);
+      for (let k = 1; k < osps.length; k++) {
+        const r = osps[k];
+        if (r[0] !== 'Acquisition') continue;
+        const date = _isoDMY(r[H['Acquired Date']]);
+        const qty = _num(r[H['Acquired Qty.']]);
+        const price = _money(r[H['Cost Basis per share']]);
+        if (!date || !(qty > 0) || !isFinite(price)) continue;
+        out.push({ action: 'acquire', date, qty, price, grant: 'OSPS', src: 'vest', type: 'OSPS', orderType: 'Dividend Reinvestment' });
+        seen(r[H['Symbol']], date);
+      }
+    }
+    return { entries: out, symbol, earliest };
   }
 
   function formatDate(dateObj) {
@@ -1864,6 +1953,17 @@
     return { newEntries, skipped, symbol, earliest, withheldTotal };
   }
 
+  // Fold ESPP/OSPS acquisition entries (from the multi-tab xlsx) into a parsed
+  // vesting log so they import, replace and report together with the RSU vests.
+  function mergeParsed(parsed, extra) {
+    if (extra && extra.entries && extra.entries.length) {
+      parsed.newEntries.push(...extra.entries);
+      if (extra.symbol && !parsed.symbol) parsed.symbol = extra.symbol;
+      if (extra.earliest && (!parsed.earliest || extra.earliest < parsed.earliest)) parsed.earliest = extra.earliest;
+    }
+    return parsed;
+  }
+
   // Apply a parsed vesting log to the entries list (shared by the CSV and the
   // BenefitHistory.xlsx paths).
   function applyVesting(parsed) {
@@ -1889,9 +1989,18 @@
       if (!startEl.value || earliest < startEl.value) { startEl.value = earliest; saveSettings(); extra += ` History start set to ${earliest}.`; }
     }
 
+    const fmtQty = n => n.toLocaleString('en-GB', { maximumFractionDigits: 3 });
     const acquired = newEntries.reduce((a, e) => a + e.qty, 0);
-    let msg = `Got it! 🎉 ${newEntries.length} vest${newEntries.length > 1 ? 's' : ''} read in — ${acquired} shares delivered to you in total.`;
-    if (withheldTotal > 0) msg += ` (We left out ${withheldTotal} shares withheld for tax at source — those never reached you, so they're not in your pool.)`;
+    const rsuN = newEntries.filter(e => e.type !== 'ESPP' && e.type !== 'OSPS').length;
+    const esppN = newEntries.filter(e => e.type === 'ESPP').length;
+    const ospsN = newEntries.filter(e => e.type === 'OSPS').length;
+    const parts = [];
+    if (rsuN) parts.push(`${rsuN} vest${rsuN > 1 ? 's' : ''}`);
+    if (esppN) parts.push(`${esppN} ESPP purchase${esppN > 1 ? 's' : ''}`);
+    if (ospsN) parts.push(`${ospsN} OSPS dividend-reinvestment lot${ospsN > 1 ? 's' : ''}`);
+    const summary = parts.length > 1 ? parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1] : parts[0];
+    let msg = `Got it! 🎉 Read in ${summary} — ${fmtQty(acquired)} shares acquired in total.`;
+    if (withheldTotal > 0) msg += ` (We left out ${fmtQty(withheldTotal)} shares withheld for tax at source — those never reached you, so they're not in your pool.)`;
     if (replaced) msg += ` (Replaced ${replaced} you'd imported before.)`;
     if (skipped.option) msg += ` Skipped ${skipped.option} option-vesting row${skipped.option > 1 ? 's' : ''} — options only count once exercised, which is in your orders.`;
     msg += extra + ' Next: grab your share prices up in step 1 (if you haven\'t), then paste your orders below.';
@@ -1915,19 +2024,21 @@
       file.arrayBuffer()
         .then(async buf => {
           try {
-            return benefitToVestingCsv(await readSheets(buf));
+            const sheets = await readSheets(buf);
+            return { csv: benefitToVestingCsv(sheets), extra: benefitPurchaseEntries(sheets) };
           } catch (clientErr) {
             // Fallback for older browsers without DecompressionStream: let a local
             // serve.py parse it. Only on localhost — never POST benefit data to a
             // remote worker. (The deployed worker has no /api/benefit by design.)
+            // (RSU/options only on this path; ESPP/OSPS need the in-browser parser.)
             if (isLocal) {
               const res = await fetch('/api/benefit', { method: 'POST', body: buf, headers: { 'Content-Type': 'application/octet-stream' } });
-              if (res.ok) return (await res.json()).vestingCsv;
+              if (res.ok) return { csv: (await res.json()).vestingCsv, extra: { entries: [], symbol: null, earliest: null } };
             }
             throw clientErr;
           }
         })
-        .then(csv => { applyVesting(parseVestingLog(csv)); input.value = ''; })
+        .then(({ csv, extra }) => { applyVesting(mergeParsed(parseVestingLog(csv), extra)); input.value = ''; })
         .catch(err => setMsg('vestMsg', 'Could not read that .xlsx (' + err.message + '). Paste a vesting-log CSV instead.', 'error'));
       return;
     }
@@ -2085,10 +2196,69 @@
     });
   }
 
+  // ---- "If you sold the whole pool today" what-if on the remaining holding ----
+  const CGT_ANNUAL_EXEMPT = 3000;   // UK annual exempt amount, 2024/25 onward
+  function _latestVal(arr, field) {
+    let value = null, date = '';
+    (arr || []).forEach(r => {
+      const d = toISODate(r['Date']); if (!d) return;
+      const n = parseFloat(r[field]); if (!isFinite(n)) return;
+      if (d > date) { date = d; value = n; }   // latest date that has a usable value
+    });
+    return { value, date };
+  }
+  function formatUSD(v) {
+    return '$' + (v || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function renderCurrentValue(pool) {
+    const shares = pool.totalShares;
+    const px = _latestVal(market.stock, 'Close_Price');
+    const fx = _latestVal(market.forex, 'Average');
+    const set = (id, t) => { document.getElementById(id).textContent = t; };
+    const note = document.getElementById('curValueNote');
+
+    if (!(shares > 0) || px.value == null) {
+      ['curPrice', 'curValueUsd', 'curValueGbp', 'curGain', 'curCgt'].forEach(id => set(id, '—'));
+      window._cgtWhatIf = null;
+      note.textContent = !(shares > 0)
+        ? 'Your pool is empty, so there is nothing left to value.'
+        : 'Fetch market data (step 1) to value your remaining holding.';
+      return;
+    }
+    const usdVal = shares * px.value;
+    const gbpVal = fx.value ? usdVal / fx.value : null;       // £ = $ / (USD-per-GBP)
+    const costGBP = pool.avgCostGBP * shares;
+    const gainGBP = gbpVal != null ? gbpVal - costGBP : null;
+
+    set('curPrice', `${formatUSD(px.value)} · ${px.date}`);
+    set('curValueUsd', formatUSD(usdVal));
+    set('curValueGbp', gbpVal != null ? formatCurrency(gbpVal) : '—');
+    set('curGain', gainGBP != null ? formatCurrency(gainGBP) : '—');
+
+    window._cgtWhatIf = { gainGBP };
+    updatePotentialCGT();
+
+    note.innerHTML = `Valued at the latest close we fetched (<b>${px.date}</b>, ${formatUSD(px.value)}` +
+      `${fx.value ? `, FX ${fx.value.toFixed(4)} on ${fx.date}` : ''}). This is a <b>what-if on selling your whole remaining pool now</b> — not part of your filed gains. ` +
+      `Potential CGT applies the £${CGT_ANNUAL_EXEMPT.toLocaleString('en-GB')} annual exempt amount (assumed fully available) at the selected share rate; it ignores brought-forward losses and any other disposals this year.`;
+  }
+  function updatePotentialCGT() {
+    const el = document.getElementById('curCgt');
+    if (!el) return;
+    const w = window._cgtWhatIf;
+    if (!w || w.gainGBP == null) { el.textContent = '—'; return; }
+    const bandEl = document.getElementById('cgtBand');
+    const rate = parseFloat(bandEl ? bandEl.value : '0.24') || 0.24;
+    const taxable = Math.max(0, w.gainGBP - CGT_ANNUAL_EXEMPT);   // a loss -> no CGT
+    el.textContent = formatCurrency(taxable * rate);
+  }
+
   function displayCGTResults({ realized, s104Pool, transactionLog, acquisitions }) {
     window.currentCGTResults = { realized, s104Pool, transactionLog, acquisitions };
     document.getElementById('poolShares').textContent = s104Pool.totalShares.toFixed(2);
     document.getElementById('poolAvgCost').textContent = formatCurrency(s104Pool.avgCostGBP);
+    document.getElementById('poolTotalCost').textContent = formatCurrency(s104Pool.avgCostGBP * s104Pool.totalShares);
+    renderCurrentValue(s104Pool);
 
     const disposalDiv = document.getElementById('disposalResults');
     disposalDiv.innerHTML = '';

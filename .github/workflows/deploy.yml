@@ -42,7 +42,9 @@ jobs:
           mkdir -p _site
           shopt -s nullglob
           # The app plus its images and metadata — but not serve.py, worker.js, etc.
-          cp index.html _site/
+          # LICENSE is included so the in-page "the license is here" link resolves
+          # (it's a relative link, so without this it 404s on the deployed copy).
+          cp index.html LICENSE _site/
           cp -t _site/ robots.txt *.png *.jpg *.jpeg *.webp *.ico *.svg
 
           # Inject the worker URL into the deployed copy only (source stays blank).

@@ -25,8 +25,10 @@ rm -rf dist
 mkdir -p dist
 
 # Copy the static site: images + metadata (but not serve.py, worker.js, etc.).
+# LICENSE is included so the in-page "the license is here" link resolves — the page
+# links to it relatively, so without this it 404s on the deployed copy.
 shopt -s nullglob
-assets=(robots.txt *.png *.jpg *.jpeg *.webp *.ico *.svg)
+assets=(LICENSE robots.txt *.png *.jpg *.jpeg *.webp *.ico *.svg)
 cp "${assets[@]}" dist/
 
 # Inject the worker URL into the deployed copy only (source index.html stays blank).
